@@ -3,8 +3,9 @@ import Link from "next/link"
 export default function Header() {
     return(
         <>
-            <nav className="navbar">
+            <nav className="header">
                 <img src="b-pop.svg"></img>
+                <a href="/signin">Sign in</a>
             </nav>
             <nav className="navbar">
                 <ul>
