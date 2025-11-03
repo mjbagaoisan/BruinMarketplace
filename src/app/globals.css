@@ -38,7 +38,7 @@
 
 .header a:hover{
   background-color: black;
-  color: white
+  color: white;
 }
 
 
@@ -87,23 +87,28 @@
   float:left
 }
 
+/*
+ █████   ███   █████          ████                                            
+░░███   ░███  ░░███          ░░███                                            
+ ░███   ░███   ░███   ██████  ░███   ██████   ██████  █████████████    ██████ 
+ ░███   ░███   ░███  ███░░███ ░███  ███░░███ ███░░███░░███░░███░░███  ███░░███
+ ░░███  █████  ███  ░███████  ░███ ░███ ░░░ ░███ ░███ ░███ ░███ ░███ ░███████ 
+  ░░░█████░█████░   ░███░░░   ░███ ░███  ███░███ ░███ ░███ ░███ ░███ ░███░░░  
+    ░░███ ░░███     ░░██████  █████░░██████ ░░██████  █████░███ █████░░██████ 
+     ░░░   ░░░       ░░░░░░  ░░░░░  ░░░░░░   ░░░░░░  ░░░░░ ░░░ ░░░░░  ░░░░░░  
+*/
+
 .homepage-welcome{
   position: relative;
-  overflow: hidden;
-  height: 500px;
+  aspect-ratio: 12 / 4;
 }
 
 .homepage-welcome h1{
   position: absolute;
   font-family: var(--font-montserrat);
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 40%;
   text-align: center;
   width: 100%;
   color: white;
-}
-
-.homepage-welcome img{
-  margin-top: -165px;
+  font-size: 3vw;
 }
