@@ -23,35 +23,33 @@ interface userData {
 export const userService = {
     async findByEmail(email: string) {
         const supabase = await createClient()
-        const { data, error } = await supabase.from("users").select("*").eq("email", email).single();
+        const { data, error } = await supabase.from("users").select("*").eq("email", email).maybeSingle();
 
-        if (error) {
-            if (error.code == 'PGRST116') {
-                return null
-            }
-            throw error
+
+        if (error && error.code !== 'PGRST116') {
+            throw error;
         }
-        return data;
+        return data || null;
     },
 
     async createUser(userData: userData) {
         const supabase = await createClient()
-        const { data, error } = await supabase.from("users").insert([userData]).select().single();
+        const { data, error } = await supabase.from("users").insert([userData]).select().maybeSingle();
 
         if (error) {
             throw error
         }
-        return data;
+        return data || null;
     },
 
     async updateUser(id: string, update: Partial<userData>) {
         const supabase = await createClient()
-        const { data, error } = await supabase.from("users").update(update).eq("id", id).select().single();
+        const { data, error } = await supabase.from("users").update(update).eq("id", id).select().maybeSingle();
 
         if (error) {
             throw error
         }
-        return data;
+        return data || null;
     },
     
     async createOrUpdateUser(googleProfile: GoogleUser) {
