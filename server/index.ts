@@ -17,7 +17,7 @@ export const app = express();
 const PORT = process.env.PORT || 3001;
 const ALLOW_ORIGIN = process.env.ALLOW_ORIGIN || "http://localhost:3000";
 
-// --- Middleware
+
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
@@ -32,10 +32,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 
-// --- Routes
 app.use("/api", apiRouter);
 
-// --- Error handling
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Server error:', err);
   res.status(err.status || 500).json({
@@ -43,10 +41,8 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   });
 });
 
-// --- Start server
+
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
-    console.log(`🚀 BruinMarketplace API server running on http://localhost:${PORT}`);
-    console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
   });
 }
