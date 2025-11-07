@@ -9,8 +9,7 @@ import {
   InputGroupButton,
 } from "@/components/ui/input-group";
 
-// If you're using usehooks.com:
-import { useDebounce } from "@uidotdev/usehooks"; // or `usehooks` depending on the package you choose
+import { useDebounce } from "@uidotdev/usehooks";
 
 type Props = {
   delay?: number;               // debounce delay (ms)
@@ -20,9 +19,7 @@ type Props = {
 
 export default function DebouncedSearch({
   delay = 300,
-  api = process.env.NEXT_PUBLIC_API_URL 
-    ? `${process.env.NEXT_PUBLIC_API_URL}/api/search`
-    : "http://localhost:3001/api/search",
+  api = `${process.env.NEXT_PUBLIC_API_URL}/api/search`,
   onResults,
 }: Props) {
   const [q, setQ] = React.useState("");
