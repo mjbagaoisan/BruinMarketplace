@@ -1,12 +1,8 @@
 import { Router } from "express";
 import { supabase } from "../services/db.js";
+import { authenticateToken } from "../middleware/auth.js";
 
 const router = Router();
-
-// temporary until we can access user's ID in the session
-function getUserId() {
-  return 1; 
-}
 
 //return all active listings (for now)
 router.get("/", async (req, res) => {
@@ -24,9 +20,8 @@ router.get("/", async (req, res) => {
 });
 
 
-router.post("/", async (req, res) => {
-  // temp id = 1
-  const user_id = getUserId();
+router.post("/", authenticateToken, async (req, res) => {
+  const user_id = req.user!.userId; 
   const { title, price } = req.body;
 
   if (!title || !price) {
@@ -47,7 +42,6 @@ router.post("/", async (req, res) => {
     .single();
 
   if (error) {
-    console.error("Insert error:", error);
     return res.status(500).json({ error: error.message });
   }
 
@@ -55,14 +49,13 @@ router.post("/", async (req, res) => {
 });
 
 
-router.get("/me", async (req, res) => {
-  // temp id = 1
-  const user_id = getUserId(); 
+router.get("/me", authenticateToken, async (req, res) => {
+  const user_id = req.user!.userId;
 
   const { data, error } = await supabase
     .from("listings")
     .select("*")
-    .eq("user_id", user_id) 
+    .eq("user_id", user_id)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -71,7 +64,6 @@ router.get("/me", async (req, res) => {
 
   return res.json(data ?? []);
 });
-
 
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
@@ -90,9 +82,8 @@ router.get("/:id", async (req, res) => {
   return res.json(data);
 });
 
-router.delete("/:id", async (req, res) => {
-    // temp id = 1
-  const user_id = getUserId();
+router.delete("/:id", authenticateToken, async (req, res) => {
+  const user_id = req.user!.userId;
   const { id } = req.params;
 
   const { data: listing, error: fetchError } = await supabase
