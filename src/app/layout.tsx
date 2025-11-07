@@ -3,6 +3,7 @@ import { Mulish } from "next/font/google";
 import "./globals.css";
 import SessionProvider from "@/components/SessionProvider";
 
+
 const mulish = Mulish({
   subsets: ["latin"],
   display: 'swap',

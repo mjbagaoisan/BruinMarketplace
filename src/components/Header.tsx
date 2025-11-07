@@ -1,18 +1,44 @@
 import Link from "next/link"
 
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
+
 export default function Header() {
     return(
-        <>
-            <nav className="header">
-                <img src="b-pop.svg"></img>
-                <a href="/signin">Sign in</a>
-            </nav>
-            <nav className="navbar">
-                <ul>
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/listings">Listings</a></li>
-                </ul>
-            </nav>
-        </>
+        <NavigationMenu>
+        <NavigationMenuList>
+            <NavigationMenuItem>
+            <NavigationMenuTrigger>Browse Listings</NavigationMenuTrigger>
+            <NavigationMenuContent>
+                <NavigationMenuLink>Clothing</NavigationMenuLink>
+                <NavigationMenuLink>Shoes</NavigationMenuLink>
+            </NavigationMenuContent>
+            </NavigationMenuItem>
+
+            <NavigationMenuItem>
+            <NavigationMenuLink asChild>
+                <Link href="/home">Home</Link>
+            </NavigationMenuLink>
+            </NavigationMenuItem>
+
+            <NavigationMenuItem>
+            <NavigationMenuLink asChild>
+                <Link href="/docs">Sell Item</Link>
+            </NavigationMenuLink>
+            </NavigationMenuItem>
+
+            <NavigationMenuItem>
+            <NavigationMenuLink asChild>
+                <Link href="/listings">My Listings</Link>
+            </NavigationMenuLink>
+            </NavigationMenuItem>
+        </NavigationMenuList>
+        </NavigationMenu>
     )
 }
