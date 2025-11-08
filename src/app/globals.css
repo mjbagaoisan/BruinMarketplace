@@ -6,8 +6,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: 'Mulish', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Mulish', monospace;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -119,4 +119,119 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* 
+ █████   █████                        █████                   
+░░███   ░░███                        ░░███                    
+ ░███    ░███   ██████   ██████    ███████   ██████  ████████ 
+ ░███████████  ███░░███ ░░░░░███  ███░░███  ███░░███░░███░░███
+ ░███░░░░░███ ░███████   ███████ ░███ ░███ ░███████  ░███ ░░░ 
+ ░███    ░███ ░███░░░   ███░░███ ░███ ░███ ░███░░░   ░███     
+ █████   █████░░██████ ░░████████░░████████░░██████  █████    
+░░░░░   ░░░░░  ░░░░░░   ░░░░░░░░  ░░░░░░░░  ░░░░░░  ░░░░░     
+*/
+
+
+.header{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid lightgrey;
+  overflow: hidden;
+  padding: 8px;
+}
+
+.header img{
+  width: 90;
+  padding: 15px;
+}
+
+.header a{
+  color: black;
+  text-decoration: none;
+  padding: 8px;
+  display: block;
+  text-align: center;
+  font-family: var(--font-montserrat);
+  font-weight: bold;
+  font-size: 18px;
+  border: solid;
+}
+
+.header a:hover{
+  background-color: black;
+  color: white;
+}
+
+
+/*
+ ██████   █████                       █████                        
+░░██████ ░░███                       ░░███                         
+ ░███░███ ░███   ██████   █████ █████ ░███████   ██████   ████████ 
+ ░███░░███░███  ░░░░░███ ░░███ ░░███  ░███░░███ ░░░░░███ ░░███░░███
+ ░███ ░░██████   ███████  ░███  ░███  ░███ ░███  ███████  ░███ ░░░ 
+ ░███  ░░█████  ███░░███  ░░███ ███   ░███ ░███ ███░░███  ░███     
+ █████  ░░█████░░████████  ░░█████    ████████ ░░████████ █████    
+░░░░░    ░░░░░  ░░░░░░░░    ░░░░░    ░░░░░░░░   ░░░░░░░░ ░░░░░     
+*/
+
+.navbar{
+
+  border-bottom: 1px solid lightgrey;
+  overflow: hidden
+}
+
+
+.navbar ul{
+  list-style-type: none;
+  background-color: white;
+  padding: 0px;
+  margin: 0px;
+  overflow: hidden
+}
+
+.navbar a{
+  color: black;
+  text-decoration: none;
+  padding: 15px;
+  display: block;
+  text-align: center;
+  font-family: var(--font-montserrat);
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.navbar a:hover{
+  background-color: black;
+  color: white
+}
+.navbar li{
+  float:left
+}
+
+/*
+ █████   ███   █████          ████                                            
+░░███   ░███  ░░███          ░░███                                            
+ ░███   ░███   ░███   ██████  ░███   ██████   ██████  █████████████    ██████ 
+ ░███   ░███   ░███  ███░░███ ░███  ███░░███ ███░░███░░███░░███░░███  ███░░███
+ ░░███  █████  ███  ░███████  ░███ ░███ ░░░ ░███ ░███ ░███ ░███ ░███ ░███████ 
+  ░░░█████░█████░   ░███░░░   ░███ ░███  ███░███ ░███ ░███ ░███ ░███ ░███░░░  
+    ░░███ ░░███     ░░██████  █████░░██████ ░░██████  █████░███ █████░░██████ 
+     ░░░   ░░░       ░░░░░░  ░░░░░  ░░░░░░   ░░░░░░  ░░░░░ ░░░ ░░░░░  ░░░░░░  
+*/
+
+.homepage-welcome{
+  position: relative;
+  aspect-ratio: 12 / 4;
+}
+
+.homepage-welcome h1{
+  position: absolute;
+  font-family: var(--font-montserrat);
+  top: 40%;
+  text-align: center;
+  width: 100%;
+  color: white;
+  font-size: 3vw;
 }
