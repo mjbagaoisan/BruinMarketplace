@@ -1,5 +1,5 @@
 import React from 'react'
-import Header from '@/components/Header'
+import CreateButton from '@/components/CreateButton'
 
 export default function Page() {
     return(
@@ -7,6 +7,7 @@ export default function Page() {
             <li>Listing 1</li>
             <li>Listing 2</li>
             <li>Listing 3</li>
+            <CreateButton/>
         </ol>
     )
 }
