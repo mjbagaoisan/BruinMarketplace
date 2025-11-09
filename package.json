@@ -7,7 +7,7 @@
     "start": "next start",
     "lint": "eslint",
     "dev:next": "next dev -p 3000",
-    "dev:api": "NODE_ENV=development npx tsx watch server/index.ts",
+    "dev:api": "NODE_ENV=development npx tsx watch ./server/index.ts",
     "dev": "concurrently \"npm:dev:next\" \"npm:dev:api\"",
     "server": "npx tsx server/index.ts",
     "server:prod": "NODE_ENV=production npx tsx server/index.ts"

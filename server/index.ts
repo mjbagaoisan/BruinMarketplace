@@ -12,6 +12,7 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import apiRouter from "./routes/index.js";
+import listingsRouter from "./routes/listings.js";
 
 export const app = express();
 const PORT = process.env.PORT || 3001;
@@ -33,6 +34,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 
 app.use("/api", apiRouter);
+app.use("/listings", listingsRouter);
 
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Server error:', err);
@@ -44,5 +46,6 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
+    console.log(`API server running on http://localhost:${PORT}`);
   });
 }
