@@ -1,5 +1,5 @@
 import React from 'react'
-import CreateButton from '@/components/CreateButton'
+import CreateListing from '@/components/CreateListing'
 
 export default function Page() {
     return(
@@ -7,7 +7,7 @@ export default function Page() {
             <li>Listing 1</li>
             <li>Listing 2</li>
             <li>Listing 3</li>
-            <CreateButton/>
+            <CreateListing/>
         </ol>
     )
 }
