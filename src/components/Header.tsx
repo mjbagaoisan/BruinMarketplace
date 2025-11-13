@@ -1,5 +1,7 @@
-import Link from "next/link"
+"use client"
 
+import React from "react"
+import Link from "next/link"
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -7,25 +9,24 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
+} from "@/components/ui/navigation-menu"
+import LogoutButton from "./LogoutButton"
 
-export default function Header() {
+const Header = React.memo(() => {
     return(
         <div className="flex w-full justify-center border-b border-gray-200 px-4 py-3">
-            <div className="flex w-130 justify-center border border-gray-200 rounded-full px-1 py-2">
-                <NavigationMenu>
+            <div className="inline-flex w-fit justify-center items-center border border-gray-200 rounded-3xl px-6 py-3">
+                <NavigationMenu viewport={false}>
                 <NavigationMenuList>
                     <NavigationMenuItem>
-                    <NavigationMenuTrigger>Browse Listings</NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                        <NavigationMenuLink>Clothing</NavigationMenuLink>
-                        <NavigationMenuLink>Shoes</NavigationMenuLink>
-                    </NavigationMenuContent>
+                   <NavigationMenuLink asChild>
+                        <Link href="/listings">Browse Listings</Link>
+                    </NavigationMenuLink>
                     </NavigationMenuItem>
 
                     <NavigationMenuItem>
                     <NavigationMenuLink asChild>
-                        <Link href="/home">Home</Link>
+                        <Link href="/home" className="block px-3 py-2 rounded-md hover:bg-accent transition-colors" >Home</Link>
                     </NavigationMenuLink>
                     </NavigationMenuItem>
 
@@ -44,8 +45,14 @@ export default function Header() {
                     <NavigationMenuItem>
                     <NavigationMenuTrigger>Account</NavigationMenuTrigger>
                     <NavigationMenuContent>
-                        <NavigationMenuLink>Settings</NavigationMenuLink>
-                        <NavigationMenuLink>Logout</NavigationMenuLink>
+                        <div className="flex flex-col p-3 min-w-[200px]">
+                          <Link href="/settings" className="block px-3 py-2 rounded-md hover:bg-accent transition-colors text-sm">
+                            Settings
+                          </Link>
+                          <div>
+                            <LogoutButton className="block px-3 py-2 rounded-md hover:bg-accent transition-colors text-med text-red-600 hover:text-red-700 cursor-pointer"/>
+                          </div>
+                        </div>
                     </NavigationMenuContent>
                     </NavigationMenuItem>
                 </NavigationMenuList>
@@ -53,4 +60,8 @@ export default function Header() {
             </div>
         </div>
     )
-}
+})
+
+Header.displayName = "Header"
+
+export default Header
