@@ -23,7 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={mulish.className}>
-      <body className="font-sans">
+      <body className="font-sans" suppressHydrationWarning={true}>
         <SessionProvider>{children}</SessionProvider>
       </body>
     </html>

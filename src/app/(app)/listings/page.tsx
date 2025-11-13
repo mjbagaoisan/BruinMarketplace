@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardMedia, CardTitle, CardPrice } from "@/components/ui/card";
 import DebouncedSearch from "@/components/SearchBar";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Header from "@/components/Header";
 
 interface Media {
   id: string;
@@ -58,14 +59,19 @@ function ListingsPage() {
     }
   };
 
+  const handleSearchResults = useCallback((data: Listing[] | SearchResponse) => {
+    setSearchResults(Array.isArray(data) ? data : data.results);
+  }, []);
+
   const displayListings = searchResults.length > 0 ? searchResults : listings;
 
   return (
     <ProtectedRoute>
+      <Header />
       <div className="min-h-screen bg-gray-50 py-8">
         {/* Centered Search Bar */}
         <div className="flex justify-center mb-8">
-          <DebouncedSearch onResults={(data: Listing[] | SearchResponse) => setSearchResults(Array.isArray(data) ? data : data.results)} />
+          <DebouncedSearch onResults={handleSearchResults} />
         </div>
 
         {/* Listings Grid */}
