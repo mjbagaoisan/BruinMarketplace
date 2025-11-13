@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardMedia, CardTitle, CardPrice } from "@/components/ui/card";
 import DebouncedSearch from "@/components/SearchBar";
-import ProtectedRoute from "@/components/ProtectedRoute";
 import Header from "@/components/Header";
 
 interface Media {
@@ -44,7 +43,6 @@ function ListingsPage() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/listings`);
       const data = await response.json();
       
-      // Ensure data is an array
       if (Array.isArray(data)) {
         setListings(data);
       } else {
@@ -66,7 +64,7 @@ function ListingsPage() {
   const displayListings = searchResults.length > 0 ? searchResults : listings;
 
   return (
-    <ProtectedRoute>
+    <>
       <Header />
       <div className="min-h-screen bg-gray-50 py-8">
         {/* Centered Search Bar */}
@@ -118,7 +116,7 @@ function ListingsPage() {
           )}
         </div>
       </div>
-    </ProtectedRoute>
+    </>
   );
 }
 

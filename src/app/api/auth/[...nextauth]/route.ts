@@ -10,6 +10,9 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
+  session: {
+    strategy: "jwt", // Required for middleware to work
+  },
   secret: process.env.NEXTAUTH_SECRET,
   cookies: {
     pkceCodeVerifier: {
