@@ -1,29 +1,30 @@
 import { withAuth } from 'next-auth/middleware';
-import { NextResponse } from 'next/server';
 
 export default withAuth(
   function middleware(req) {
-    // Add any additional middleware logic here
-    return NextResponse.next();
+    // Middleware logic runs after authorization check
+    console.log('Middleware running for:', req.nextUrl.pathname);
   },
   {
     callbacks: {
-      authorized: ({ req, token }) => {
-        // Require authentication for all routes under /dashboard
-        if (req.nextUrl.pathname.startsWith('/dashboard')) {
-          return !!token;
-        }
-        return true;
+      authorized: ({ token, req }) => {
+        // Must return true to allow access, false to redirect to signIn page
+        const isAuthenticated = !!token;
+        console.log('Auth check:', req.nextUrl.pathname, 'Authenticated:', isAuthenticated);
+        return isAuthenticated;
       },
+    },
+    pages: {
+      signIn: '/login',
     },
   }
 );
 
-// Configure which routes to protect
 export const config = {
   matcher: [
-    // Protect all dashboard routes
-    '/dashboard/:path*',
-    // Add other protected routes here
+    '/home/:path*',
+    '/listings/:path*',
+    '/profile/:path*',
+    '/settings/:path*',
   ],
 };
