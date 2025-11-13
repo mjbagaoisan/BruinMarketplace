@@ -2,6 +2,7 @@ import { Router } from 'express';
 import searchRouter from './search.js';
 import authRouter from './auth.js';
 import listingsRouter from './listings.js';
+import { authenticateToken } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -14,6 +15,7 @@ router.get('/', (req, res) => {
 router.use('/search', searchRouter);
 router.use('/auth', authRouter);
 router.use('/listings', listingsRouter);
+
 
 
 export default router;
