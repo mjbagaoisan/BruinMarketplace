@@ -14,6 +14,8 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import apiRouter from "./routes/index.js";
 import listingsRouter from "./routes/listings.js";
+import userRoutes from "./routes/user.js";
+
 
 export const app = express();
 const PORT = process.env.PORT || 3001;
