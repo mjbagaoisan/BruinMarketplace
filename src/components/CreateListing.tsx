@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+
 import {
   Dialog,
   DialogContent,
@@ -29,43 +33,62 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 
 export default function CreateListing(){
+
+    const [formData, setFormData] = useState({
+        title: "",
+        price: "",
+        description: "",
+    });
+
+    function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+        
+        const formData = new FormData(e.currentTarget);
+        const formValues = Object.fromEntries(formData);
+
+        console.log(formValues);
+    }
+
     return(
         <Dialog>
             <DialogTrigger>New Listing</DialogTrigger>
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Create a Listing</DialogTitle>
+                    <DialogDescription></DialogDescription> {/* suppress warning */}
 
-                    <FieldGroup></FieldGroup>
-                    <FieldGroup>
-                        <Field>
-                            <FieldLabel htmlFor="title">Title</FieldLabel>
-                            <Input id="title" placeholder="e.g. Nike Blazer Highs" required/>
-                        </Field>
+                    <form onSubmit={handleSubmit}>
+                        <FieldGroup></FieldGroup> {/* for spacing */}
+                        <FieldGroup>
+                            <Field>
+                                <FieldLabel htmlFor="title">Title</FieldLabel>
+                                <Input name="title" placeholder="e.g. Nike Blazer Highs" required/>
+                            </Field>
 
-                        <Field className="w-20">
-                        <FieldLabel htmlFor="price">Price</FieldLabel>
-                        <Field orientation="responsive">
-                            <FieldLabel htmlFor="price">$</FieldLabel>
-                            <Input id="price" required/>
-                        </Field>
-                        </Field>
+                            <Field className="w-20">
+                            <FieldLabel htmlFor="price">Price</FieldLabel>
+                            <Field orientation="responsive">
+                                <FieldLabel htmlFor="price">$</FieldLabel>
+                                <Input name="price" required/>
+                            </Field>
+                            </Field>
 
-                        <Field>
-                            <FieldLabel htmlFor="upload-media">Upload media</FieldLabel>
-                            <Input id="picture" type="file" required/>
-                        </Field>
+                            <Field>
+                                <FieldLabel htmlFor="upload-media">Upload media</FieldLabel>
+                                <Input name="picture" type="file" required/>
+                            </Field>
 
-                        <Field>
-                            <FieldLabel htmlFor="description">Description</FieldLabel>
-                            <Textarea id="description" placeholder="Describe your listing" className="resize-none"/>
-                        </Field>
+                            <Field>
+                                <FieldLabel htmlFor="description">Description</FieldLabel>
+                                <Textarea name="description" placeholder="Describe your listing" className="resize-none"/>
+                            </Field>
 
-                    <Field orientation="horizontal">
-                        <Button type="submit">Submit</Button>
-                        <Button variant="outline" type="button">Cancel</Button>
-                    </Field>
-                    </FieldGroup>
+                        <Field orientation="horizontal">
+                            <Button type="submit">Post</Button>
+                            <Button variant="outline" type="button">Cancel</Button>
+                        </Field>
+                        </FieldGroup>
+                    </form>
                     
                 </DialogHeader>
             </DialogContent>
