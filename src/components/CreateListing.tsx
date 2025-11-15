@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
@@ -34,11 +35,7 @@ import { Button } from "@/components/ui/button"
 
 export default function CreateListing(){
 
-    const [formData, setFormData] = useState({
-        title: "",
-        price: "",
-        description: "",
-    });
+    const [open, setOpen] = useState(false);
 
     function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -47,10 +44,12 @@ export default function CreateListing(){
         const formValues = Object.fromEntries(formData);
 
         console.log(formValues);
+
+        setOpen(false);
     }
 
     return(
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger>New Listing</DialogTrigger>
             <DialogContent>
                 <DialogHeader>
@@ -85,7 +84,9 @@ export default function CreateListing(){
 
                         <Field orientation="horizontal">
                             <Button type="submit">Post</Button>
-                            <Button variant="outline" type="button">Cancel</Button>
+                            <DialogClose asChild>
+                                <Button variant="outline" type="button">Cancel</Button>
+                            </DialogClose>
                         </Field>
                         </FieldGroup>
                     </form>
