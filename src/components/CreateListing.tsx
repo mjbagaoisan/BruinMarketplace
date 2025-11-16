@@ -35,6 +35,8 @@ import { Button } from "@/components/ui/button"
 
 import ListingCard, { ListingData } from '@/components/ListingCard'
 
+import { PlusIcon } from "lucide-react"
+
 interface CreateListingProps {
     onListingSubmit: (newListing: ListingData) => void
 }
@@ -64,7 +66,13 @@ export default function CreateListing(props: CreateListingProps){
 
     return(
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger>New Listing</DialogTrigger>
+            <DialogTrigger>
+                <div className="flex flex-col gap-8">
+                <Button variant="outline" size="icon-lg" className="rounded-full h-14 w-14">
+                    <PlusIcon />
+                </Button>
+                </div>
+            </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Create a Listing</DialogTitle>
