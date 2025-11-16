@@ -33,7 +33,7 @@ export default function ListingCard(props: ListingData) {
         </div>
       <CardHeader>
         <CardTitle>{ props.title }</CardTitle>
-        <Label><b>{ props.price }</b></Label>
+        <Label><b>${ props.price }</b></Label>
       </CardHeader>
     </Card>
   )

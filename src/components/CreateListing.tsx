@@ -66,7 +66,7 @@ export default function CreateListing(props: CreateListingProps){
 
     return(
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger>
+            <DialogTrigger asChild>
                 <div className="flex flex-col gap-8">
                 <Button variant="outline" size="icon-lg" className="rounded-full h-14 w-14">
                     <PlusIcon />
