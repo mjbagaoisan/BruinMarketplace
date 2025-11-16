@@ -13,14 +13,14 @@ import { Label } from "@/components/ui/label"
 
 import Image from "next/image";
 
-interface ListingCardProps {
+export interface ListingData {
   title: string;
   price: string;
   description: string;
   imgUrls: string[];
 }
 
-export default function ListingCard(props: ListingCardProps) {
+export default function ListingCard(props: ListingData) {
   return (
     <Card className="w-full max-w-sm">
         <div className="relative h-75 w-7/8 mx-auto rounded-lg overflow-hidden">

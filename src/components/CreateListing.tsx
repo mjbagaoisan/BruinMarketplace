@@ -33,7 +33,13 @@ import { Textarea } from "@/components/ui/textarea"
 
 import { Button } from "@/components/ui/button"
 
-export default function CreateListing(){
+import ListingCard, { ListingData } from '@/components/ListingCard'
+
+interface CreateListingProps {
+    onListingSubmit: (newListing: ListingData) => void
+}
+
+export default function CreateListing(props: CreateListingProps){
 
     const [open, setOpen] = useState(false);
 
@@ -41,9 +47,17 @@ export default function CreateListing(){
         e.preventDefault();
         
         const formData = new FormData(e.currentTarget);
-        const formValues = Object.fromEntries(formData);
 
-        console.log(formValues);
+        // Using .get(name) to get fields of formData
+        // names are specified in HTML <Input name="..."
+        const newListingData: ListingData = {
+            title: formData.get("title") as string,
+            price: formData.get("price") as string,
+            description: formData.get("description") as string,
+            imgUrls: [URL.createObjectURL(formData.get("images") as File)]
+        };
+
+        props.onListingSubmit(newListingData);
 
         setOpen(false);
     }
@@ -74,7 +88,7 @@ export default function CreateListing(){
 
                             <Field>
                                 <FieldLabel htmlFor="upload-media">Upload media</FieldLabel>
-                                <Input name="picture" type="file" required/>
+                                <Input name="images" type="file" required/>
                             </Field>
 
                             <Field>
