@@ -1,12 +1,14 @@
 import { Router } from "express";
 import { supabase } from "../services/db.js";
-import { authenticateToken } from "../middleware/auth.js";
 
 const router = Router();
 
 // gets the logged in user's profile
-router.get("/me", authenticateToken, async (req, res) => {
-  const userId = req.user!.userId;
+router.get("/me", async (req, res) => {
+  const userId = req.query.userId;
+  if (!userId) {
+    return res.status(400).json({ error: "missing userId" });
+  }
 
   const { data, error } = await supabase
     .from("users")
@@ -21,11 +23,16 @@ router.get("/me", authenticateToken, async (req, res) => {
   return res.json(data);
 });
 
-// updates the logged in user's profile
-router.patch("/me", authenticateToken, async (req, res) => {
-  const userId = req.user!.userId;
-  const updates = req.body;
 
+
+// updates the logged in user's profile
+router.patch("/me", async (req, res) => {
+  const userId = req.query.userId;
+  if (!userId) {
+    return res.status(400).json({ error: "missing userId" });
+  }
+  
+  const updates = req.body;
   updates.updated_at = new Date().toISOString();
 
   const { data, error } = await supabase
@@ -34,9 +41,13 @@ router.patch("/me", authenticateToken, async (req, res) => {
     .eq("id", userId)
     .select()
     .single();
+  if (!data) {
+    console.error("User update error:", error);
+    return res.status(404).json({ error: "User not found" });
+  }
   if (error) {
     console.error("User update error:", error);
-    return res.status(400).json({ error: "Failed to update profile" });
+    return res.status(404).json({ error: "Failed to update profile" });
   }
 
   return res.json(data);
