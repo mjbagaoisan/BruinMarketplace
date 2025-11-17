@@ -35,6 +35,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
+import { ScrollArea } from "@/components/ui/scroll-area"
+
+import { Dropzone, DropzoneContent, DropzoneEmptyState } from '@/components/dropzone'
+import { useSupabaseUpload } from '@/hooks/use-supabase-upload'
+
 import { Input } from "@/components/ui/input"
 
 import { Switch } from "@/components/ui/switch"
@@ -74,6 +79,15 @@ export default function CreateListing(props: CreateListingProps){
         setOpen(false);
     }
 
+    const dropzoneProps = useSupabaseUpload({
+        bucketName: 'test',
+        path: 'test',
+        allowedMimeTypes: ['image/*'],
+        maxFiles: 2,
+        maxFileSize: 1000 * 1000 * 10, // 10MB,
+    })
+ 
+
     return(
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
@@ -86,60 +100,67 @@ export default function CreateListing(props: CreateListingProps){
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Create a Listing</DialogTitle>
-                    <DialogDescription></DialogDescription> {/* suppress warning */}
-
-                    <form onSubmit={handleSubmit}>
-                        <FieldGroup></FieldGroup> {/* for spacing */}
-                        <FieldGroup>
-                            <Field>
-                                <FieldLabel>Title</FieldLabel>
-                                <Input name="title" placeholder="e.g. Nike Blazer Highs" required/>
-                            </Field>
-
-                            <Field className="w-20">
-                            <FieldLabel>Price</FieldLabel>
-                            <Field orientation="responsive">
-                                <FieldLabel>$</FieldLabel>
-                                <Input name="price" required/>
-                            </Field>
-                            </Field>
-
-                            <Field>
-                                <FieldLabel>Upload media</FieldLabel>
-                                <Input name="images" type="file" required/>
-                            </Field>
-
-                            <Field>
-                                <FieldLabel>
-                                    Location
-                                </FieldLabel>
-                                <Select defaultValue="">
-                                    <SelectTrigger>
-                                    <SelectValue/>
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="the-hill">The Hill</SelectItem>
-                                        <SelectItem value="ua">University Appartments</SelectItem>
-                                        <SelectItem value="off-campus">Off-Campus</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </Field>
-
-                            <Field>
-                                <FieldLabel htmlFor="description">Description</FieldLabel>
-                                <Textarea name="description" placeholder="Describe your listing" className="resize-none"/>
-                            </Field>
-
-                        <Field orientation="horizontal">
-                            <Button type="submit">Post</Button>
-                            <DialogClose asChild>
-                                <Button variant="outline" type="button">Cancel</Button>
-                            </DialogClose>
-                        </Field>
-                        </FieldGroup>
-                    </form>
-                    
+                    <DialogDescription></DialogDescription> {/* required, suppresses warning */}
                 </DialogHeader>
+
+                <form onSubmit={handleSubmit}>
+                    <ScrollArea className="h-[60vh] w-full pr-4">
+                    <FieldGroup></FieldGroup> {/* for spacing */}
+                    <FieldGroup className="pl-1">
+                        <Field>
+                            <FieldLabel>Title</FieldLabel>
+                            <Input name="title" placeholder="e.g. Nike Blazer Highs" required/>
+                        </Field>
+
+                        <Field className="w-20">
+                        <FieldLabel>Price</FieldLabel>
+                        <Field orientation="responsive">
+                            <FieldLabel>$</FieldLabel>
+                            <Input name="price" required/>
+                        </Field>
+                        </Field>
+
+                        <Field>
+                            <FieldLabel>Media</FieldLabel>
+                            <Dropzone {...dropzoneProps}>
+                                <DropzoneEmptyState />
+                                <DropzoneContent />
+                            </Dropzone>
+                        </Field>
+
+                        <Field>
+                            <FieldLabel>
+                                Location
+                            </FieldLabel>
+                            <Select defaultValue="">
+                                <SelectTrigger>
+                                <SelectValue/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="the-hill">The Hill</SelectItem>
+                                    <SelectItem value="ua">University Apartments</SelectItem>
+                                    <SelectItem value="off-campus">Off-Campus</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </Field>
+
+                        <Field>
+                            <FieldLabel htmlFor="description">Description</FieldLabel>
+                            <Textarea name="description" placeholder="Describe your listing" className="resize-none"/>
+                        </Field>
+                    </FieldGroup>
+                    </ScrollArea>
+
+                    <FieldGroup className="mt-4">
+                    <Field orientation="horizontal">
+                        <Button type="submit">Post</Button>
+                        <DialogClose asChild>
+                            <Button variant="outline" type="button">Cancel</Button>
+                        </DialogClose>
+                    </Field>
+                    </FieldGroup>
+                </form>
+                
             </DialogContent>
         </Dialog>
     )
