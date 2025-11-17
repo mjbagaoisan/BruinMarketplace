@@ -106,7 +106,7 @@ export default function CreateListing(props: CreateListingProps){
                 <form onSubmit={handleSubmit}>
                     <ScrollArea className="h-[60vh] w-full pr-4">
                     <FieldGroup></FieldGroup> {/* for spacing */}
-                    <FieldGroup className="pl-1">
+                    <FieldGroup className="pl-1 pr-1 pb-1">
                         <Field>
                             <FieldLabel>Title</FieldLabel>
                             <Input name="title" placeholder="e.g. Nike Blazer Highs" required/>
