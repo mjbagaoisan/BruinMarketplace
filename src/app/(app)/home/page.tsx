@@ -1,7 +1,24 @@
+"use client";
+
 import Link from 'next/link';
 import { Check, Shield, Users, Zap, Search, MessageCircle, Handshake } from 'lucide-react';
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Home() {
+
+  const { user } = useAuth();
+
+  // Get full name or fallback
+  const fullName = user?.name ?? "Bruin";
+
+  // Take only the first word
+  const [firstRaw] = fullName.split(" ");
+
+  // Make it "Normal" case: first letter upper, rest lower
+  const firstName =
+    firstRaw.charAt(0).toUpperCase() + firstRaw.slice(1).toLowerCase();
+
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f5f9ff] to-[#f0f7ff]">
       {/* Hero Section */}
@@ -9,7 +26,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
           <div className="text-left">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-              Welcome <span className="text-[#2774AE]">Aron</span><br />
+              Welcome <span className="text-[#2774AE]">{firstName}!</span><br />
             </h1>
             <p className="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed">
               Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iure, vero ipsam est ab ipsa commodi repudiandae aspernatur amet recusandae error quia.
