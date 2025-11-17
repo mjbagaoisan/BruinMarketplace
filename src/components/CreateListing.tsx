@@ -83,7 +83,7 @@ export default function CreateListing(props: CreateListingProps){
         bucketName: 'test',
         path: 'test',
         allowedMimeTypes: ['image/*'],
-        maxFiles: 2,
+        maxFiles: 5,
         maxFileSize: 1000 * 1000 * 10, // 10MB,
     })
  

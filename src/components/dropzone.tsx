@@ -1,5 +1,19 @@
 'use client'
 
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+
+import Image from "next/image";
+
+import { ScrollArea } from "@/components/ui/scroll-area"
+
 import { cn } from '@/lib/utils'
 import { type UseSupabaseUploadReturn } from '@/hooks/use-supabase-upload'
 import { Button } from '@/components/ui/button'
@@ -106,9 +120,28 @@ const DropzoneContent = ({ className }: { className?: string }) => {
             className="flex items-center gap-x-4 border-b py-2 first:mt-4 last:mb-4 "
           >
             {file.type.startsWith('image/') ? (
-              <div className="h-10 w-10 rounded border overflow-hidden shrink-0 bg-muted flex items-center justify-center">
-                <img src={file.preview} alt={file.name} className="object-cover" />
-              </div>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <div className="h-10 w-10 rounded border overflow-hidden shrink-0 bg-muted flex items-center justify-center">
+                    <img src={file.preview} alt={file.name} className="object-cover" />
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-4xl">
+                <DialogHeader>
+                    <DialogTitle>{file.name}</DialogTitle>
+                    <DialogDescription></DialogDescription> {/* required, suppresses warning */}
+                </DialogHeader>
+                <ScrollArea className="max-h-[70vh] w-full pr-4">
+                <Image 
+                  src={file.preview!} 
+                  alt={file.name} 
+                  width={1000} 
+                  height={1000}
+                  className="object-contain"
+                />
+                </ScrollArea>
+                </DialogContent>
+              </Dialog>
             ) : (
               <div className="h-10 w-10 rounded border bg-muted flex items-center justify-center">
                 <File size={18} />
