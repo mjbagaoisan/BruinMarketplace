@@ -25,6 +25,16 @@ import {
   FieldTitle,
 } from "@/components/ui/field"
 
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
 import { Input } from "@/components/ui/input"
 
 import { Switch } from "@/components/ui/switch"
@@ -82,21 +92,37 @@ export default function CreateListing(props: CreateListingProps){
                         <FieldGroup></FieldGroup> {/* for spacing */}
                         <FieldGroup>
                             <Field>
-                                <FieldLabel htmlFor="title">Title</FieldLabel>
+                                <FieldLabel>Title</FieldLabel>
                                 <Input name="title" placeholder="e.g. Nike Blazer Highs" required/>
                             </Field>
 
                             <Field className="w-20">
-                            <FieldLabel htmlFor="price">Price</FieldLabel>
+                            <FieldLabel>Price</FieldLabel>
                             <Field orientation="responsive">
-                                <FieldLabel htmlFor="price">$</FieldLabel>
+                                <FieldLabel>$</FieldLabel>
                                 <Input name="price" required/>
                             </Field>
                             </Field>
 
                             <Field>
-                                <FieldLabel htmlFor="upload-media">Upload media</FieldLabel>
+                                <FieldLabel>Upload media</FieldLabel>
                                 <Input name="images" type="file" required/>
+                            </Field>
+
+                            <Field>
+                                <FieldLabel>
+                                    Location
+                                </FieldLabel>
+                                <Select defaultValue="">
+                                    <SelectTrigger>
+                                    <SelectValue/>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="the-hill">The Hill</SelectItem>
+                                        <SelectItem value="ua">University Appartments</SelectItem>
+                                        <SelectItem value="off-campus">Off-Campus</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </Field>
 
                             <Field>
