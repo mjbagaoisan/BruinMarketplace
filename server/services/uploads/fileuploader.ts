@@ -1,22 +1,22 @@
 
 import path from "path";
 import { supabase } from "../db";
-// Create 'avatars' bucket
-const { data: avatarsData, error: avatarsError } = await supabase
-    .storage
-    .createBucket('avatars', {
-        public: false,
-        allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif'],
-        fileSizeLimit: 5 * 1024 * 1024 // 5MB    
-    });
-// Create 'listings' bucket
-const {data: listingsData, error: listingsError} = await supabase
-    .storage
-    .createBucket('listings', {
-        public: false,
-        allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'video/mp4'],
-        fileSizeLimit: 10 * 1024 * 1024 // 10MB    
-    });
+// // Create 'avatars' bucket
+// const { data: avatarsData, error: avatarsError } = await supabase
+//     .storage
+//     .createBucket('avatars', {
+//         public: false,
+//         allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif'],
+//         fileSizeLimit: 5 * 1024 * 1024 // 5MB    
+//     });
+// // Create 'listings' bucket
+// const {data: listingsData, error: listingsError} = await supabase
+//     .storage
+//     .createBucket('listings', {
+//         public: false,
+//         allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'video/mp4'],
+//         fileSizeLimit: 10 * 1024 * 1024 // 10MB    
+//     });
 
 
 

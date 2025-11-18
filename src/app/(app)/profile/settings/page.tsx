@@ -33,11 +33,12 @@ function profileSettingsPage() {
         const data = await response.json();
         if (!response.ok) return console.log("Failed to fetch profile");
 
-        setProfilePicUrl(data.profile_image_url || null);
+        //setProfilePicUrl(data.profile_image_url || null);
         setMajor(data.major || "");
         setHideMajor(data.hide_major);
         setClassYear(data.class_year);
         setHideClassYear(data.hide_class_year);
+        setProfilePicUrl(data.profile_image_url || null);
     }
       catch (error) {
         console.error("Error loading profile:", error);
@@ -104,6 +105,7 @@ function profileSettingsPage() {
         </>
       );
     }
+    const fileExtension = File.name?.split('.').pop() || "png";
 
     return (
     <>
@@ -121,7 +123,7 @@ function profileSettingsPage() {
               <label className="text-sm font-medium">Profile Picture</label>
                 <label className="relative w-24 h-24 rounded-full overflow-hidden border cursor-pointer flex items-center justify-center bg-gray-100">
                   <img
-                    src={profilePicUrl || "/default-avatar.png"}
+                    src={profilePicUrl?? ""}
                     className="w-full h-full object-cover"
                   />
                   <input 
