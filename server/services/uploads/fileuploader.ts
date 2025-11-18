@@ -1,6 +1,6 @@
 
 import path from "path";
-import { supabase } from '../../services/db.js';
+import { supabase } from "../db";
 // Create 'avatars' bucket
 const { data: avatarsData, error: avatarsError } = await supabase
     .storage
@@ -58,7 +58,7 @@ export async function uploadAvatarImage( opts: { userId: string; file: File | Bl
 export async function uploadListingMedia( opts: { listingId: string; file: File | Blob;}) {
     const { listingId, file } = opts;
     
-    const fileName = (file as File).name || `${Date.now()}`;
+    const fileName = (file as File).name 
     const fileExtension = fileName.split('.').pop() || 'bin';
     
     const validTypes = ["jpg", "jpeg", "png", "mp4"]; // Different usage from avatar upload bc/ of mp4 allowance.
