@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { supabase } from '../services/db.js';
+import { verifyToken } from '../utils/jwt.js';
 
 // Extend Express Request type to include user
 declare global {
@@ -16,8 +16,7 @@ declare global {
 }
 
 /**
- * Middleware to verify JWT token from Authorization header
- * Expects: Authorization: Bearer <token>
+ * Middleware to verify JWT token from auth_token cookie
  */
 export async function authenticateToken(
   req: Request,
@@ -25,46 +24,30 @@ export async function authenticateToken(
   next: NextFunction
 ): Promise<void> {
   try {
-    const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+    const token = req.cookies?.auth_token;
 
     if (!token) {
       res.status(401).json({ error: 'Authentication required' });
       return;
     }
 
-    // Verify token with Supabase
-    const { data: { user }, error } = await supabase.auth.getUser(token);
+    const decoded = verifyToken(token);
 
-    if (error || !user) {
-      res.status(403).json({ error: 'Invalid or expired token' });
-      return;
-    }
-
-    // Fetch user details from database
-    const { data: dbUser, error: dbError } = await supabase
-      .from('users')
-      .select('id, email, name, role')
-      .eq('id', user.id)
-      .single();
-
-    if (dbError || !dbUser) {
-      res.status(403).json({ error: 'User not found in database' });
-      return;
-    }
-
-    // Attach user to request
     req.user = {
-      userId: dbUser.id,
-      email: dbUser.email,
-      role: dbUser.role,
-      name: dbUser.name,
+      userId: decoded.userId,
+      email: decoded.email,
+      role: decoded.role,
+      name: decoded.name,
     };
 
     next();
-  } catch (error) {
+  } catch (error: any) {
     console.error('Auth middleware error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    if (error?.message === 'Token expired') {
+      res.status(401).json({ error: 'Token expired' });
+    } else {
+      res.status(403).json({ error: 'Invalid token' });
+    }
   }
 }
 
@@ -98,32 +81,24 @@ export async function optionalAuth(
   next: NextFunction
 ): Promise<void> {
   try {
-    const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(' ')[1];
+    const token = req.cookies?.auth_token;
 
     if (token) {
-      const { data: { user }, error } = await supabase.auth.getUser(token);
-
-      if (!error && user) {
-        const { data: dbUser } = await supabase
-          .from('users')
-          .select('id, email, name, role')
-          .eq('id', user.id)
-          .single();
-
-        if (dbUser) {
-          req.user = {
-            userId: dbUser.id,
-            email: dbUser.email,
-            role: dbUser.role,
-            name: dbUser.name,
-          };
-        }
+      try {
+        const decoded = verifyToken(token);
+        req.user = {
+          userId: decoded.userId,
+          email: decoded.email,
+          role: decoded.role,
+          name: decoded.name,
+        };
+      } catch {
+        // Ignore invalid token and continue without user
       }
     }
 
     next();
-  } catch (error) {
+  } catch {
     // Continue without authentication
     next();
   }
