@@ -15,7 +15,7 @@ const {data: listingsData, error: listingsError} = await supabase
     .createBucket('listings', {
         public: false,
         allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'video/mp4'],
-        fileSizeLimit: 25 * 1024 * 1024 // 25MB    
+        fileSizeLimit: 10 * 1024 * 1024 // 10MB    
     });
 
 
