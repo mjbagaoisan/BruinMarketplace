@@ -53,6 +53,7 @@ export default function DebouncedSearch({
 
     fetch(`${api}?q=${encodeURIComponent(debouncedQ)}`, {
       headers: { "cache-control": "no-store" },
+      credentials: 'include',
     })
       .then((r) => r.json())
       .then((data) => onResultsRef.current?.(data))
