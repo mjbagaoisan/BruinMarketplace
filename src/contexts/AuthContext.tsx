@@ -1,7 +1,6 @@
 "use client";
 
-import { createContext, useContext } from 'react';
-import { useSession } from 'next-auth/react';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 interface User {
   userId: string;
@@ -19,19 +18,61 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { data: session, status } = useSession();
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const user = session?.user ? {
-    userId: (session.user as any).userId,
-    email: session.user.email!,
-    name: session.user.name!,
-    role: (session.user as any).role || 'user'
-  } : null;
+  const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
-  const value = {
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchUser = async () => {
+      try {
+        setIsLoading(true);
+        const res = await fetch(`${apiBase}/api/auth/me`, {
+          credentials: "include",
+        });
+
+        if (!res.ok) {
+          if (isMounted) {
+            setUser(null);
+          }
+          return;
+        }
+
+        const data = await res.json();
+
+        if (data?.user && isMounted) {
+          setUser({
+            userId: data.user.id ?? data.user.userId,
+            email: data.user.email,
+            name: data.user.name,
+            role: data.user.role || "user",
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch current user:", error);
+        if (isMounted) {
+          setUser(null);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchUser();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [apiBase]);
+
+  const value: AuthContextType = {
     user,
-    isLoading: status === 'loading',
-    isAuthenticated: !!session
+    isLoading,
+    isAuthenticated: !!user,
   };
 
   return (

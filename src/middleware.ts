@@ -1,24 +1,9 @@
-import { withAuth } from 'next-auth/middleware';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
-export default withAuth(
-  function middleware(req) {
-    // Middleware logic runs after authorization check
-    console.log('Middleware running for:', req.nextUrl.pathname);
-  },
-  {
-    callbacks: {
-      authorized: ({ token, req }) => {
-        // Must return true to allow access, false to redirect to signIn page
-        const isAuthenticated = !!token;
-        console.log('Auth check:', req.nextUrl.pathname, 'Authenticated:', isAuthenticated);
-        return isAuthenticated;
-      },
-    },
-    pages: {
-      signIn: '/login',
-    },
-  }
-);
+export function middleware(_req: NextRequest) {
+  return NextResponse.next();
+}
 
 export const config = {
   matcher: [
