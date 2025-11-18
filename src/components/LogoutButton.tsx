@@ -15,8 +15,9 @@ const LogoutButton = React.memo(({ className, children }: LogoutButtonProps) => 
 
   const handleLogout = React.useCallback(async () => {
     try {
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const apiBase = process.env.NEXT_PUBLIC_API_URL;
 
+      // sends Post request to /api/auth/logout to clear auth_token cookie
       await fetch(`${apiBase}/api/auth/logout`, {
         method: 'POST',
         credentials: 'include',

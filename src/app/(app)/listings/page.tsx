@@ -46,6 +46,7 @@ function ListingsPage() {
         credentials: 'include',
       });
 
+      // if user is not signed in, redirect to login page
       if (response.status === 401) {
         router.push('/login');
         setListings([]);

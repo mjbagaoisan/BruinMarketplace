@@ -50,7 +50,7 @@ export default function DebouncedSearch({
       onResultsRef.current?.([]);
       return;
     }
-
+    // send GET request to search endpoint
     fetch(`${api}?q=${encodeURIComponent(debouncedQ)}`, {
       headers: { "cache-control": "no-store" },
       credentials: 'include',

@@ -20,6 +20,7 @@ if (!JWT_SECRET) {
   throw new Error("JWT_SECRET environment variable is required");
 }
 
+// generates a JWT token from JWTPayLoad object
 export function generateToken(payload: JWTPayload): string {
   return jwt.sign(payload, JWT_SECRET as string, {
     expiresIn: JWT_EXPIRES_IN,
@@ -27,6 +28,7 @@ export function generateToken(payload: JWTPayload): string {
   });
 }
 
+// verifies a JWT token and returns the decoded payload
 export function verifyToken(token: string): DecodedToken {
   try {
     return jwt.verify(token, JWT_SECRET as string, {

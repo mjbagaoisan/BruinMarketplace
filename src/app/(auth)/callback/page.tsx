@@ -12,22 +12,13 @@ export default function CallbackPage() {
 
   useEffect(() => {
     const run = async () => {
-      const hasError = searchParams.get("error");
-
-      if (hasError) {
-        setError("Something went wrong signing you in.");
-        router.push("/login");
-        return;
-      }
 
       try {
-        // The backend has already set the auth cookie at this point.
-        // We can take the user straight to home; the app will hydrate auth state.
-        router.push("/home");
+        router.push("/home"); // sends user to home page if everything went well
       } catch (err) {
         console.error("Callback handling error:", err);
         setError("Something went wrong signing you in.");
-        router.push("/login");
+        router.push("/login"); // sends user back to login page if something went wrong
       }
     };
 

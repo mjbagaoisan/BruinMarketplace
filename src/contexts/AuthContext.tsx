@@ -21,7 +21,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+  const apiBase = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
     let isMounted = true;
@@ -29,7 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const fetchUser = async () => {
       try {
         setIsLoading(true);
-        const res = await fetch(`${apiBase}/api/auth/me`, {
+        const res = await fetch(`${apiBase}/api/auth/me`, { // include auth_token cookie
           credentials: "include",
         });
 
@@ -47,7 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             userId: data.user.id ?? data.user.userId,
             email: data.user.email,
             name: data.user.name,
-            role: data.user.role || "user",
+            role: data.user.role,
           });
         }
       } catch (error) {

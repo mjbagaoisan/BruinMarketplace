@@ -12,6 +12,7 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
+    // uses useAuth to check if user is signed in
     if (!isLoading && !user) {
       router.push('/login');
     }

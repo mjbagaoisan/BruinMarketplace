@@ -22,6 +22,7 @@ router.get('/google', (req: Request, res: Response) => {
       return res.status(500).json({ error: 'Google OAuth is not configured' });
     }
 
+    // generate a random state for CSRF protection with 32 bytes of random data
     const state = crypto.randomBytes(32).toString('hex');
 
     res.cookie('oauth_state', state, {
@@ -55,11 +56,15 @@ router.get('/google', (req: Request, res: Response) => {
   }
 });
 
+// handles the callback from Google OAuth
+// exchanges the authorization code for an access token and user info
+// then creates or updates the user in the database
+// and then generates a JWT token and returns it to the client
 router.get('/google/callback', async (req: Request, res: Response) => {
   try {
     const { code, state } = req.query;
     const storedState = req.cookies?.oauth_state;
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const frontendUrl = process.env.FRONTEND_URL;
 
     if (!code || typeof code !== 'string') {
       return res.redirect(`${frontendUrl}/login?error=missing_code`);
@@ -102,6 +107,7 @@ router.get('/google/callback', async (req: Request, res: Response) => {
       return res.redirect(`${frontendUrl}/login?error=invalid_domain`);
     }
 
+    // check if user exists in database
     const { data: existing, error: fetchError } = await supabase
       .from('users')
       .select('*')
@@ -114,7 +120,6 @@ router.get('/google/callback', async (req: Request, res: Response) => {
     }
 
     let user = existing;
-
     if (user) {
       const { data: updated, error: updateError } = await supabase
         .from('users')
@@ -134,12 +139,13 @@ router.get('/google/callback', async (req: Request, res: Response) => {
 
       user = updated;
     } else {
+      // insert new user into database if user does not exist
       const { data: inserted, error: insertError } = await supabase
         .from('users')
         .insert({
           id: sub,
           email,
-          name: name || 'UCLA Student',
+          name: name,
           profile_image_url: picture || null,
           role: 'user',
           is_verified: true,
@@ -165,6 +171,7 @@ router.get('/google/callback', async (req: Request, res: Response) => {
       role: user.role,
     });
 
+    // set auth_token cookie
     res.cookie('auth_token', token, {
       httpOnly: true,
       sameSite: 'lax',
@@ -181,6 +188,8 @@ router.get('/google/callback', async (req: Request, res: Response) => {
   }
 });
 
+// uses authenticateToken to load the user's information from the database
+// and returns a minimal profile object back to the client
 router.get('/me', authenticateToken, async (req: Request, res: Response) => {
   try {
     if (!req.user) {
@@ -213,6 +222,7 @@ router.get('/me', authenticateToken, async (req: Request, res: Response) => {
   }
 });
 
+// clears the auth_token cookie
 router.post('/logout', (req: Request, res: Response) => {
   res.clearCookie('auth_token', {
     httpOnly: true,
@@ -222,22 +232,6 @@ router.post('/logout', (req: Request, res: Response) => {
   });
 
   res.status(200).json({ success: true });
-});
-
-// POST /api/auth/verify-email
-router.post('/verify-email', (req: Request, res: Response) => {
-  try {
-    const { email } = req.body;
-
-    if (!email) {
-      return res.status(400).json({ error: 'Email is required' });
-    }
-
-    const allowed = isAllowedEmail(email);
-    res.json({ allowed });
-  } catch (error: any) {
-    res.status(500).json({ error: error?.message || 'Internal server error' });
-  }
 });
 
 export default router;
