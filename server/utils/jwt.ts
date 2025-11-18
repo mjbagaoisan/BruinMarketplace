@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+import jwt, { type SignOptions } from "jsonwebtoken";
 
 interface JWTPayload {
   userId: string;
@@ -13,7 +13,8 @@ interface DecodedToken extends JWTPayload {
 }
 
 const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "1d";
+const JWT_EXPIRES_IN: SignOptions["expiresIn"] =
+  (process.env.JWT_EXPIRES_IN as SignOptions["expiresIn"]) ?? "1d";
 
 if (!JWT_SECRET) {
   throw new Error("JWT_SECRET environment variable is required");
