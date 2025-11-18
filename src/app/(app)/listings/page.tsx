@@ -18,7 +18,7 @@ export default function Page() {
         <ol>
             <CreateListing onListingSubmit={addListing} />
             {listings.map((listing, index) => (
-                <ListingCard key={index} title={listing.title} price={listing.price} description={listing.description} imgUrls={listing.imgUrls} />
+                <ListingCard key={index} title={listing.title} price={listing.price} description={listing.description} location={listing.location} />
             ))}
         </ol>
     )
