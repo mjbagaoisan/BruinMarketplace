@@ -71,8 +71,10 @@ export default function CreateListing(props: CreateListingProps){
             title: formData.get("title") as string,
             price: formData.get("price") as string,
             description: formData.get("description") as string,
-            imgUrls: [URL.createObjectURL(formData.get("images") as File)]
+            location: formData.get("location") as string
         };
+
+        console.log("MEOW:", formData.get("location"))
 
         props.onListingSubmit(newListingData);
 
@@ -132,13 +134,13 @@ export default function CreateListing(props: CreateListingProps){
                             <FieldLabel>
                                 Location
                             </FieldLabel>
-                            <Select defaultValue="">
+                            <Select defaultValue="" name="location">
                                 <SelectTrigger>
                                 <SelectValue/>
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="the-hill">The Hill</SelectItem>
-                                    <SelectItem value="ua">University Apartments</SelectItem>
+                                    <SelectItem value="univ-apps">University Apartments</SelectItem>
                                     <SelectItem value="off-campus">Off-Campus</SelectItem>
                                 </SelectContent>
                             </Select>

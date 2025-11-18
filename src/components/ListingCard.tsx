@@ -17,7 +17,7 @@ export interface ListingData {
   title: string;
   price: string;
   description: string;
-  imgUrls: string[];
+  location: string;
 }
 
 export default function ListingCard(props: ListingData) {
@@ -25,10 +25,13 @@ export default function ListingCard(props: ListingData) {
     <Card className="w-full max-w-sm">
         <div className="relative h-75 w-7/8 mx-auto rounded-lg overflow-hidden">
             <Image
-            src={ props.imgUrls[0] }
+            src="/listingcard_sample2.jpg"
             alt="Bruin Logo"
             fill
             style={{ objectFit: "cover" }} 
+            sizes="(max-width: 640px) 100vw, 
+                  (max-width: 1024px) 50vw, 
+                  33vw"
             />
         </div>
       <CardHeader>
