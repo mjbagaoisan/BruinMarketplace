@@ -1,6 +1,6 @@
 
 import path from "path";
-import { supabase } from "../../../../../../server/services/db";
+import { supabase } from '../../services/db.js';
 // Create 'avatars' bucket
 const { data: avatarsData, error: avatarsError } = await supabase
     .storage
