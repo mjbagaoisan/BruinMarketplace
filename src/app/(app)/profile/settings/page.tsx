@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 function profileSettingsPage() {
     const { data: session } = useSession();
 
+    const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
+    const [profilePicFile, setProfilePicFile] = useState<File | null>(null);    
     const [major, setMajor] = useState<string | null>(null); 
     const [hideMajor, setHideMajor] = useState<boolean>(false);
     const [classYear, setClassYear] = useState<number | null>(null);
@@ -16,6 +18,7 @@ function profileSettingsPage() {
     const [save, setSave] = useState<boolean>(false);
     const [saveMsg, setSaveMsg] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
+
 
     useEffect(() => {
       if (session?.user?.userId) {
@@ -26,10 +29,11 @@ function profileSettingsPage() {
     // load user's profile info
     const fetchProfile = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/me?userId=${session.user.userId}`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/me?userId=${session?.user?.userId}`);
         const data = await response.json();
         if (!response.ok) return console.log("Failed to fetch profile");
 
+        setProfilePicUrl(data.profile_image_url || null);
         setMajor(data.major || "");
         setHideMajor(data.hide_major);
         setClassYear(data.class_year);
@@ -43,7 +47,13 @@ function profileSettingsPage() {
       }
   };
   
-  
+
+  function handleAvatarSelect(e: React.ChangeEvent<HTMLInputElement>) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      setProfilePicFile(file);
+    }
+    
     // update user's profile info
     const handleSave = async () => {
       if (!session?.user?.userId) return;
@@ -51,36 +61,39 @@ function profileSettingsPage() {
       setSave(true);
       setSaveMsg(null);
       try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/me?userId=${session.user.userId}`, {
-              method: "PATCH",
-              credentials: "include",
-              headers: { "Content-Type": "application/json" }, 
-              body: JSON.stringify({
-                  major: major,
-                  hide_major: hideMajor,
-                  class_year: classYear,
-                  hide_class_year: hideClassYear
-              }),
-          });
-          
-          const data = await response.json();
+        const formData = new FormData();
+        formData.append("userId", session.user.userId);
+        if (profilePicFile) {formData.append("avatar", profilePicFile);}
+        formData.append("major", String(major ?? ""));
+        formData.append("hide_major", (hideMajor? "true" : "false"));
+        formData.append("class_year", String(classYear ?? ""));
+        formData.append("hide_class_year", (hideClassYear? "true" : "false"));
 
-          if (!response.ok) {
-            setSaveMsg("Failed to save changes");
-            setSave(false);
-            return;
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/me?userId=${session.user.userId}`, {
+          method: "PATCH",
+          credentials: "include",
+          body: formData,       
+        });             
+          
+        const data = await response.json();
+
+        if (!response.ok) {
+          setSaveMsg("Failed to save changes");
+          setSave(false);
+          return;
+        }
+        // updates pic
+        if (data.profile_image_url) {
+        setProfilePicUrl(data.profile_image_url);
         }
 
-        setSaveMsg("changes saved!");
+      setSaveMsg("changes saved!");
       } catch (error) {
           console.error("Error saving changes:", error);
           setSaveMsg("Error saving changes");
       } 
-      
       setSave(false);
-    };
-
-
+    }
     if (loading) {
       return (
         <>
@@ -102,6 +115,23 @@ function profileSettingsPage() {
           <h1 className="text-3xl font-bold mb-8">Profile Settings</h1>
 
           <div className="flex flex-col gap-6 bg-white p-6 rounded-lg shadow-sm">
+
+            {/* user's profile picture */}
+            <div>
+              <label className="text-sm font-medium">Profile Picture</label>
+                <label className="relative w-24 h-24 rounded-full overflow-hidden border cursor-pointer flex items-center justify-center bg-gray-100">
+                  <img
+                    src={profilePicUrl || "/default-avatar.png"}
+                    className="w-full h-full object-cover"
+                  />
+                  <input 
+                    type="file" 
+                    accept="image/*"
+                    onChange={handleAvatarSelect}
+                    className="hidden"
+                  />
+                </label>
+            </div>
 
             {/* user's name */}
             <div>
@@ -160,20 +190,20 @@ function profileSettingsPage() {
 
             {/* save changes button */}
             <div className="flex flex-col justify-end">
-            <Button
-              onClick={handleSave}
-              disabled={save}
-              className="w-fit"
-            >
-              {save ? "Saving..." : "Save Changes"}
-            </Button>
-            
-            {saveMsg && (
-              <p className="text-red-600 text-sm mt-1">
-                {saveMsg}
-              </p>
-            )}
-          </div>
+              <Button
+                onClick={handleSave}
+                disabled={save}
+                className="w-fit"
+              >
+                {save ? "Saving..." : "Save Changes"}
+              </Button>
+              
+              {saveMsg && (
+                <p className="text-red-600 text-sm mt-1">
+                  {saveMsg}
+                </p>
+              )}
+            </div>
 
           </div>
         </div>

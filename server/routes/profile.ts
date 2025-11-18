@@ -37,12 +37,16 @@ router.patch("/me", upload.single("avatar"), async (req, res) => {
     }
 
     const updateFields: any = {
-      name: req.body.name,
-      bio: req.body.bio,
+      major: req.body.major ?? null,
+      hide_major: req.body.hide_major,
+      class_year: req.body.class_year ? Number(req.body.class_year) : null,
+      hide_class_year: req.body.hide_class_year,
+      updated_at: new Date().toISOString(),
     };
+
     if (req.file) {
       const result = await uploadAvatarImage({userId, file: new Blob([req.file.buffer], { type: req.file.mimetype })});
-      updateFields.profilePicURL = result.publicUrl;
+      updateFields.profile_image_url = result.publicUrl;
     }
 
     const updates = req.body;
@@ -50,17 +54,16 @@ router.patch("/me", upload.single("avatar"), async (req, res) => {
     
     const { data, error } = await supabase
       .from("users")
-      .update(updates)
+      .update(updateFields)
       .eq("id", userId)
       .select()
       .single();
-    if (!data) {
+    if (!data || error) {
       console.error("User update error:", error);
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ error: "User update failed " });
     }
-    if (error) throw error;
 
-    return res.json({success: true, updated: updateFields});
+    return res.json(data);
   } catch (err) {
       console.error(err);
       return res.status(500).json({ error: "Profile update failed." });
