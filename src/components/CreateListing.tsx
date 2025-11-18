@@ -1,6 +1,8 @@
 "use client";
 
+import React from "react";
 import { useState } from "react";
+import { createClient as createSupabaseBrowserClient } from "@/lib/client";
 
 import {
   Dialog,
@@ -52,6 +54,67 @@ import ListingCard, { ListingData } from '@/components/ListingCard'
 
 import { PlusIcon } from "lucide-react"
 
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  "";
+
+type CreateListingPayload = {
+  title: string;
+  price: string;
+  description?: string;
+  location?: string;
+};
+
+type CreateListingResponse = {
+  id: string;
+  title: string;
+  price: number | string;
+  [key: string]: unknown;
+};
+
+async function createListingApi(payload: CreateListingPayload): Promise<CreateListingResponse> {
+  if (!API_BASE_URL) {
+    throw new Error("API base URL is not configured");
+  }
+
+  const supabase = createSupabaseBrowserClient();
+  const { data, error: sessionError } = await supabase.auth.getSession();
+
+  if (sessionError) {
+    throw new Error("Failed to get auth session");
+  }
+
+  const accessToken = data.session?.access_token;
+
+  if (!accessToken) {
+    throw new Error("Not authenticated");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/listings`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    credentials: "include",
+    body: JSON.stringify(payload),
+  });
+
+  let body: any = null;
+  try {
+    body = await response.json();
+  } catch {
+  }
+
+  if (!response.ok) {
+    const message = body?.error ?? "Failed to create listing";
+    throw new Error(message);
+  }
+
+  return body as CreateListingResponse;
+}
+
 interface CreateListingProps {
     onListingSubmit: (newListing: ListingData) => void
 }
@@ -59,26 +122,46 @@ interface CreateListingProps {
 export default function CreateListing(props: CreateListingProps){
 
     const [open, setOpen] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState<string | null>(null);
 
-    function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
         
         const formData = new FormData(e.currentTarget);
 
-        // Using .get(name) to get fields of formData
-        // names are specified in HTML <Input name="..."
-        const newListingData: ListingData = {
+        const payload: CreateListingPayload = {
             title: formData.get("title") as string,
             price: formData.get("price") as string,
-            description: formData.get("description") as string,
-            location: formData.get("location") as string
+            description: (formData.get("description") as string) || undefined,
+            location: (formData.get("location") as string) || undefined,
         };
 
-        console.log("MEOW:", formData.get("location"))
+        setSubmitting(true);
+        setSubmitError(null);
 
-        props.onListingSubmit(newListingData);
+        try {
+            const created = await createListingApi(payload);
 
-        setOpen(false);
+            const newListingData: ListingData = {
+                title: (created.title as string) ?? payload.title,
+                price: String(created.price ?? payload.price),
+                description: payload.description ?? "",
+                location: payload.location ?? "",
+            };
+
+            props.onListingSubmit(newListingData);
+            e.currentTarget.reset();
+            setOpen(false);
+        } catch (error) {
+            if (error instanceof Error) {
+                setSubmitError(error.message);
+            } else {
+                setSubmitError("Failed to create listing");
+            }
+        } finally {
+            setSubmitting(false);
+        }
     }
 
     const dropzoneProps = useSupabaseUpload({
@@ -155,11 +238,16 @@ export default function CreateListing(props: CreateListingProps){
 
                     <FieldGroup className="mt-4">
                     <Field orientation="horizontal">
-                        <Button type="submit">Post</Button>
+                        <Button type="submit" disabled={submitting}>
+                            {submitting ? "Posting..." : "Post"}
+                        </Button>
                         <DialogClose asChild>
                             <Button variant="outline" type="button">Cancel</Button>
                         </DialogClose>
                     </Field>
+                    {submitError && (
+                        <FieldError>{submitError}</FieldError>
+                    )}
                     </FieldGroup>
                 </form>
                 
