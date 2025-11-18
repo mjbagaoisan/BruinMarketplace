@@ -25,7 +25,7 @@ export async function uploadAvatarImage( opts: { userId: string; file: File | Bl
     const { userId, file } = opts;
 
     const fileExtension = (file as File).name?.split('.').pop() || "png";
-    const filePath = '${userId}/%{Date.now()}-avatar.${fileExtension}';
+    const filePath = `${userId}/${Date.now()}-avatar.${fileExtension}`;
 
 
     const { data, error } = await supabase.storage
@@ -39,7 +39,7 @@ export async function uploadAvatarImage( opts: { userId: string; file: File | Bl
 
 
     if (error) {
-        console.error('Error uploading avatar image:', error):
+        console.error('Error uploading avatar image:', error);
         throw error;
     }
 
@@ -58,7 +58,7 @@ export async function uploadAvatarImage( opts: { userId: string; file: File | Bl
 export async function uploadListingMedia( opts: { listingId: string; file: File | Blob;}) {
     const { listingId, file } = opts;
     
-    const fileName = (file as File).name || 
+    const fileName = (file as File).name || `${Date.now()}`;
     const fileExtension = fileName.split('.').pop() || 'bin';
     
     const validTypes = ["jpg", "jpeg", "png", "mp4"]; // Different usage from avatar upload bc/ of mp4 allowance.
