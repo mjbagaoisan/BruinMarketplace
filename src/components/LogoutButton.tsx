@@ -1,8 +1,8 @@
 "use client";
 
 import React from 'react';
-import { signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface LogoutButtonProps {
   className?: string;
@@ -11,12 +11,18 @@ interface LogoutButtonProps {
 
 const LogoutButton = React.memo(({ className, children }: LogoutButtonProps) => {
   const router = useRouter();
+  const { user } = useAuth();
 
   const handleLogout = React.useCallback(async () => {
     try {
-      await signOut({ 
-        redirect: false
+      const apiBase = process.env.NEXT_PUBLIC_API_URL;
+
+      // sends Post request to /api/auth/logout to clear auth_token cookie
+      await fetch(`${apiBase}/api/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
       });
+
       router.push('/');
     } catch (error) {
       console.error('Logout error:', error);

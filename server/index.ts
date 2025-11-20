@@ -11,6 +11,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import cookieParser from "cookie-parser";
 import apiRouter from "./routes/index.js";
 import listingsRouter from "./routes/listings.js";
 
@@ -31,6 +32,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser()); // parse cookies so auth middleware can read req.cookies.auth_token
 app.use(morgan("dev"));
 
 app.use("/api", apiRouter);

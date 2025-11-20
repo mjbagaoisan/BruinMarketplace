@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardMedia, CardTitle, CardPrice } from "@/components/ui/card";
 import DebouncedSearch from "@/components/SearchBar";
 import Header from "@/components/Header";
@@ -33,6 +34,7 @@ function ListingsPage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchResults, setSearchResults] = useState<Listing[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
     fetchListings();
@@ -40,7 +42,17 @@ function ListingsPage() {
 
   const fetchListings = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/listings`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/listings`, {
+        credentials: 'include',
+      });
+
+      // if user is not signed in, redirect to login page
+      if (response.status === 401) {
+        router.push('/login');
+        setListings([]);
+        return;
+      }
+
       const data = await response.json();
       
       if (Array.isArray(data)) {
