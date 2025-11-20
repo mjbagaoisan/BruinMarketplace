@@ -29,7 +29,7 @@ export async function uploadAvatarImage( opts: { userId: string; file: File | Bl
 
 
     const { data, error } = await supabase.storage
-    
+
     .from ('avatars')
     .upload(filePath, file, {
         cacheControl: '3600',

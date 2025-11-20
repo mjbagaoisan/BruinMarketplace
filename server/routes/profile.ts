@@ -1,8 +1,10 @@
 import { Router } from "express";
 import { supabase } from "../services/db.js";
 import { uploadAvatarImage } from "../services/uploads/fileuploader.js";
+import multer from "multer";
 
 const router = Router();
+const upload = multer();
 
 // gets the logged in user's profile
 router.get("/me", async (req, res) => {
@@ -27,7 +29,7 @@ router.get("/me", async (req, res) => {
 
 
 // updates the logged in user's profile
-router.patch("/me", async (req, res) => {
+router.patch("/me", upload.single("avatar"), async (req, res) => {
   try {
     const userId = String(req.query.userId);
     if (!userId) {
@@ -43,11 +45,18 @@ router.patch("/me", async (req, res) => {
       updated_at: new Date().toISOString(),
     };
 
-    /*const { publicUrl } = await uploadAvatarImage({
-        userId,
-        file: 
-      });*/
-
+    // if we are inputting a file (pfp)
+    if (req.file) {
+      //convert multer file to blob to save in supabase
+      const blob = new Blob([req.file.buffer], { type: req.file.mimetype });
+      // upload image and get the public url
+      const newPfp = await uploadAvatarImage({
+        userId: userId,
+        file: blob,
+      });
+        updateFields.profile_image_url = newPfp.publicUrl; 
+    }
+      
 
     const { data, error } = await supabase
       .from("users")

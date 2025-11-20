@@ -4,12 +4,14 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Header from "@/components/Header";
 import {useSession} from "next-auth/react";
 import { Button } from "@/components/ui/button";
+import { format } from 'path';
 
 
 function profileSettingsPage() {
     const { data: session } = useSession();
 
     const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
+    const [tempPicUrl, setTempPicUrl] = useState<string | null>(null);
     const [profilePicFile, setProfilePicFile] = useState<File | null>(null);    
     const [major, setMajor] = useState<string | null>(null); 
     const [hideMajor, setHideMajor] = useState<boolean>(false);
@@ -29,16 +31,18 @@ function profileSettingsPage() {
     // load user's profile info
     const fetchProfile = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/me?userId=${session?.user?.userId}`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/me?userId=${session.user.userId}`, {
+            credentials: "include",
+          }
+        );        
         const data = await response.json();
         if (!response.ok) return console.log("Failed to fetch profile");
 
-        //setProfilePicUrl(data.profile_image_url || null);
         setMajor(data.major || "");
         setHideMajor(data.hide_major);
         setClassYear(data.class_year);
         setHideClassYear(data.hide_class_year);
-        setProfilePicUrl(data.profile_image_url || null);
+        setProfilePicUrl(data.profile_image_url || "undefined");
     }
       catch (error) {
         console.error("Error loading profile:", error);
@@ -46,47 +50,50 @@ function profileSettingsPage() {
       finally {
         setLoading(false);
       }
+
   };
   
 
   function handleAvatarSelect(e: React.ChangeEvent<HTMLInputElement>) {
-      const file = e.target.files?.[0];
-      if (!file) return;
-      setProfilePicFile(file);
+      const avatarFile = e.target.files?.[0];
+
+      if (!avatarFile) return;
+      setProfilePicFile(avatarFile);
+      setTempPicUrl(URL.createObjectURL(avatarFile));
     }
-    
     // update user's profile info
     const handleSave = async () => {
       if (!session?.user?.userId) return;
 
       setSave(true);
       setSaveMsg(null);
+      
       try {
         const formData = new FormData();
         formData.append("userId", session.user.userId);
-        if (profilePicFile) {formData.append("avatar", profilePicFile);}
+        if (profilePicFile) {
+          formData.append("avatar", profilePicFile);
+        }
         formData.append("major", String(major ?? ""));
         formData.append("hide_major", (hideMajor? "true" : "false"));
         formData.append("class_year", String(classYear ?? ""));
         formData.append("hide_class_year", (hideClassYear? "true" : "false"));
 
+
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/me?userId=${session.user.userId}`, {
           method: "PATCH",
-          credentials: "include",
-          body: formData,       
-        });             
+          body: formData,
+        }
+      );
           
         const data = await response.json();
 
-        if (!response.ok) {
-          setSaveMsg("Failed to save changes");
-          setSave(false);
-          return;
-        }
-        // updates pic
-        if (data.profile_image_url) {
-        setProfilePicUrl(data.profile_image_url);
-        }
+      if (!response.ok) {
+        setSaveMsg("Failed to save changes");
+        setSave(false);
+        return;
+      }
+      setProfilePicUrl(data.profile_image_url);
 
       setSaveMsg("changes saved!");
       } catch (error) {
@@ -95,6 +102,8 @@ function profileSettingsPage() {
       } 
       setSave(false);
     }
+
+
     if (loading) {
       return (
         <>
@@ -105,7 +114,6 @@ function profileSettingsPage() {
         </>
       );
     }
-    const fileExtension = File.name?.split('.').pop() || "png";
 
     return (
     <>
@@ -123,7 +131,7 @@ function profileSettingsPage() {
               <label className="text-sm font-medium">Profile Picture</label>
                 <label className="relative w-24 h-24 rounded-full overflow-hidden border cursor-pointer flex items-center justify-center bg-gray-100">
                   <img
-                    src={profilePicUrl?? ""}
+                    src={tempPicUrl || profilePicUrl || "undefined"}
                     className="w-full h-full object-cover"
                   />
                   <input 
