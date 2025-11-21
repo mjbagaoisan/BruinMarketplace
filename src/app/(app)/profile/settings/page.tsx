@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Header from "@/components/Header";
-import {useSession} from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from 'path';
@@ -27,7 +26,7 @@ function profileSettingsPage() {
       if (!authLoading && user) {
         fetchProfile();
       }
-    }, [[authLoading, user]]);
+    }, [authLoading, user]);
 
     // load user's profile info
     const fetchProfile = async () => {
