@@ -9,7 +9,22 @@ import {
   InputGroupButton,
 } from "@/components/ui/input-group";
 
-import { useDebounce } from "@uidotdev/usehooks";
+// Custom debounce hook that's SSR-friendly
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = React.useState<T>(value);
+
+  React.useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
 
 type Props = {
   delay?: number;               // debounce delay (ms)
@@ -24,20 +39,26 @@ export default function DebouncedSearch({
 }: Props) {
   const [q, setQ] = React.useState("");
   const debouncedQ = useDebounce(q, delay);
+  const onResultsRef = React.useRef(onResults);
+  
+  React.useEffect(() => {
+    onResultsRef.current = onResults;
+  }, [onResults]);
 
   React.useEffect(() => {
     if (!debouncedQ.trim()) {
-      onResults?.([]);
+      onResultsRef.current?.([]);
       return;
     }
-
+    // send GET request to search endpoint
     fetch(`${api}?q=${encodeURIComponent(debouncedQ)}`, {
       headers: { "cache-control": "no-store" },
+      credentials: 'include',
     })
       .then((r) => r.json())
-      .then((data) => onResults?.(data))
+      .then((data) => onResultsRef.current?.(data))
       .catch((e) => console.error("Search error:", e));
-  }, [debouncedQ, api, onResults]);
+  }, [debouncedQ, api]);
 
   return (
     <div className="w-full max-w-lg">

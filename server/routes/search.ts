@@ -1,17 +1,18 @@
 import { Router, Request, Response } from 'express';
 import { supabase } from '../services/db.js';
+import { authenticateToken } from '../middleware/auth.js';
 
 const router = Router();
 
 /**
  * GET /api/search
- * Search listings by title or description
+ * Search listings by title or description (requires authentication)
  * Query params:
  *   - q: search query (required)
  *   - page: page number (default: 1)
  *   - limit: results per page (default: 12, max: 50)
  */
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', authenticateToken, async (req: Request, res: Response) => {
   try {
     const q = String(req.query.q || '').trim();
     const page = Math.max(1, parseInt(String(req.query.page || '1'), 10));

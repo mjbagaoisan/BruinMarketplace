@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Mulish } from "next/font/google";
 import "./globals.css";
-import SessionProvider from "@/components/SessionProvider";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 
 const mulish = Mulish({
@@ -23,8 +23,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={mulish.className}>
-      <body className="font-sans">
-        <SessionProvider>{children}</SessionProvider>
+      <body className="font-sans" suppressHydrationWarning={true}>
+        <AuthProvider>{children}</AuthProvider> // wraps children with AuthProvider to provide auth context to all components
       </body>
     </html>
   );
