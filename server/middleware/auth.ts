@@ -44,12 +44,20 @@ export async function authenticateToken(
     // Fetch user details from database
     const { data: dbUser, error: dbError } = await supabase
       .from('users')
-      .select('id, email, name, role')
+      .select('id, email, name, role, is_suspended')
       .eq('id', user.id)
       .single();
 
     if (dbError || !dbUser) {
       res.status(403).json({ error: 'User not found in database' });
+      return;
+    }
+
+    //Check if Suspended
+    if (dbUser.is_suspended) {
+      res.status(403).json({
+        error: 'Your account has been suspended. Please contact support.',
+      });
       return;
     }
 
@@ -107,7 +115,7 @@ export async function optionalAuth(
       if (!error && user) {
         const { data: dbUser } = await supabase
           .from('users')
-          .select('id, email, name, role')
+          .select('id, email, name, role, is_suspended')
           .eq('id', user.id)
           .single();
 
