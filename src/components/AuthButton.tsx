@@ -1,30 +1,33 @@
 "use client";
 
-import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Image from "next/image";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function AuthButton() {
-  const { data: session, status } = useSession();
+  const { user, isLoading } = useAuth();
   const router = useRouter();
 
   // Redirect to home if already signed in
   useEffect(() => {
-    if (session) {
+    if (user) {
       router.push('/home');
     }
-  }, [session, router]);
+  }, [user, router]);
 
-  if (status === "loading") {
+  if (isLoading) {
     return <div className="text-sm text-gray-500">Loading...</div>;
   }
 
-  if (!session) {
+  if (!user) {
     return (
       <div className="w-full">
         <button
-          onClick={() => signIn('google', { callbackUrl: '/home' })}
+          onClick={() => {
+            const apiBase = process.env.NEXT_PUBLIC_API_URL;
+            window.location.href = `${apiBase}/api/auth/google`; // redirect to Google OAuth instead of signIn('google') from NextAuth
+          }}
           className="flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         >
           <Image

@@ -11,8 +11,11 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import cookieParser from "cookie-parser";
 import apiRouter from "./routes/index.js";
 import listingsRouter from "./routes/listings.js";
+import profileRouter from "./routes/profile.js";
+
 
 export const app = express();
 const PORT = process.env.PORT || 3001;
@@ -25,16 +28,19 @@ app.use(helmet({
 app.use(cors({ 
   origin: ALLOW_ORIGIN, 
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control'],
   exposedHeaders: ['Content-Type', 'Cache-Control']
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser()); // parse cookies so auth middleware can read req.cookies.auth_token
 app.use(morgan("dev"));
 
 app.use("/api", apiRouter);
 app.use("/listings", listingsRouter);
+app.use("/profile", profileRouter);
+
 
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Server error:', err);

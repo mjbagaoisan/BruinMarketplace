@@ -10,8 +10,8 @@ const STATUS_ENUM = ["active", "sold", "traded", "removed"];
 const PAYMENT_ENUM = ["zelle", "cash", "venmo", "other"];
 const LOCATION_ENUM = ["hill", "on campus", "off campus"];
 
-//return all active listings (for now)
-router.get("/", async (req, res) => {
+//return all active listings (now requires authentication)
+router.get("/", authenticateToken, async (req, res) => {
   const { data, error } = await supabase
     .from("listings")
     .select("*")

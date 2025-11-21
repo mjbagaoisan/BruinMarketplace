@@ -1,12 +1,30 @@
 "use client";
 
+import { useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Check, Shield, Users, Zap, Search, MessageCircle, Handshake } from 'lucide-react';
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function Home() {
 
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    // uses useAuth to check if user is signed in
+    if (!isLoading && !user) {
+      router.push('/login');
+    }
+  }, [isLoading, user, router]);
+
+  if (isLoading || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-sm text-gray-600">Loading...</p>
+      </div>
+    );
+  }
 
   // Get full name or fallback
   const fullName = user?.name ?? "Bruin";
