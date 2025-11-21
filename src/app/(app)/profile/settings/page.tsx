@@ -4,11 +4,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Header from "@/components/Header";
 import {useSession} from "next-auth/react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 import { format } from 'path';
 
 
 function profileSettingsPage() {
-    const { data: session } = useSession();
+    const { user, isLoading: authLoading} = useAuth();
 
     const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
     const [tempPicUrl, setTempPicUrl] = useState<string | null>(null);
@@ -23,20 +24,20 @@ function profileSettingsPage() {
 
 
     useEffect(() => {
-      if (session?.user?.userId) {
+      if (!authLoading && user) {
         fetchProfile();
       }
-    }, [session]);
+    }, [[authLoading, user]]);
 
     // load user's profile info
     const fetchProfile = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/me?userId=${session.user.userId}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/me`, {
             credentials: "include",
           }
         );        
-        const data = await response.json();
         if (!response.ok) return console.log("Failed to fetch profile");
+        const data = await response.json();
 
         setMajor(data.major || "");
         setHideMajor(data.hide_major);
@@ -63,14 +64,13 @@ function profileSettingsPage() {
     }
     // update user's profile info
     const handleSave = async () => {
-      if (!session?.user?.userId) return;
+      if (!user) return;
 
       setSave(true);
       setSaveMsg(null);
       
       try {
         const formData = new FormData();
-        formData.append("userId", session.user.userId);
         if (profilePicFile) {
           formData.append("avatar", profilePicFile);
         }
@@ -80,8 +80,9 @@ function profileSettingsPage() {
         formData.append("hide_class_year", (hideClassYear? "true" : "false"));
 
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/me?userId=${session.user.userId}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/me`, {
           method: "PATCH",
+          credentials: "include",
           body: formData,
         }
       );
@@ -93,8 +94,8 @@ function profileSettingsPage() {
         setSave(false);
         return;
       }
-      setProfilePicUrl(data.profile_image_url);
 
+      setProfilePicUrl(data.profile_image_url);
       setSaveMsg("changes saved!");
       } catch (error) {
           console.error("Error saving changes:", error);
@@ -104,7 +105,7 @@ function profileSettingsPage() {
     }
 
 
-    if (loading) {
+    if (loading || authLoading) {
       return (
         <>
           <Header />
@@ -148,7 +149,7 @@ function profileSettingsPage() {
               <label className="text-sm font-medium">Name</label>
               <input
                 className="border p-2 rounded w-full mt-1 bg-gray-100"
-                value={session?.user?.name || ""}
+                value={user?.name || ""}
                 disabled
               />
             </div>

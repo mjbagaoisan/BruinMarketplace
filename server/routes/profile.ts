@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { supabase } from "../services/db.js";
+import { authenticateToken } from "../middleware/auth.js";
 import { uploadAvatarImage } from "../services/uploads/fileuploader.js";
 import multer from "multer";
 
@@ -7,16 +8,13 @@ const router = Router();
 const upload = multer();
 
 // gets the logged in user's profile
-router.get("/me", async (req, res) => {
-  const userId = req.query.userId;
-  if (!userId) {
-    return res.status(400).json({ error: "missing userId" });
-  }
+router.get("/me", authenticateToken, async (req, res) => {
+  const user_id = req.user!.userId;
 
   const { data, error } = await supabase
     .from("users")
     .select("*")
-    .eq("id", userId)
+    .eq("id", user_id)
     .single();
   if (error || !data) {
     console.error("Fetch user profile error:", error);
@@ -29,13 +27,10 @@ router.get("/me", async (req, res) => {
 
 
 // updates the logged in user's profile
-router.patch("/me", upload.single("avatar"), async (req, res) => {
+router.patch("/me", authenticateToken, upload.single("avatar"), async (req, res) => {
   try {
-    const userId = String(req.query.userId);
-    if (!userId) {
-      return res.status(400).json({ error: "missing userId" });
-    }
-
+    const user_id = req.user!.userId;
+ 
     const updateFields: any = {
 
       major: req.body.major ?? null,
@@ -51,7 +46,7 @@ router.patch("/me", upload.single("avatar"), async (req, res) => {
       const blob = new Blob([req.file.buffer], { type: req.file.mimetype });
       // upload image and get the public url
       const newPfp = await uploadAvatarImage({
-        userId: userId,
+        userId: user_id,
         file: blob,
       });
         updateFields.profile_image_url = newPfp.publicUrl; 
@@ -61,7 +56,7 @@ router.patch("/me", upload.single("avatar"), async (req, res) => {
     const { data, error } = await supabase
       .from("users")
       .update(updateFields)
-      .eq("id", userId)
+      .eq("id", user_id)
       .select()
       .single();
     if (!data || error) {
