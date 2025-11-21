@@ -5,13 +5,14 @@ import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from 'path';
+import { profile } from 'console';
 
 
 function profileSettingsPage() {
     const { user, isLoading: authLoading} = useAuth();
 
-    const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
-    const [tempPicUrl, setTempPicUrl] = useState<string | null>(null);
+    const [profilePicUrl, setProfilePicUrl] = useState<string | undefined>(undefined);
+    const [tempPicUrl, setTempPicUrl] = useState<string | undefined>(undefined);
     const [profilePicFile, setProfilePicFile] = useState<File | null>(null);    
     const [major, setMajor] = useState<string | null>(null); 
     const [hideMajor, setHideMajor] = useState<boolean>(false);
@@ -31,7 +32,7 @@ function profileSettingsPage() {
     // load user's profile info
     const fetchProfile = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/me`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile/me`, {
             credentials: "include",
           }
         );        
@@ -40,9 +41,9 @@ function profileSettingsPage() {
 
         setMajor(data.major || "");
         setHideMajor(data.hide_major);
-        setClassYear(data.class_year);
+        setClassYear(data.class_year || null);
         setHideClassYear(data.hide_class_year);
-        setProfilePicUrl(data.profile_image_url || "undefined");
+        setProfilePicUrl(data.profile_image_url);
     }
       catch (error) {
         console.error("Error loading profile:", error);
@@ -50,7 +51,7 @@ function profileSettingsPage() {
       finally {
         setLoading(false);
       }
-
+      
   };
   
 
@@ -79,7 +80,7 @@ function profileSettingsPage() {
         formData.append("hide_class_year", (hideClassYear? "true" : "false"));
 
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/me`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile/me`, {
           method: "PATCH",
           credentials: "include",
           body: formData,
@@ -131,7 +132,7 @@ function profileSettingsPage() {
               <label className="text-sm font-medium">Profile Picture</label>
                 <label className="relative w-24 h-24 rounded-full overflow-hidden border cursor-pointer flex items-center justify-center bg-gray-100">
                   <img
-                    src={tempPicUrl || profilePicUrl || "undefined"}
+                    src={tempPicUrl || profilePicUrl || undefined}
                     className="w-full h-full object-cover"
                   />
                   <input 

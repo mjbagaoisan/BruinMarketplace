@@ -4,6 +4,7 @@ import { OAuth2Client } from 'google-auth-library';
 import { supabase } from '../services/db.js';
 import { generateToken } from '../utils/jwt.js';
 import { authenticateToken } from '../middleware/auth.js';
+import { uploadAvatarImage } from "../services/uploads/fileuploader.js";
 
 const router = Router();
 
@@ -121,17 +122,34 @@ router.get('/google/callback', async (req: Request, res: Response) => {
 
     let user = existing;
     if (user) {
+      // check if profile pic was not saved to database yet
+      const picPublicUrl = user.profile_image_url ?? undefined;
+      if (user.profile_image_url && user.profile_image_url?.startsWith("https://lh3.googleusercontent.com/")) {
+        let picPublicUrl = undefined;
+        if (picture) {
+          const profilePic = await fetch(picture); 
+          const arrayBuffer = await profilePic.arrayBuffer();
+          const mimeType = profilePic.headers.get("content-type");
+            
+          const blob = new Blob([arrayBuffer], { type: mimeType ?? undefined });
+          const uploadResult = await uploadAvatarImage({
+            userId: sub,
+            file: blob,
+          });
+            picPublicUrl = uploadResult.publicUrl;
+        }
+      }
       const { data: updated, error: updateError } = await supabase
         .from('users')
         .update({
           name: name || user.name,
-          profile_image_url: picture || user.profile_image_url,
+          profile_image_url: picPublicUrl,
           updated_at: new Date().toISOString(),
         })
         .eq('id', user.id)
         .select()
         .single();
-
+        
       if (updateError) {
         console.error('Error updating user:', updateError);
         return res.redirect(`${frontendUrl}/login?error=database_error`);
@@ -139,6 +157,21 @@ router.get('/google/callback', async (req: Request, res: Response) => {
 
       user = updated;
     } else {
+      // stores current profile picture int database
+      let picPublicUrl = undefined;
+      if (picture) {
+        const profilePic = await fetch(picture); 
+        const arrayBuffer = await profilePic.arrayBuffer();
+        const mimeType = profilePic.headers.get("content-type");
+        
+        const blob = new Blob([arrayBuffer], { type: mimeType ?? undefined });
+        const uploadResult = await uploadAvatarImage({
+          userId: sub,
+          file: blob,
+        });
+          picPublicUrl = uploadResult.publicUrl;
+      }
+      
       // insert new user into database if user does not exist
       const { data: inserted, error: insertError } = await supabase
         .from('users')
@@ -146,7 +179,7 @@ router.get('/google/callback', async (req: Request, res: Response) => {
           id: sub,
           email,
           name: name,
-          profile_image_url: picture || null,
+          profile_image_url: picPublicUrl || undefined,
           role: 'user',
           is_verified: true,
           hide_class_year: false,

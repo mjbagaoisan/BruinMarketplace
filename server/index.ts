@@ -14,7 +14,7 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import apiRouter from "./routes/index.js";
 import listingsRouter from "./routes/listings.js";
-import userRouter from "./routes/profile.js";
+import profileRouter from "./routes/profile.js";
 
 
 export const app = express();
@@ -39,7 +39,7 @@ app.use(morgan("dev"));
 
 app.use("/api", apiRouter);
 app.use("/listings", listingsRouter);
-app.use("/user", userRouter);
+app.use("/profile", profileRouter);
 
 
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
