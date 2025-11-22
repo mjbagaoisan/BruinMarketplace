@@ -8,7 +8,7 @@ const CONDITION_ENUM = ["new", "like_new", "good", "fair", "poor"];
 const CATEGORY_ENUM = ["textbooks", "electronics", "furniture", "parking", "clothing", "tickets", "other"];
 const STATUS_ENUM = ["active", "sold", "traded", "removed"];
 const PAYMENT_ENUM = ["zelle", "cash", "venmo", "other"];
-const LOCATION_ENUM = ["hill", "on campus", "off campus"];
+const LOCATION_ENUM = ["hill", "on_campus", "off_campus", "univ_apps"];
 
 //return all active listings (now requires authentication)
 router.get("/", authenticateToken, async (req, res) => {
