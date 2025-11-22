@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardMedia, CardTitle, CardPrice } from "@/components/ui/card";
 import DebouncedSearch from "@/components/SearchBar";
-import Header from "@/components/Header";
+import CreateListing from '@/components/CreateListing';
 
 interface Media {
   id: string;
@@ -77,8 +77,11 @@ function ListingsPage() {
 
   return (
     <>
-      <Header />
       <div className="min-h-screen bg-gray-50 py-8">
+        {/* Create New Listing */}
+        <div className="fixed bottom-10 right-10">
+          <CreateListing />
+        </div>
         {/* Centered Search Bar */}
         <div className="flex justify-center mb-8">
           <DebouncedSearch onResults={handleSearchResults} />

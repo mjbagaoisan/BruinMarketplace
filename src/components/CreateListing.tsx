@@ -119,7 +119,7 @@ interface CreateListingProps {
     onListingSubmit: (newListing: ListingData) => void
 }
 
-export default function CreateListing(props: CreateListingProps){
+export default function CreateListing(){
 
     const [open, setOpen] = useState(false);
     const [submitting, setSubmitting] = useState(false);
@@ -150,7 +150,6 @@ export default function CreateListing(props: CreateListingProps){
                 location: payload.location ?? "",
             };
 
-            props.onListingSubmit(newListingData);
             e.currentTarget.reset();
             setOpen(false);
         } catch (error) {
