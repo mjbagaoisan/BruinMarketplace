@@ -52,8 +52,6 @@ import { Button } from "@/components/ui/button"
 
 import ListingCard, { ListingData } from '@/components/ListingCard'
 
-import { PlusIcon } from "lucide-react"
-
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE ||
   process.env.NEXT_PUBLIC_API_URL ||
@@ -116,10 +114,10 @@ async function createListingApi(payload: CreateListingPayload): Promise<CreateLi
 }
 
 interface CreateListingProps {
-    onListingSubmit: (newListing: ListingData) => void
+    children: React.ReactNode;
 }
 
-export default function CreateListing(){
+export default function CreateListing(props: CreateListingProps){
 
     const [open, setOpen] = useState(false);
     const [submitting, setSubmitting] = useState(false);
@@ -175,11 +173,7 @@ export default function CreateListing(){
     return(
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <div className="flex flex-col gap-8">
-                <Button variant="outline" size="icon-lg" className="rounded-full h-14 w-14">
-                    <PlusIcon />
-                </Button>
-                </div>
+                {props.children}
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
