@@ -11,6 +11,8 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu"
 import LogoutButton from "./LogoutButton"
+import CreateListing from "./CreateListing"
+import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu"
 
 const Header = React.memo(() => {
     return(
@@ -31,9 +33,11 @@ const Header = React.memo(() => {
                     </NavigationMenuItem>
 
                     <NavigationMenuItem>
-                    <NavigationMenuLink asChild>
-                        <Link href="/docs">Sell Item</Link>
-                    </NavigationMenuLink>
+                    <CreateListing>
+                        <button className={navigationMenuTriggerStyle()}>
+                            Sell Item
+                        </button>
+                    </CreateListing>
                     </NavigationMenuItem>
 
                     <NavigationMenuItem>
