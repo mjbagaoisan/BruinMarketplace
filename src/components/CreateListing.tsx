@@ -61,7 +61,11 @@ type CreateListingPayload = {
   title: string;
   price: string;
   description?: string;
-  location?: string;
+  condition: string;
+  category: string;
+  location: string;
+  preferred_payment: string;
+  status: string;
 };
 
 type CreateListingResponse = {
@@ -76,24 +80,11 @@ async function createListingApi(payload: CreateListingPayload): Promise<CreateLi
     throw new Error("API base URL is not configured");
   }
 
-  const supabase = createSupabaseBrowserClient();
-  const { data, error: sessionError } = await supabase.auth.getSession();
-
-  if (sessionError) {
-    throw new Error("Failed to get auth session");
-  }
-
-  const accessToken = data.session?.access_token;
-
-  if (!accessToken) {
-    throw new Error("Not authenticated");
-  }
 
   const response = await fetch(`${API_BASE_URL}/api/listings`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
     },
     credentials: "include",
     body: JSON.stringify(payload),
@@ -125,6 +116,8 @@ export default function CreateListing(props: CreateListingProps){
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
+
+        const form = e.currentTarget;
         
         const formData = new FormData(e.currentTarget);
 
@@ -132,7 +125,11 @@ export default function CreateListing(props: CreateListingProps){
             title: formData.get("title") as string,
             price: formData.get("price") as string,
             description: (formData.get("description") as string) || undefined,
-            location: (formData.get("location") as string) || undefined,
+            condition: (formData.get("condition") as string),
+            category: (formData.get("category") as string),
+            location: (formData.get("location") as string),
+            preferred_payment: (formData.get("preferred_payment") as string),
+            status: "active"
         };
 
         setSubmitting(true);
@@ -148,7 +145,7 @@ export default function CreateListing(props: CreateListingProps){
                 location: payload.location ?? "",
             };
 
-            e.currentTarget.reset();
+            form.reset();
             setOpen(false);
         } catch (error) {
             if (error instanceof Error) {
@@ -190,12 +187,29 @@ export default function CreateListing(props: CreateListingProps){
                             <Input name="title" placeholder="e.g. Nike Blazer Highs" required/>
                         </Field>
 
-                        <Field className="w-20">
-                        <FieldLabel>Price</FieldLabel>
-                        <Field orientation="responsive">
-                            <FieldLabel>$</FieldLabel>
-                            <Input name="price" required/>
-                        </Field>
+                        <Field orientation="horizontal">
+                            <Field className="w-35">
+                            <FieldLabel>Price</FieldLabel>
+                            <Field orientation="horizontal">
+                                <FieldLabel>$</FieldLabel>
+                                <Input name="price" required/>
+                            </Field>
+                            </Field>
+
+                            <Field className="pl-10 w-full">
+                            <FieldLabel>Preferred Payment</FieldLabel>
+                            <Select defaultValue="" name="preferred_payment">
+                                <SelectTrigger>
+                                <SelectValue/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="zelle">Zelle</SelectItem>
+                                    <SelectItem value="cash">Cash</SelectItem>
+                                    <SelectItem value="venmo">Venmo</SelectItem>
+                                    <SelectItem value="other">Other</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            </Field>
                         </Field>
 
                         <Field>
@@ -208,6 +222,44 @@ export default function CreateListing(props: CreateListingProps){
 
                         <Field>
                             <FieldLabel>
+                                Category
+                            </FieldLabel>
+                            <Select defaultValue="" name="category">
+                                <SelectTrigger>
+                                <SelectValue/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="textbooks">Textbooks</SelectItem>
+                                    <SelectItem value="electronics">Electronics</SelectItem>
+                                    <SelectItem value="furniture">Furniture</SelectItem>
+                                    <SelectItem value="parking">Parking</SelectItem>
+                                    <SelectItem value="clothing">Clothing</SelectItem>
+                                    <SelectItem value="tickets">Tickets</SelectItem>
+                                    <SelectItem value="other">Other</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </Field>
+
+                        <Field>
+                            <FieldLabel>
+                                Condition
+                            </FieldLabel>
+                            <Select defaultValue="" name="condition">
+                                <SelectTrigger>
+                                <SelectValue/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="new">New</SelectItem>
+                                    <SelectItem value="like-new">Like-new</SelectItem>
+                                    <SelectItem value="good">Good</SelectItem>
+                                    <SelectItem value="fair">Fair</SelectItem>
+                                    <SelectItem value="poor">Poor</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </Field>
+
+                        <Field>
+                            <FieldLabel>
                                 Location
                             </FieldLabel>
                             <Select defaultValue="" name="location">
@@ -215,9 +267,10 @@ export default function CreateListing(props: CreateListingProps){
                                 <SelectValue/>
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="the-hill">The Hill</SelectItem>
-                                    <SelectItem value="univ-apps">University Apartments</SelectItem>
-                                    <SelectItem value="off-campus">Off-Campus</SelectItem>
+                                    <SelectItem value="hill">The Hill</SelectItem>
+                                    <SelectItem value="univ_apps">University Apartments</SelectItem>
+                                    <SelectItem value="on_campus">On-Campus</SelectItem>
+                                    <SelectItem value="off_campus">Off-Campus</SelectItem>
                                 </SelectContent>
                             </Select>
                         </Field>
