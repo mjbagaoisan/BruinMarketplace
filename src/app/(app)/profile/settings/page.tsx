@@ -21,7 +21,8 @@ function profileSettingsPage() {
     const [save, setSave] = useState<boolean>(false);
     const [saveMsg, setSaveMsg] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
-
+    const [email, setEmail] = useState<string | null>(null);
+    const [phoneNumber, setPhoneNumber] = useState<string | null>(null);
 
     useEffect(() => {
       if (!authLoading && user) {
@@ -44,6 +45,8 @@ function profileSettingsPage() {
         setClassYear(data.class_year || null);
         setHideClassYear(data.hide_class_year);
         setProfilePicUrl(data.profile_image_url);
+        setEmail(data.email || "");
+        setPhoneNumber(data.phone_number || "");
     }
       catch (error) {
         console.error("Error loading profile:", error);
@@ -78,6 +81,8 @@ function profileSettingsPage() {
         formData.append("hide_major", (hideMajor? "true" : "false"));
         formData.append("class_year", String(classYear ?? ""));
         formData.append("hide_class_year", (hideClassYear? "true" : "false"));
+        formData.append("email", String(email ?? ""));
+        formData.append("phone_number", String(phoneNumber ?? ""));
 
 
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile/me`, {
@@ -151,6 +156,28 @@ function profileSettingsPage() {
                 className="border p-2 rounded w-full mt-1 bg-gray-100"
                 value={user?.name || ""}
                 disabled
+              />
+            </div>
+
+            {/* user's email */}
+            <div>
+              <label className="text-sm font-medium">Email</label>
+              <input
+                type="email"
+                className="border p-2 rounded w-full mt-1"
+                value={email ?? ""}
+                onChange={(e) => setEmail(e.target.value || null)}
+              />
+            </div>
+
+            {/* user's phone number */}
+            <div>
+              <label className="text-sm font-medium">Phone Number</label>
+              <input
+                type="tel"
+                className="border p-2 rounded w-full mt-1"
+                value={phoneNumber ?? ""}
+                onChange={(e) => setPhoneNumber(e.target.value || null)}
               />
             </div>
 
