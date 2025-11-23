@@ -121,6 +121,12 @@ function ListingsPage() {
                     {listing.condition && (
                       <div className="text-sm text-gray-500 capitalize">Condition: {listing.condition}</div>
                     )}
+                    <button
+                      type="button"
+                      className="mt-auto w-full rounded bg-blue-600 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+                    >
+                      I'm Interested
+                    </button>
                   </div>
                 </Card>
               ))}
