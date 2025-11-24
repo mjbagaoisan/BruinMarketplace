@@ -159,9 +159,9 @@ export default function CreateListing(props: CreateListingProps){
     }
 
     const dropzoneProps = useSupabaseUpload({
-        bucketName: 'test',
-        path: 'test',
-        allowedMimeTypes: ['image/*'],
+        bucketName: 'listings',
+        path: 'public',
+        allowedMimeTypes: ['image/*', 'video/*'],
         maxFiles: 5,
         maxFileSize: 1000 * 1000 * 10, // 10MB,
     })
