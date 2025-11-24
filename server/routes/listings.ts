@@ -14,7 +14,7 @@ const LOCATION_ENUM = ["hill", "on_campus", "off_campus", "univ_apps"];
 router.get("/", authenticateToken, async (req, res) => {
   const { data, error } = await supabase
     .from("listings")
-    .select("*")
+    .select("*, media ( * )")
     .eq("status", "active")
     .order("created_at", { ascending: false });
 
