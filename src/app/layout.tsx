@@ -24,7 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={mulish.className}>
       <body className="font-sans" suppressHydrationWarning={true}>
-        <AuthProvider>{children}</AuthProvider> // wraps children with AuthProvider to provide auth context to all components
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );
