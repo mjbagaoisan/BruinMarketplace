@@ -39,9 +39,6 @@ import {
 
 import { ScrollArea } from "@/components/ui/scroll-area"
 
-import { Dropzone, DropzoneContent, DropzoneEmptyState } from '@/components/dropzone'
-import { useSupabaseUpload } from '@/hooks/use-supabase-upload'
-
 import { Input } from "@/components/ui/input"
 
 import { Switch } from "@/components/ui/switch"
@@ -52,57 +49,10 @@ import { Button } from "@/components/ui/button"
 
 import ListingCard, { ListingData } from '@/components/ListingCard'
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE ||
-  process.env.NEXT_PUBLIC_API_URL ||
-  "";
+import { useCallback } from 'react';
+import { useDropzone } from 'react-dropzone';
 
-type CreateListingPayload = {
-  title: string;
-  price: string;
-  description?: string;
-  condition: string;
-  category: string;
-  location: string;
-  preferred_payment: string;
-  status: string;
-};
-
-type CreateListingResponse = {
-  id: string;
-  title: string;
-  price: number | string;
-  [key: string]: unknown;
-};
-
-async function createListingApi(payload: CreateListingPayload): Promise<CreateListingResponse> {
-  if (!API_BASE_URL) {
-    throw new Error("API base URL is not configured");
-  }
-
-
-  const response = await fetch(`${API_BASE_URL}/api/listings`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-    body: JSON.stringify(payload),
-  });
-
-  let body: any = null;
-  try {
-    body = await response.json();
-  } catch {
-  }
-
-  if (!response.ok) {
-    const message = body?.error ?? "Failed to create listing";
-    throw new Error(message);
-  }
-
-  return body as CreateListingResponse;
-}
+import { File, X } from 'lucide-react';
 
 interface CreateListingProps {
     children: React.ReactNode;
@@ -114,6 +64,34 @@ export default function CreateListing(props: CreateListingProps){
     const [submitting, setSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
 
+    const [filesToUpload, setFilesToUpload] = useState<File[]>([]);
+
+    const [filesForPreview, setFilesForPreview] = useState<any[]>([]);
+    
+    const handleFileDrop = (acceptedFiles: File[]) => {
+      setFilesToUpload(prevFiles => [...prevFiles, ...acceptedFiles].slice(0, 5));
+      const newFilesForPreview = acceptedFiles.map(file => {
+        return Object.assign(file, {
+          preview: URL.createObjectURL(file),
+          errors: [], 
+        });
+      });
+
+      setFilesForPreview(prev => [...prev, ...newFilesForPreview].slice(0, 5));
+    }
+
+    const handleFileRemove = (fileToRemove: any) => {
+      URL.revokeObjectURL(fileToRemove.preview);
+      setFilesToUpload(prev => prev.filter(f => f.name !== fileToRemove.name));
+      setFilesForPreview(prev => prev.filter(f => f.name !== fileToRemove.name));
+    };
+
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+      onDrop: handleFileDrop, // Use your existing handler
+      accept: { 'image/*': [], 'video/*': [] },
+      maxFiles: 5,
+    });
+
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
@@ -121,31 +99,30 @@ export default function CreateListing(props: CreateListingProps){
         
         const formData = new FormData(e.currentTarget);
 
-        const payload: CreateListingPayload = {
-            title: formData.get("title") as string,
-            price: formData.get("price") as string,
-            description: (formData.get("description") as string) || undefined,
-            condition: (formData.get("condition") as string),
-            category: (formData.get("category") as string),
-            location: (formData.get("location") as string),
-            preferred_payment: (formData.get("preferred_payment") as string),
-            status: "active"
-        };
+        for (const file of filesToUpload) {
+          formData.append('mediaFiles', file); 
+        }
+
+        formData.append('status', 'active');
 
         setSubmitting(true);
         setSubmitError(null);
 
         try {
-            const created = await createListingApi(payload);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/listings`, {
+              method: 'POST',
+              credentials: 'include',
+              body: formData, 
+            });
 
-            const newListingData: ListingData = {
-                title: (created.title as string) ?? payload.title,
-                price: String(created.price ?? payload.price),
-                description: payload.description ?? "",
-                location: payload.location ?? "",
-            };
+            if (!response.ok) {
+              const err = await response.json();
+              throw new Error(err.error || 'Failed to create listing');
+            }
 
             form.reset();
+            setFilesToUpload([]);
+            setFilesForPreview([]);
             setOpen(false);
         } catch (error) {
             if (error instanceof Error) {
@@ -157,14 +134,6 @@ export default function CreateListing(props: CreateListingProps){
             setSubmitting(false);
         }
     }
-
-    const dropzoneProps = useSupabaseUpload({
-        bucketName: 'listings',
-        path: 'public',
-        allowedMimeTypes: ['image/*', 'video/*'],
-        maxFiles: 5,
-        maxFileSize: 1000 * 1000 * 10, // 10MB,
-    })
  
 
     return(
@@ -214,10 +183,54 @@ export default function CreateListing(props: CreateListingProps){
 
                         <Field>
                             <FieldLabel>Media</FieldLabel>
-                            <Dropzone {...dropzoneProps}>
-                                <DropzoneEmptyState />
-                                <DropzoneContent />
-                            </Dropzone>
+
+                            <div 
+                            {...getRootProps()} 
+                            className={`mt-1 flex flex-col items-center rounded-md border-2 border-dashed border-gray-300 px-6 pb-5 pt-5 ${isDragActive ? 'border-blue-500 bg-blue-50' : ''}`}
+                            >
+                            <input {...getInputProps()} />
+                            
+                            <div className="text-center pt-2 pb-5">
+                                <p>Drag 5 drop files here, or click to select</p>
+                                <p className="text-xs text-gray-500">Up to 5 files, 10MB each</p>
+                            </div>
+
+                            {filesForPreview.length > 0 && (
+                                <ul className="space-y-2 w-full">
+                                {filesForPreview.map((file: any) => (
+                                    <li key={file.name} className="flex items-center gap-x-4 rounded-md border border-gray-200 p-2 w-full">
+
+                                    {file.type.startsWith('image/') ? (
+                                        <img 
+                                            src={file.preview}
+                                            alt={file.name}
+                                            className="h-10 w-10 shrink-0 rounde border object-cover"
+                                        />
+                                    ) : (
+                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded border bg-gray-100">
+                                        </div>
+                                    )}
+
+                                    <div className="flex-1 min-w-0"> 
+                                        <span className="block truncate text-sm">{file.name}</span>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.stopPropagation(); 
+                                            handleFileRemove(file);
+                                        }}
+                                        className="shrink-0 text-sm font-medium text-grey pr-3"
+                                    >
+                                        <X size={18} />
+                                    </button>
+                                    </li>
+                                ))}
+                                </ul>
+                            )}
+
+                            </div>
                         </Field>
 
                         <Field>
@@ -250,7 +263,7 @@ export default function CreateListing(props: CreateListingProps){
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="new">New</SelectItem>
-                                    <SelectItem value="like-new">Like-new</SelectItem>
+                                    <SelectItem value="like_new">Like-new</SelectItem>
                                     <SelectItem value="good">Good</SelectItem>
                                     <SelectItem value="fair">Fair</SelectItem>
                                     <SelectItem value="poor">Poor</SelectItem>
