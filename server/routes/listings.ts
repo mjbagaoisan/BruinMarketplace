@@ -12,12 +12,51 @@ const LOCATION_ENUM = ["hill", "on campus", "off campus"];
 
 //return all active listings (now requires authentication)
 router.get("/", authenticateToken, async (req, res) => {
-  const { data, error } = await supabase
+  const {
+    condition,
+    location,
+    minPrice,
+    maxPrice,
+    sort,
+  } = req.query as {
+    condition?: string;
+    location?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    sort?: string;
+  };
+  
+  let query = supabase
     .from("listings")
     .select("*, media(*)")
-    .eq("status", "active")
-    .order("created_at", { ascending: false });
+    .eq("status", "active");
 
+    // filter applies to db based on user selection
+    if (condition && CONDITION_ENUM.includes(condition)) {
+      query = query.eq("condition", condition);
+    }
+    if (location && LOCATION_ENUM.includes(location)) {
+      query = query.eq("location", location);
+    }
+    if (minPrice) {
+      const min = Number(minPrice);
+      if (!Number.isNaN(min)) query = query.gte("price", min);
+    }
+    if (maxPrice) {
+      const max = Number(maxPrice);
+      if (!Number.isNaN(max)) query = query.lte("price", max);
+    }
+
+    // sort by date (newest first by default)
+    let ascending = false;
+    if (sort === "date_asc") {
+      ascending = true;
+    } else if (sort === "date_desc") {
+      ascending = false;
+    }
+    query = query.order("created_at", { ascending });
+    
+  const { data, error } = await query;
   if (error) {
     console.error("Listings fetch errr:", error);
     return res.status(500).json({ error: error.message });
@@ -94,7 +133,6 @@ router.post("/", authenticateToken, async (req, res) => {
 
   return res.status(201).json(data);
 });
-
 
 router.get("/me", authenticateToken, async (req, res) => {
   const user_id = req.user!.userId;
@@ -286,6 +324,5 @@ router.post("/:id/status", authenticateToken, async (req, res) => {
 
   return res.json(data);
 });
-
 
 export default router;
