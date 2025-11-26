@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Card, CardMedia, CardTitle, CardPrice } from "@/components/ui/card";
 import DebouncedSearch from "@/components/SearchBar";
 import Header from "@/components/Header";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Media {
   id: string;
@@ -20,6 +21,7 @@ interface Listing {
   condition?: string;
   category?: string;
   created_at: string;
+  user_id: string;
   media?: Media[];
 }
 
@@ -35,6 +37,7 @@ function ListingsPage() {
   const [loading, setLoading] = useState(true);
   const [searchResults, setSearchResults] = useState<Listing[]>([]);
   const router = useRouter();
+  const { user } = useAuth();
 
   useEffect(() => {
     fetchListings();
@@ -123,9 +126,14 @@ function ListingsPage() {
                     )}
                     <button
                       type="button"
-                      className="mt-auto w-full rounded bg-blue-600 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+                      className={`mt-auto w-full rounded py-2 text-sm font-semibold transition-colors ${
+                        user?.userId === listing.user_id
+                          ? "bg-gray-200 text-black cursor-default"
+                          : "bg-blue-600 text-white hover:bg-blue-700"
+                      }`}
+                      disabled={user?.userId === listing.user_id}
                     >
-                      I'm Interested
+                      {user?.userId === listing.user_id ? "Your Listing" : "I'm Interested"}
                     </button>
                   </div>
                 </Card>
