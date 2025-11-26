@@ -27,6 +27,7 @@ router.get("/", authenticateToken, async (req, res) => {
 });
 
 
+// create a new listing
 router.post("/", authenticateToken, async (req, res) => {
   const user_id = req.user!.userId; 
   const {
@@ -96,13 +97,15 @@ router.post("/", authenticateToken, async (req, res) => {
 });
 
 
+// get all active listings for the authenticated user
 router.get("/me", authenticateToken, async (req, res) => {
   const user_id = req.user!.userId;
 
   const { data, error } = await supabase
     .from("listings")
-    .select("*")
+    .select("*, media(*)")
     .eq("user_id", user_id)
+    .eq("status", "active")
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -113,6 +116,7 @@ router.get("/me", authenticateToken, async (req, res) => {
 });
 
 
+// update a listing
 router.put("/:id", authenticateToken, async (req, res) => {
   const user_id = req.user!.userId;
   const { id } = req.params;
@@ -189,6 +193,7 @@ router.put("/:id", authenticateToken, async (req, res) => {
 });
 
 
+// get a specific listing by its id
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
 
@@ -216,6 +221,8 @@ router.get("/:id", async (req, res) => {
   return res.json(data);
 });
 
+
+// delete a listing by its id
 router.delete("/:id", authenticateToken, async (req, res) => {
   const user_id = req.user!.userId;
   const { id } = req.params;
@@ -246,6 +253,7 @@ router.delete("/:id", authenticateToken, async (req, res) => {
 });
 
 
+// update an existant listing
 router.post("/:id/status", authenticateToken, async (req, res) => {
   const user_id = req.user!.userId;
   const user_role = req.user!.role; // we already store role in req.user

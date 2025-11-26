@@ -1,0 +1,140 @@
+"use client";
+
+import React, { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Card, CardMedia, CardTitle, CardPrice } from "@/components/ui/card";
+import DebouncedSearch from "@/components/SearchBar";
+import Header from "@/components/Header";
+
+interface Media {
+  id: string;
+  listing_id: string;
+  url: string;
+}
+
+interface Listing {
+  id: string;
+  title: string;
+  price: number;
+  description?: string;
+  condition?: string;
+  category?: string;
+  created_at: string;
+  media?: Media[];
+}
+
+interface SearchResponse {
+  results: Listing[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+function MyListingsPage() {
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchResults, setSearchResults] = useState<Listing[]>([]);
+  const router = useRouter();
+
+  useEffect(() => {
+    fetchListings();
+  }, []);
+
+  const fetchListings = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/listings/me`, {
+        credentials: 'include',
+      });
+
+      if (response.status === 401) {
+        router.push('/login');
+        setListings([]);
+        return;
+      }
+
+      const data = await response.json();
+      
+      if (Array.isArray(data)) {
+        setListings(data);
+      } else {
+        console.error('API returned non-array data:', data);
+        setListings([]);
+      }
+    } catch (error) {
+      console.error('Error fetching listings:', error);
+      setListings([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearchResults = useCallback((data: Listing[] | SearchResponse) => {
+    setSearchResults(Array.isArray(data) ? data : data.results);
+  }, []);
+
+  const displayListings = searchResults.length > 0 ? searchResults : listings;
+
+  const formatCondition = (condition: string) => {
+    return condition.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  };
+
+  return (
+    <>
+      <Header />
+      <div className="min-h-screen bg-gray-50 py-8">
+        {/* Centered Search Bar */}
+        <div className="flex justify-center mb-8">
+          <DebouncedSearch onResults={handleSearchResults} />
+        </div>
+
+        {/* Listings Grid */}
+        <div className="container mx-auto px-8">
+          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="text-lg text-gray-600">Loading listings...</div>
+            </div>
+          ) : displayListings.length === 0 ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="text-lg text-gray-600">
+                {searchResults.length === 0 && listings.length > 0 
+                  ? "No listings found matching your search." 
+                  : "No listings available."}
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-wrap justify-center gap-6">
+              {displayListings.map((listing) => (
+                <Link key={listing.id} href={`/listings/${listing.id}`} className="block w-full sm:w-60">
+                  <Card className="w-full h-full hover:shadow-lg transition-shadow cursor-pointer flex flex-col mb-7">
+                    <CardMedia>
+                      {listing.media && listing.media.length > 0 ? (
+                        <img 
+                          src={listing.media[0].url} 
+                          alt={listing.title} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                          <span className="text-gray-400 text-sm">No Image</span>
+                        </div>
+                      )}
+                    </CardMedia>
+                    <div className="p-4 pb-2 flex flex-col gap-2 flex-grow">
+                      <CardTitle className="truncate">{listing.title}</CardTitle>
+                      <CardPrice>${listing.price.toFixed(2)}</CardPrice>
+                      {listing.condition && (
+                        <div className="text-sm text-gray-500">Condition: {formatCondition(listing.condition)}</div>
+                      )}
+                    </div>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+export default MyListingsPage;

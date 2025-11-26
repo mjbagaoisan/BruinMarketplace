@@ -38,7 +38,7 @@ const Header = React.memo(() => {
 
                     <NavigationMenuItem>
                     <NavigationMenuLink asChild>
-                        <Link href="/listings">My Listings</Link>
+                        <Link href="/listings/me">My Listings</Link>
                     </NavigationMenuLink>
                     </NavigationMenuItem>
 
