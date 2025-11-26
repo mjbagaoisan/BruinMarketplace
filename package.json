@@ -24,6 +24,8 @@
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
+    "embla-carousel": "^8.6.0",
+    "embla-carousel-react": "^8.6.0",
     "express": "^5.1.0",
     "google-auth-library": "^9.15.1",
     "helmet": "^8.1.0",
