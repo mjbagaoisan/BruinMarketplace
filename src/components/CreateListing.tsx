@@ -1,7 +1,7 @@
 "use client";
 
-import React from "react";
-import { useState } from "react";
+import React, { useEffect } from "react";
+import { useState, useRef } from "react";
 import { createClient as createSupabaseBrowserClient } from "@/lib/client";
 
 import {
@@ -134,6 +134,15 @@ export default function CreateListing(props: CreateListingProps){
             setSubmitting(false);
         }
     }
+
+    // reset pending uploads on close for when they reopen
+    useEffect(() => {
+        if (open == false) {
+            setFilesToUpload([]);
+            setFilesForPreview([]);
+            setSubmitError(null);
+        }
+    }, [open])
  
 
     return(
