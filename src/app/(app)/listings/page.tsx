@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Card, CardMedia, CardTitle, CardPrice } from "@/components/ui/card";
 import { Button } from "@/components/ui/button"
@@ -77,6 +78,10 @@ function ListingsPage() {
 
   const displayListings = searchResults.length > 0 ? searchResults : listings;
 
+  const formatCondition = (condition: string) => {
+    return condition.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  };
+
   return (
     <>
       <div className="min-h-screen bg-gray-50 py-8">
@@ -106,34 +111,36 @@ function ListingsPage() {
               <div className="text-lg text-gray-600">
                 {searchResults.length === 0 && listings.length > 0 
                   ? "No listings found matching your search." 
-                  : "No listings available."}``
+                  : "No listings available."}
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            <div className="flex flex-wrap justify-center gap-6">
               {displayListings.map((listing) => (
-                <Card key={listing.id} className="w-full hover:shadow-lg transition-shadow cursor-pointer">
-                  <CardMedia>
-                    {listing.media && listing.media.length > 0 ? (
-                      <img 
-                        src={listing.media[0].url} 
-                        alt={listing.title} 
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                        <span className="text-gray-400 text-sm">No Image</span>
-                      </div>
-                    )}
-                  </CardMedia>
-                  <div className="p-4 pb-2 flex flex-col gap-2 flex-grow">
-                    <CardTitle className="truncate">{listing.title}</CardTitle>
-                    <CardPrice>${listing.price.toFixed(2)}</CardPrice>
-                    {listing.condition && (
-                      <div className="text-sm text-gray-500 capitalize">Condition: {listing.condition}</div>
-                    )}
-                  </div>
-                </Card>
+                <Link key={listing.id} href={`/listings/${listing.id}`} className="block w-full sm:w-60">
+                  <Card className="w-full h-full hover:shadow-lg transition-shadow cursor-pointer flex flex-col mb-7">
+                    <CardMedia>
+                      {listing.media && listing.media.length > 0 ? (
+                        <img 
+                          src={listing.media[0].url} 
+                          alt={listing.title} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                          <span className="text-gray-400 text-sm">No Image</span>
+                        </div>
+                      )}
+                    </CardMedia>
+                    <div className="p-4 pb-2 flex flex-col gap-2 flex-grow">
+                      <CardTitle className="truncate">{listing.title}</CardTitle>
+                      <CardPrice>${listing.price.toFixed(2)}</CardPrice>
+                      {listing.condition && (
+                        <div className="text-sm text-gray-500">Condition: {formatCondition(listing.condition)}</div>
+                      )}
+                    </div>
+                  </Card>
+                </Link>
               ))}
             </div>
           )}

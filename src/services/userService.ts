@@ -14,6 +14,8 @@ interface userData {
     profile_image_url?: string | null;
     class_year?: number | null;
     hide_class_year: boolean;
+    major?: string | null;
+    hide_major: boolean;
     role: string;
     is_verified: boolean;
     created_at: string;
@@ -67,6 +69,8 @@ export const userService = {
                 profile_image_url: googleProfile.image || null,
                 class_year: null,
                 hide_class_year: false,
+                major: null,
+                hide_major: false,
                 role: 'user',
                 is_verified: true,
                 created_at: new Date().toISOString(),

@@ -80,7 +80,7 @@ export default function DebouncedSearch({
 
           <InputGroupInput
             id="site-search"
-            type="search"
+            type="text"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search for a listing…"
