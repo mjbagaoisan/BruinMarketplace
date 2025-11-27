@@ -12,13 +12,11 @@ export const TEST_ENV = {
 
 /**
  * Test user credentials
- * NOTE: For Google OAuth E2E tests, you'll need a real test Google account
  * with @ucla.edu or @g.ucla.edu email
  */
 export const TEST_USERS = {
   validUser: {
-    email: 'test@ucla.edu', // Replace with actual test account
-    // Google OAuth doesn't use password, but keep for reference
+    email: 'mjbagaoisan@ucla.edu', // Replace with actual test account
   },
   invalidUser: {
     email: 'invalid@gmail.com',
@@ -69,5 +67,5 @@ export const TIMEOUTS = {
   SHORT: 5000,
   MEDIUM: 10000,
   LONG: 30000,
-  OAUTH: 60000, // OAuth flow can be slow
+  OAUTH: 60000,
 };

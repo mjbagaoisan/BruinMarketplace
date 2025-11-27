@@ -7,6 +7,9 @@ dotenv.config({ path: '.env.local' });
 export default defineConfig({
   testDir: './tests/e2e',
   
+  // Global setup
+  globalSetup: './tests/setup/global-setup.ts',
+  
   // Run tests in files in parallel
   fullyParallel: false, // Sequential for DB consistency
   
