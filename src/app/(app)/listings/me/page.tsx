@@ -31,7 +31,7 @@ interface SearchResponse {
   limit: number;
 }
 
-function ListingsPage() {
+function MyListingsPage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchResults, setSearchResults] = useState<Listing[]>([]);
@@ -43,11 +43,10 @@ function ListingsPage() {
 
   const fetchListings = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/listings`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/listings/me`, {
         credentials: 'include',
       });
 
-      // if user is not signed in, redirect to login page
       if (response.status === 401) {
         router.push('/login');
         setListings([]);
@@ -86,7 +85,7 @@ function ListingsPage() {
       <div className="min-h-screen bg-gray-50 py-8">
         {/* Centered Search Bar */}
         <div className="flex justify-center mb-8">
-          <DebouncedSearch onResults={handleSearchResults} />
+          <DebouncedSearch scope = "me" onResults={handleSearchResults} />
         </div>
 
         {/* Listings Grid */}
@@ -138,5 +137,4 @@ function ListingsPage() {
     </>
   );
 }
-
-export default ListingsPage;
+export default MyListingsPage;

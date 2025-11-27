@@ -15,6 +15,7 @@ const router = Router();
 router.get('/', authenticateToken, async (req: Request, res: Response) => {
   try {
     const q = String(req.query.q || '').trim();
+    const scope = String(req.query.scope || 'all');
     const page = Math.max(1, parseInt(String(req.query.page || '1'), 10));
     const limit = Math.min(50, Math.max(1, parseInt(String(req.query.limit || '12'), 10)));
     const from = (page - 1) * limit;
@@ -24,13 +25,21 @@ router.get('/', authenticateToken, async (req: Request, res: Response) => {
       return res.json({ results: [], total: 0, page, limit });
     }
 
-    const { data, error, count } = await supabase
+    let query = supabase
       .from('listings')
       .select('*', { count: 'exact' })
       .or(`title.ilike.%${q}%,description.ilike.%${q}%`)
       .eq('status', 'active')
+
+    if (scope == 'me') {
+      const user_id = req.user!.userId;
+      query = query.eq('user_id', user_id);
+    }
+    query = query
       .order('created_at', { ascending: false })
       .range(from, to);
+
+    const { data, error, count } = await query;
 
     if (error) {
       console.error('Supabase search error:', error);
