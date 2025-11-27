@@ -2,8 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { User } from 'lucide-react';
+import { User, ArrowLeft } from 'lucide-react';
 
 type UserProfile = {
   name: string;
@@ -12,10 +14,12 @@ type UserProfile = {
   class_year: number | null;
   hide_class_year: boolean;
   profile_image_url: string | null;
+  created_at: string;
 };
 
 export default function viewOtherProfilePage() {
   const params = useParams();
+  const router = useRouter();
 
   const { user, isLoading: authLoading} = useAuth();
 
@@ -74,8 +78,32 @@ export default function viewOtherProfilePage() {
     );
   }
 
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
     <>
+
+      {/* Navigation Header */}
+      <div className="sticky top-0 z-10 bg-white border-b px-4 py-3 flex items-center justify-between shadow-sm">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="gap-2 text-gray-600 hover:text-gray-900"
+          onClick={() => router.back()}
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Button>
+        <div className="flex gap-2">
+        </div>
+      </div>
 
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="container mx-auto px-8 max-w-3xl">
@@ -85,18 +113,13 @@ export default function viewOtherProfilePage() {
           <div className="flex flex-col gap-6 bg-white p-6 rounded-lg shadow-sm">
 
             {/* user's profile picture */}
-            <div>
-                <label className="relative w-24 h-24 rounded-full overflow-hidden border cursor-pointer flex items-center justify-center bg-gray-100">
-                  {profile.profile_image_url ? (
-                  <img
-                    src={profile.profile_image_url}
-                    alt={`${profile.name}'s profile picture`}
-                    className="w-full h-full object-cover"
-                  />
-                  ) : (
-                    <User className="w-12 h-12 text-gray-400" />
-                  )}
-                </label>
+            <div>                
+                <Avatar className="h-24 w-24 border-2 border-white shadow-sm">
+                    <AvatarImage src={profile.profile_image_url || undefined} />
+                    <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                      {getInitials(profile.name)}
+                    </AvatarFallback>
+                </Avatar>
             </div>
 
             {/* name */}
@@ -108,7 +131,7 @@ export default function viewOtherProfilePage() {
             </div>
 
             {/* major */}
-            {!profile.hide_major && (
+            {!profile.hide_major && profile.major && (
               <div>
                 <label className="text-sm font-medium">Major</label>
                 <p className="border p-2 rounded w-full mt-1 bg-gray-100"> 
@@ -118,7 +141,7 @@ export default function viewOtherProfilePage() {
             )}
 
             {/* major */}
-            {!profile.hide_class_year && (
+            {!profile.hide_class_year && profile.class_year && (
               <div>
                 <label className="text-sm font-medium">Class Year</label>
                 <p className="border p-2 rounded w-full mt-1 bg-gray-100"> 
@@ -126,6 +149,10 @@ export default function viewOtherProfilePage() {
                 </p>
               </div>
             )}
+
+            <p className="text-sm text-gray-500">
+              Member since {new Date(profile.created_at).getFullYear()}
+            </p>
           </div>
         </div>
       </div>

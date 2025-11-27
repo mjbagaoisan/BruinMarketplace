@@ -30,7 +30,7 @@ router.get("/:id", authenticateToken, async (req, res) => {
   const { data, error } = await supabase
     .from("users")
     .select(
-      "id, name, major, hide_major, class_year, hide_class_year, profile_image_url"
+      "id, name, major, hide_major, class_year, hide_class_year, profile_image_url, created_at"
     )
     .eq("id", id)
     .single();
