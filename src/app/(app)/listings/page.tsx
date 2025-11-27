@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { Card, CardMedia, CardTitle, CardPrice } from "@/components/ui/card";
 import { Button } from "@/components/ui/button"
 import { PlusIcon } from "lucide-react"
-import { Button } from "@/components/ui/button";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select"
 import DebouncedSearch from "@/components/SearchBar";
 import CreateListing from '@/components/CreateListing';
