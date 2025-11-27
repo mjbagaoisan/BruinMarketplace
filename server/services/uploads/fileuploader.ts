@@ -1,6 +1,28 @@
 
 import path from "path";
-import { supabase } from "../db";
+import { supabase } from '../../services/db.js';
+
+
+// was crashing server on startup due to "top-level await" error
+/*
+// Create 'avatars' bucket
+const { data: avatarsData, error: avatarsError } = await supabase
+    .storage
+    .createBucket('avatars', {
+        public: false,
+        allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif'],
+        fileSizeLimit: 5 * 1024 * 1024 // 5MB    
+    });
+// Create 'listings' bucket
+const {data: listingsData, error: listingsError} = await supabase
+    .storage
+    .createBucket('listings', {
+        public: false,
+        allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'video/mp4'],
+        fileSizeLimit: 10 * 1024 * 1024 // 10MB    
+    });
+*/
+
 
 export async function uploadAvatarImage( opts: { userId: string; file: File | Blob;}) {
 
@@ -69,7 +91,7 @@ export async function uploadListingMedia( opts: { listingId: string; file: File 
     return {
         path: data?.path ?? filePath,
         publicUrl: publicUrlData?.publicUrl,
-        type: fileExtension === 'mp4' ? 'video' : 'image'
+        type: fileExtension === 'mp4' ? 'video' : 'photo' // channged 'image' to 'photo' to match media_type_check
     };
 
     }

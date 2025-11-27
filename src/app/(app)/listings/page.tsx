@@ -4,10 +4,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Card, CardMedia, CardTitle, CardPrice } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"
+import { PlusIcon } from "lucide-react"
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select"
 import DebouncedSearch from "@/components/SearchBar";
-import Header from "@/components/Header";
+import CreateListing from '@/components/CreateListing';
 
 interface Media {
   id: string;
@@ -119,8 +120,17 @@ function ListingsPage() {
 
   return (
     <>
-      <Header />
       <div className="min-h-screen bg-gray-50 py-8">
+        {/* Create New Listing */}
+        <div className="fixed bottom-10 right-10">
+          <CreateListing>
+            <div className="flex flex-col gap-8">
+              <Button variant="outline" size="icon-lg" className="rounded-full h-14 w-14">
+                <PlusIcon />
+              </Button>
+            </div>
+          </CreateListing>
+        </div>
         {/* Centered Search Bar */}
         <div className="flex justify-center mb-8">
           <DebouncedSearch onResults={handleSearchResults} />
