@@ -15,14 +15,12 @@ router.get("/", authenticateToken, async (req, res) => {
   const {
     condition,
     location,
-    minPrice,
-    maxPrice,
+    category,
     sort,
   } = req.query as {
     condition?: string;
     location?: string;
-    minPrice?: string;
-    maxPrice?: string;
+    category?: string;
     sort?: string;
   };
   
@@ -38,16 +36,11 @@ router.get("/", authenticateToken, async (req, res) => {
     if (location && LOCATION_ENUM.includes(location)) {
       query = query.eq("location", location);
     }
-    if (minPrice) {
-      const min = Number(minPrice);
-      if (!Number.isNaN(min)) query = query.gte("price", min);
-    }
-    if (maxPrice) {
-      const max = Number(maxPrice);
-      if (!Number.isNaN(max)) query = query.lte("price", max);
+    if (category && CATEGORY_ENUM.includes(category)) {
+      query = query.eq("category", category);
     }
 
-    // sort by date (newest first by default)
+    // sort by date
     let ascending = false;
     if (sort === "date_asc") {
       ascending = true;
