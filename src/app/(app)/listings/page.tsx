@@ -98,6 +98,21 @@ function ListingsPage() {
 
   const displayListings = searchResults.length > 0 ? searchResults : listings;
 
+  const formatDate = (dateString: string) => {
+    const created = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - created.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays <= 0) {
+      return "Today";
+    }
+    if (diffDays === 1) {
+      return "1 day ago";
+    }
+    return `${diffDays} days ago`;
+  };
+
   const formatCondition = (condition: string) => {
     return condition.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   };
@@ -222,6 +237,9 @@ function ListingsPage() {
                       <CardPrice>${listing.price.toFixed(2)}</CardPrice>
                       {listing.condition && (
                         <div className="text-sm text-gray-500">Condition: {formatCondition(listing.condition)}</div>
+                      )}
+                      {listing.created_at &&(
+                         <div className="text-sm text-gray-500">Posted: {formatDate(listing.created_at)}</div>
                       )}
                     </div>
                   </Card>
