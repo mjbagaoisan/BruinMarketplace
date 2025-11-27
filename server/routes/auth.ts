@@ -198,7 +198,7 @@ router.get('/google/callback', async (req: Request, res: Response) => {
       user = inserted;
     }
 
-    // 🔴 NEW: block suspended accounts from getting a token
+ 
     if (user.is_suspended) {
       return res.redirect(`${frontendUrl}/login?error=account_suspended`);
     }
