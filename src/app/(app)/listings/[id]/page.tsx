@@ -252,7 +252,7 @@ export default function ListingDetailPage() {
                   </Avatar>
                   <div>
                     <div className="flex items-center gap-1">
-                      <a href="#" className="font-semibold text-lg hover:underline text-gray-900">
+                      <a href={`/profile/${listing.user.id}`} className="font-semibold text-lg hover:underline text-gray-900">
                         {listing.user.name}
                       </a>
                     </div>
