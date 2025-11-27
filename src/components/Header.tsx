@@ -50,7 +50,7 @@ const Header = React.memo(() => {
                     <NavigationMenuTrigger>Account</NavigationMenuTrigger>
                     <NavigationMenuContent>
                         <div className="flex flex-col p-3 min-w-[200px]">
-                          <Link href="/settings" className="block px-3 py-2 rounded-md hover:bg-accent transition-colors text-sm">
+                          <Link href="/profile/settings" className="block px-3 py-2 rounded-md hover:bg-accent transition-colors text-sm">
                             Settings
                           </Link>
                           <div>
