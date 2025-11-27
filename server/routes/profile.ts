@@ -24,6 +24,24 @@ router.get("/me", authenticateToken, async (req, res) => {
   return res.json(data);
 });
 
+router.get("/:id", authenticateToken, async (req, res) => {
+  const { id } = req.params;
+
+  const { data, error } = await supabase
+    .from("users")
+    .select(
+      "id, name, major, hide_major, class_year, hide_class_year, profile_image_url"
+    )
+    .eq("id", id)
+    .single();
+
+  if (error || !data) {
+    console.error(`Fetch user profile by ID error (ID: ${id}):`, error);
+    return res.status(404).json({ error: "User not found" });
+  }
+
+  return res.json(data);
+})
 
 
 // updates the logged in user's profile
