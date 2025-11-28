@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardMedia, CardTitle, CardPrice } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { User, ArrowLeft } from 'lucide-react';
@@ -17,14 +19,44 @@ type UserProfile = {
   created_at: string;
 };
 
+interface Media {
+  id: string;
+  listing_id: string;
+  url: string;
+}
+
+interface Listing {
+  id: string;
+  title: string;
+  price: number;
+  description?: string;
+  condition?: string;
+  category?: string;
+  location?: string;
+  created_at: string;
+  media?: Media[];
+}
+
+interface SearchResponse {
+  results: Listing[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export default function viewOtherProfilePage() {
   const params = useParams();
   const router = useRouter();
 
-  const { user, isLoading: authLoading} = useAuth();
 
+  // profile
+  const { user, isLoading: authLoading} = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // listing
+  const [searchResults, setSearchResults] = useState<Listing[]>([]);
+  const [listings, setListings] = useState<Listing[]>([]);
 
   const profileId = params.id as string;
 
@@ -33,6 +65,48 @@ export default function viewOtherProfilePage() {
       fetchProfile(profileId);
     }
   }, [profileId]);
+
+  
+  const fetchListings = async () => {
+    try {
+
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/listings/user/${profileId}`;
+
+      const response = await fetch(url, {
+        credentials: 'include',
+      });
+
+      // if user is not signed in, redirect to login page
+      if (response.status === 401) {
+        router.push('/login');
+        setListings([]);
+        return;
+      }
+
+      const data = await response.json();
+      
+      if (Array.isArray(data)) {
+        setListings(data);
+      } else {
+        console.error('API returned non-array data:', data);
+        setListings([]);
+      }
+    } catch (error) {
+      console.error('Error fetching listings:', error);
+      setListings([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearchResults = useCallback((data: Listing[] | SearchResponse) => {
+      setSearchResults(Array.isArray(data) ? data : data.results);
+  }, []);
+  
+
+  useEffect(() => {
+    fetchListings();
+  }, []);
 
   // load user's profile info
   const fetchProfile = async (id: string) => {
@@ -85,6 +159,25 @@ export default function viewOtherProfilePage() {
       .join('')
       .toUpperCase()
       .slice(0, 2);
+  };
+
+  const formatCondition = (condition: string) => {
+    return condition.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  };
+  
+  const formatDate = (dateString: string) => {
+    const created = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - created.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays <= 0) {
+      return "Today";
+    }
+    if (diffDays === 1) {
+      return "1 day ago";
+    }
+    return `${diffDays} days ago`;
   };
 
   return (
@@ -153,8 +246,61 @@ export default function viewOtherProfilePage() {
             <p className="text-sm text-gray-500">
               Member since {new Date(profile.created_at).getFullYear()}
             </p>
+
+
           </div>
         </div>
+
+
+        {/* Listings Grid */}
+            <div className="container mx-auto px-8 pt-10">
+              {loading ? (
+                <div className="flex justify-center items-center py-12">
+                  <div className="text-lg text-gray-600">Loading listings...</div>
+                </div>
+              ) : listings.length === 0 ? (
+                <div className="flex justify-center items-center py-12">
+                  <div className="text-lg text-gray-600">
+                    {searchResults.length === 0 && listings.length > 0 
+                      ? "No listings found matching your search." 
+                      : "No listings available."}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-wrap justify-center gap-6">
+                  {listings.map((listing) => (
+                    <Link key={listing.id} href={`/listings/${listing.id}`} className="block w-full sm:w-60">
+                      <Card className="w-full h-full hover:shadow-lg transition-shadow cursor-pointer flex flex-col mb-7">
+                        <CardMedia>
+                          {listing.media && listing.media.length > 0 ? (
+                            <img 
+                              src={listing.media[0].url} 
+                              alt={listing.title} 
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                              <span className="text-gray-400 text-sm">No Image</span>
+                            </div>
+                          )}
+                        </CardMedia>
+                        <div className="p-4 pb-2 flex flex-col gap-2 flex-grow">
+                          <CardTitle className="truncate">{listing.title}</CardTitle>
+                          <CardPrice>${listing.price.toFixed(2)}</CardPrice>
+                          {listing.condition && (
+                            <div className="text-sm text-gray-500">Condition: {formatCondition(listing.condition)}</div>
+                          )}
+                          {listing.created_at &&(
+                            <div className="text-sm text-gray-500">Posted: {formatDate(listing.created_at)}</div>
+                          )}
+                        </div>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
       </div>
     </>
   );
