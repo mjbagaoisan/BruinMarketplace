@@ -116,7 +116,7 @@ export default function viewOtherProfilePage() {
             <div>                
                 <Avatar className="h-24 w-24 border-2 border-white shadow-sm">
                     <AvatarImage src={profile.profile_image_url || undefined} />
-                    <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                    <AvatarFallback className="bg-primary/10 text-primary font-medium text-xl">
                       {getInitials(profile.name)}
                     </AvatarFallback>
                 </Avatar>
