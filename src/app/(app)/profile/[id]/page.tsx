@@ -233,7 +233,7 @@ export default function viewOtherProfilePage() {
               </div>
             )}
 
-            {/* major */}
+            {/* class year */}
             {!profile.hide_class_year && profile.class_year && (
               <div>
                 <label className="text-sm font-medium">Class Year</label>
