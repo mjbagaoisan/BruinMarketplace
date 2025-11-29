@@ -160,9 +160,9 @@ function profileSettingsPage() {
               <label className="text-sm font-medium">Email</label>
               <input
                 type="email"
-                className="border p-2 rounded w-full mt-1"
+                className="border p-2 rounded w-full mt-1 bg-gray-100 cursor-not-allowed"
                 value={email ?? ""}
-                onChange={(e) => setEmail(e.target.value || null)}
+                disabled
               />
             </div>
 
