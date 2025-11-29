@@ -7,42 +7,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardMedia, CardTitle, CardPrice } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { User, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 
-type UserProfile = {
-  name: string;
-  major: string | null;
-  hide_major: boolean;
-  class_year: number | null;
-  hide_class_year: boolean;
-  profile_image_url: string | null;
-  created_at: string;
-};
+import { formatDate, formatCondition, getInitials } from "@/lib/utils"
+import { Listing, UserProfile } from "@/lib/types"
 
-interface Media {
-  id: string;
-  listing_id: string;
-  url: string;
-}
-
-interface Listing {
-  id: string;
-  title: string;
-  price: number;
-  description?: string;
-  condition?: string;
-  category?: string;
-  location?: string;
-  created_at: string;
-  media?: Media[];
-}
-
-interface SearchResponse {
-  results: Listing[];
-  total: number;
-  page: number;
-  limit: number;
-}
 
 export default function viewOtherProfilePage() {
   const params = useParams();
@@ -98,12 +67,7 @@ export default function viewOtherProfilePage() {
       setLoading(false);
     }
   };
-
-  const handleSearchResults = useCallback((data: Listing[] | SearchResponse) => {
-      setSearchResults(Array.isArray(data) ? data : data.results);
-  }, []);
   
-
   useEffect(() => {
     fetchListings();
   }, []);
@@ -151,34 +115,6 @@ export default function viewOtherProfilePage() {
       </div>
     );
   }
-
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
-  const formatCondition = (condition: string) => {
-    return condition.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-  };
-  
-  const formatDate = (dateString: string) => {
-    const created = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - created.getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-    if (diffDays <= 0) {
-      return "Today";
-    }
-    if (diffDays === 1) {
-      return "1 day ago";
-    }
-    return `${diffDays} days ago`;
-  };
 
   return (
     <>
