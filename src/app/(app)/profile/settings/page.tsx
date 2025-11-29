@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from 'path';
@@ -113,7 +112,6 @@ function profileSettingsPage() {
     if (loading || authLoading) {
       return (
         <>
-          <Header />
           <div className="flex justify-center items-center min-h-screen">
             <p className="text-gray-500 -mt-50">Loading Profile Information...</p>
           </div>
@@ -123,8 +121,6 @@ function profileSettingsPage() {
 
     return (
     <>
-      <Header />
-
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="container mx-auto px-8 max-w-3xl">
 

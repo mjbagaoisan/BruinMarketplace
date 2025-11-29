@@ -2,22 +2,62 @@ import { Router } from "express";
 import { supabase } from "../services/db.js";
 import { authenticateToken } from "../middleware/auth.js";
 
+
+import multer from "multer"; // middleware for handling formData
+import { uploadListingMedia } from "../services/uploads/fileuploader.js";
+
+
 const router = Router();
+
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 const CONDITION_ENUM = ["new", "like_new", "good", "fair", "poor"];
 const CATEGORY_ENUM = ["textbooks", "electronics", "furniture", "parking", "clothing", "tickets", "other"];
 const STATUS_ENUM = ["active", "sold", "traded", "removed"];
 const PAYMENT_ENUM = ["zelle", "cash", "venmo", "other"];
-const LOCATION_ENUM = ["hill", "on campus", "off campus"];
+const LOCATION_ENUM = ["hill", "on_campus", "off_campus", "univ_apps"];
 
 //return all active listings (now requires authentication)
 router.get("/", authenticateToken, async (req, res) => {
-  const { data, error } = await supabase
+  const {
+    condition,
+    location,
+    category,
+    sort,
+  } = req.query as {
+    condition?: string;
+    location?: string;
+    category?: string;
+    sort?: string;
+  };
+  
+  let query = supabase
     .from("listings")
-    .select("*")
-    .eq("status", "active")
-    .order("created_at", { ascending: false });
+    .select("*, media(*)")
+    .eq("status", "active");
 
+    // filter applies to db based on user selection
+    if (condition && CONDITION_ENUM.includes(condition)) {
+      query = query.eq("condition", condition);
+    }
+    if (location && LOCATION_ENUM.includes(location)) {
+      query = query.eq("location", location);
+    }
+    if (category && CATEGORY_ENUM.includes(category)) {
+      query = query.eq("category", category);
+    }
+
+    // sort by date
+    let ascending = false;
+    if (sort === "date_asc") {
+      ascending = true;
+    } else if (sort === "date_desc") {
+      ascending = false;
+    }
+    query = query.order("created_at", { ascending });
+    
+  const { data, error } = await query;
   if (error) {
     console.error("Listings fetch errr:", error);
     return res.status(500).json({ error: error.message });
@@ -27,7 +67,7 @@ router.get("/", authenticateToken, async (req, res) => {
 });
 
 
-router.post("/", authenticateToken, async (req, res) => {
+router.post("/", authenticateToken, upload.array('mediaFiles', 5), async (req, res) => {
   const user_id = req.user!.userId; 
   const {
     title,
@@ -39,6 +79,8 @@ router.post("/", authenticateToken, async (req, res) => {
     preferred_payment = "other",
     status,
   } = req.body;
+
+  const files = req.files as Express.Multer.File[];
 
   //validation
   if (!title || !title.trim() ) {
@@ -92,9 +134,44 @@ router.post("/", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 
+  if (files && files.length > 0) {
+    const mediaToInsert = [];
+
+    for (const file of files) {
+      try {
+        const fileForUpload = new File([file.buffer], file.originalname, {
+            type: file.mimetype,
+        });
+
+        const { publicUrl, type } = await uploadListingMedia({
+            listingId: data.id, 
+            file: fileForUpload, 
+        });
+
+        mediaToInsert.push({
+          listing_id: data.id,
+          url: publicUrl,
+          type: type,
+        });
+      } catch (uploadError) {
+        console.error("Error uploading one of the files:", uploadError);
+      } 
+    }
+
+    if (mediaToInsert.length > 0) {
+      const { error: mediaError } = await supabase
+        .from("media")
+        .insert(mediaToInsert);
+
+      if (mediaError) {
+        console.error("Insert media error:", mediaError);
+      }
+    }
+  }
+
+
   return res.status(201).json(data);
 });
-
 
 router.get("/me", authenticateToken, async (req, res) => {
   const user_id = req.user!.userId;
@@ -194,7 +271,17 @@ router.get("/:id", async (req, res) => {
 
   const { data, error } = await supabase
     .from("listings")
-    .select("*")
+    .select(`
+      *,
+      media (*),
+      user:users (
+        id,
+        name,
+        profile_image_url,
+        is_verified,
+        created_at
+      )
+    `)
     .eq("id", id)
     .single();
 
@@ -276,6 +363,5 @@ router.post("/:id/status", authenticateToken, async (req, res) => {
 
   return res.json(data);
 });
-
 
 export default router;
