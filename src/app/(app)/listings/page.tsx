@@ -10,30 +10,9 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@
 import DebouncedSearch from "@/components/SearchBar";
 import CreateListing from '@/components/CreateListing';
 
-interface Media {
-  id: string;
-  listing_id: string;
-  url: string;
-}
+import { formatDate, formatCondition } from "@/lib/utils"
 
-interface Listing {
-  id: string;
-  title: string;
-  price: number;
-  description?: string;
-  condition?: string;
-  category?: string;
-  location?: string;
-  created_at: string;
-  media?: Media[];
-}
-
-interface SearchResponse {
-  results: Listing[];
-  total: number;
-  page: number;
-  limit: number;
-}
+import { Listing, SearchResponse } from "@/lib/types"
 
 function ListingsPage() {
   const [listings, setListings] = useState<Listing[]>([]);
@@ -98,25 +77,6 @@ function ListingsPage() {
   }, []);
 
   const displayListings = searchResults.length > 0 ? searchResults : listings;
-
-  const formatDate = (dateString: string) => {
-    const created = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - created.getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-    if (diffDays <= 0) {
-      return "Today";
-    }
-    if (diffDays === 1) {
-      return "1 day ago";
-    }
-    return `${diffDays} days ago`;
-  };
-
-  const formatCondition = (condition: string) => {
-    return condition.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-  };
 
   return (
     <>

@@ -87,7 +87,7 @@ export default function CreateListing(props: CreateListingProps){
     };
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
-      onDrop: handleFileDrop, // Use your existing handler
+      onDrop: handleFileDrop,
       accept: { 'image/*': [], 'video/*': [] },
       maxFiles: 5,
     });

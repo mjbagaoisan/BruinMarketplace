@@ -22,35 +22,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
-interface Media {
-  id: string;
-  listing_id: string;
-  url: string;
-  type: string;
-}
+import { Listing } from "@/lib/types"
 
-interface Seller {
-  id: string;
-  name: string;
-  profile_image_url?: string;
-  is_verified: boolean;
-  created_at: string;
-}
-
-interface Listing {
-  id: string;
-  title: string;
-  price: number;
-  description: string;
-  condition: string;
-  category: string;
-  status: string;
-  location: string;
-  preferred_payment: string;
-  created_at: string;
-  media?: Media[];
-  user?: Seller;
-}
 
 export default function ListingDetailPage() {
   const params = useParams();
@@ -252,7 +225,7 @@ export default function ListingDetailPage() {
                   </Avatar>
                   <div>
                     <div className="flex items-center gap-1">
-                      <a href="#" className="font-semibold text-lg hover:underline text-gray-900">
+                      <a href={`/profile/${listing.user.id}`} className="font-semibold text-lg hover:underline text-gray-900">
                         {listing.user.name}
                       </a>
                     </div>
