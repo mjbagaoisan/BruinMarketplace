@@ -24,19 +24,23 @@ router.get("/me", authenticateToken, async (req, res) => {
   return res.json(data);
 });
 
-router.get("/:id", authenticateToken, async (req, res) => {
-  const { id } = req.params;
+router.get("/:user_id", authenticateToken, async (req, res) => {
+  const { user_id } = req.params;
 
   const { data, error } = await supabase
     .from("users")
-    .select(
-      "id, name, major, hide_major, class_year, hide_class_year, profile_image_url, created_at"
-    )
-    .eq("id", id)
+    // selecting specific fields to avoid sending private data
+    .select("id, name, profile_image_url, major, hide_major, class_year, hide_class_year, created_at")
+    .eq("id", user_id)
     .single();
 
-  if (error || !data) {
-    console.error(`Fetch user profile by ID error (ID: ${id}):`, error);
+  if (error) {
+    console.error(`Error fetching user ID: ${user_id}:`, error);
+    return res.status(404).json({ error: "An error occured while fetching" });
+  }
+
+  if (!data) {
+    console.error(`User ID ${user_id} not found`);
     return res.status(404).json({ error: "User not found" });
   }
 
