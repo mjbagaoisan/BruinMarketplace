@@ -118,7 +118,7 @@ function ListingsPage() {
                 <SelectItem value="poor">Poor</SelectItem>
               </SelectContent>
             </Select>
-            {/* Locaiton Filter */}
+            {/* Location Filter */}
             <Select
               value={locationFilter || "all"}
               onValueChange={(value) =>
