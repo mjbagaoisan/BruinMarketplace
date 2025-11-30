@@ -36,7 +36,7 @@ router.get("/:user_id", authenticateToken, async (req, res) => {
 
   if (error) {
     console.error(`Error fetching user ID: ${user_id}:`, error);
-    return res.status(404).json({ error: "An error occurred while fetching" });
+    return res.status(500).json({ error: "An error occurred while fetching" });
   }
 
   if (!data) {
