@@ -39,6 +39,15 @@ interface Seller {
   created_at: string;
 }
 
+interface InterestedUser {
+  id: string;
+  name?: string;
+  email?: string;
+  phone_number?: string;
+  class_year?: number;
+  major?: string;
+}
+
 interface Listing {
   id: string;
   title: string;
@@ -50,6 +59,8 @@ interface Listing {
   location: string;
   preferred_payment: string;
   created_at: string;
+  interested_users?: string[];
+  interested_user_details?: InterestedUser[];
   media?: Media[];
   user?: Seller;
 }
@@ -60,11 +71,15 @@ export default function ListingDetailPage() {
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showInterestConfirm, setShowInterestConfirm] = useState(false);
+  const [interestSubmitting, setInterestSubmitting] = useState(false);
+  const [interestError, setInterestError] = useState<string | null>(null);
+  const [showInterestedList, setShowInterestedList] = useState(false);
   const { user } = useAuth();
   
   const isOwner = !!(user?.userId && listing?.user?.id && user.userId === listing.user.id);
   let interestButton = (
-    <Button className="w-full gap-2 text-base py-6" size="lg">
+    <Button className="w-full gap-2 text-base py-6" size="lg" onClick={() => setShowInterestConfirm(true)}>
       <MessageCircle className="h-5 w-5" />
       I'm interested
     </Button>
@@ -72,7 +87,12 @@ export default function ListingDetailPage() {
 
   if (isOwner) {
     interestButton = (
-      <Button className="w-full gap-2 text-base py-6 bg-gray-200 text-black hover:bg-gray-200" size="lg" variant="secondary" disabled>
+      <Button
+        className="w-full gap-2 text-base py-6 bg-gray-200 text-black hover:bg-gray-200"
+        size="lg"
+        variant="secondary"
+        onClick={() => setShowInterestedList(true)}
+      >
         Your Listing
       </Button>
     );
@@ -103,6 +123,36 @@ export default function ListingDetailPage() {
       fetchListing();
     }
   }, [params.id]);
+
+  const handleSendInterest = async () => {
+    if (isOwner) return;
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    if (!listing?.id) return;
+
+    setInterestSubmitting(true);
+    setInterestError(null);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/listings/${listing.id}/interested`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || "Failed to send interest");
+      }
+
+      setShowInterestConfirm(false);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to send interest";
+      setInterestError(message);
+    } finally {
+      setInterestSubmitting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -299,6 +349,61 @@ export default function ListingDetailPage() {
           </div>
         </div>
       </main>
+
+      {showInterestConfirm && !isOwner && (
+        <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-lg space-y-4">
+            <h3 className="text-xl font-semibold text-gray-900">
+              Do you want to send your information to the seller?
+            </h3>
+            <p className="text-sm text-gray-600">
+              We’ll share your contact details so the seller can reach out.
+            </p>
+            {interestError && (
+              <p className="text-sm text-red-600">{interestError}</p>
+            )}
+            <div className="flex gap-3 justify-end">
+              <Button variant="outline" onClick={() => setShowInterestConfirm(false)}>
+                No
+              </Button>
+              <Button
+                onClick={handleSendInterest}
+                disabled={interestSubmitting}
+              >
+                {interestSubmitting ? "Sending..." : "Yes"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showInterestedList && isOwner && (
+        <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-2xl rounded-xl bg-white p-6 shadow-lg space-y-4 max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-semibold text-gray-900">Interested Buyers</h3>
+              <Button variant="ghost" size="sm" onClick={() => setShowInterestedList(false)}>
+                Close
+              </Button>
+            </div>
+            {!listing?.interested_user_details || listing.interested_user_details.length === 0 ? (
+              <p className="text-sm text-gray-600">No one has expressed interest yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {listing.interested_user_details.map((buyer) => (
+                  <div key={buyer.id} className="border rounded-lg p-4">
+                    <p className="font-semibold text-gray-900">{buyer.name || "Unknown Name"}</p>
+                    <p className="text-sm text-gray-700">Email: {buyer.email || "Not provided"}</p>
+                    <p className="text-sm text-gray-700">Phone Number: {buyer.phone_number || "Not provided"}</p>
+                    <p className="text-sm text-gray-700">Class Year: {buyer.class_year || "Not provided"}</p>
+                    <p className="text-sm text-gray-700">Major: {buyer.major || "Not provided"}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
