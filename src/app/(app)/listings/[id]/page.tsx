@@ -21,12 +21,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Media {
   id: string;
   listing_id: string;
   url: string;
   type: string;
+  user_id: string;
 }
 
 interface Seller {
@@ -58,6 +60,23 @@ export default function ListingDetailPage() {
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
+  
+  const isOwner = !!(user?.userId && listing?.user?.id && user.userId === listing.user.id);
+  let interestButton = (
+    <Button className="w-full gap-2 text-base py-6" size="lg">
+      <MessageCircle className="h-5 w-5" />
+      I'm interested
+    </Button>
+  );
+
+  if (isOwner) {
+    interestButton = (
+      <Button className="w-full gap-2 text-base py-6 bg-gray-200 text-black hover:bg-gray-200" size="lg" variant="secondary" disabled>
+        Your Listing
+      </Button>
+    );
+  }
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -265,10 +284,7 @@ export default function ListingDetailPage() {
                 <div className="text-gray-500 mb-6">Seller information unavailable</div>
               )}
 
-              <Button className="w-full gap-2 text-base py-6" size="lg">
-                <MessageCircle className="h-5 w-5" />
-                I'm interested
-              </Button>
+              {interestButton}
 
               <div className="mt-4 flex justify-center">
                 <Button variant="ghost" className="text-red-500 hover:text-red-600 hover:bg-red-50 gap-2" size="sm">
