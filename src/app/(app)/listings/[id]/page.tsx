@@ -88,7 +88,7 @@ export default function ListingDetailPage() {
   if (isOwner) {
     interestButton = (
       <Button
-        className="w-full gap-2 text-base py-6 bg-sky-200 text-black hover:bg-sky-300"
+        className="w-full gap-2 text-base py-6 text-black hover:bg-sky-100 " 
         size="lg"
         variant="secondary"
         onClick={() => setShowInterestedList(true)}
