@@ -1,17 +1,19 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 import { generateTestListingTitle } from '../fixtures/test-data';
 
 test.describe('Listings - Create', () => {
   
   test.use({ storageState: 'tests/e2e/.auth/user.json' });
 
-  async function openCreateDialog(page: any) {
-    await page.locator('button').filter({ has: page.locator('svg') }).last().click();
-    await expect(page.getByRole('dialog')).toBeVisible();
+  async function openCreateDialog(page: Page) {
+    const floatingButton = page.locator('div.fixed button').first();
+    await expect(floatingButton).toBeVisible({ timeout: 10000 });
+    await floatingButton.click();
+    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 10000 });
   }
 
-  async function fillRequiredFields(page: any, title: string, price: string) {
-    await page.getByLabel(/title/i).fill(title);
+  async function fillRequiredFields(page: Page, title: string, price: string) {
+    await page.locator('input[name="title"]').fill(title);
     await page.locator('input[name="price"]').fill(price);
     
     await page.getByRole('combobox').filter({ hasText: '' }).first().click();
@@ -40,7 +42,7 @@ test.describe('Listings - Create', () => {
     await expect(page.getByText(/create a listing/i)).toBeVisible();
     
     await fillRequiredFields(page, uniqueTitle, '25');
-    await page.getByLabel(/description/i).fill('Test listing created by E2E test');
+    await page.locator('textarea[name="description"]').fill('Test listing created by E2E test');
     
     await page.getByRole('button', { name: /^post$/i }).click();
     await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 15000 });
@@ -55,12 +57,12 @@ test.describe('Listings - Create', () => {
     
     await openCreateDialog(page);
     
-    await page.getByLabel(/title/i).fill(uniqueTitle);
+    await page.locator('input[name="title"]').fill(uniqueTitle);
     await page.locator('input[name="price"]').fill('50');
     
-    await page.locator('input[type="file"]').setInputFiles('public/BruinLogo.svg');
+    await page.locator('input[type="file"]').setInputFiles('public/39717e342e8eadd12055eb24442c0e22.jpg');
     await page.waitForTimeout(500);
-    await expect(page.getByText(/bruinlogo/i)).toBeVisible();
+    await expect(page.getByText(/39717e342e8eadd12055eb24442c0e22/i)).toBeVisible();
     
     await page.getByRole('combobox').first().click();
     await page.getByRole('option', { name: /cash/i }).click();
@@ -84,7 +86,7 @@ test.describe('Listings - Create', () => {
     await fillRequiredFields(page, '', '25');
     await page.getByRole('button', { name: /^post$/i }).click();
     
-    const titleInput = page.getByLabel(/title/i);
+    const titleInput = page.locator('input[name="title"]');
     const failsValidation = await titleInput.evaluate((el: HTMLInputElement) => !el.validity.valid);
     expect(failsValidation).toBe(true);
     
@@ -104,7 +106,7 @@ test.describe('Listings - Create', () => {
 
   test('closes dialog on cancel', async ({ page }) => {
     await openCreateDialog(page);
-    await page.getByLabel(/title/i).fill('Test Title');
+    await page.locator('input[name="title"]').fill('Test Title');
     await page.getByRole('button', { name: /cancel/i }).click();
     
     await expect(page.getByRole('dialog')).not.toBeVisible();
@@ -113,11 +115,11 @@ test.describe('Listings - Create', () => {
   test('removes uploaded file when clicking X', async ({ page }) => {
     await openCreateDialog(page);
     
-    await page.locator('input[type="file"]').setInputFiles('public/BruinLogo.svg');
+    await page.locator('input[type="file"]').setInputFiles('public/39717e342e8eadd12055eb24442c0e22.jpg');
     await page.waitForTimeout(500);
-    await expect(page.getByText(/bruinlogo/i)).toBeVisible();
+    await expect(page.getByText(/39717e342e8eadd12055eb24442c0e22/i)).toBeVisible();
     
-    await page.locator('button').filter({ has: page.locator('svg.lucide-x') }).click();
-    await expect(page.getByText(/bruinlogo/i)).not.toBeVisible();
+    await page.locator('li button', { has: page.locator('svg.lucide-x') }).click();
+    await expect(page.getByText(/39717e342e8eadd12055eb24442c0e22/i)).not.toBeVisible();
   });
 });
