@@ -82,7 +82,7 @@ function profileSettingsPage() {
 
 
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile/me`, {
-          method: "PATCH",
+          method: "PUT",
           credentials: "include",
           body: formData,
         }

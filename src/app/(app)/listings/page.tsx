@@ -171,8 +171,10 @@ function ListingsPage() {
               <SelectContent>
                 <SelectItem value="all">Locations</SelectItem>
                 <SelectItem value="hill">The Hill</SelectItem>
-                <SelectItem value="on campus">On Campus</SelectItem>
-                <SelectItem value="off campus">Off Campus</SelectItem>
+                <SelectItem value="on_campus">On Campus</SelectItem>
+                <SelectItem value="off_campus">Off Campus</SelectItem>
+                <SelectItem value="univ_apps">University Apartments</SelectItem>
+
               </SelectContent>
             </Select>
             {/* Category Filter */}

@@ -195,8 +195,9 @@ export default function EditListingPage() {
                 className="border p-2 rounded w-full"
               >
                 <option value="hill">Hill</option>
-                <option value="on campus">On Campus</option>
-                <option value="off campus">Off Campus</option>
+                <option value="on_campus">On Campus</option>
+                <option value="off_campus">Off Campus</option>
+                  <option value="univ_apps">University Apartments</option>
               </select>
             </div>
           </div>

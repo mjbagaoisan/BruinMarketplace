@@ -14,6 +14,7 @@ import {
   ListingStatus,
   Listing,
 } from "@/lib/listings";
+import Link from "next/link";
 
 interface ListingsActionsMenuProps {
   listingId: string;
@@ -63,8 +64,10 @@ export function ListingsActionsMenu({
         >
           Mark as sold
         </DropdownMenuItem>
-        <DropdownMenuItem>
-          Edit Listing
+        <DropdownMenuItem asChild>
+          <Link href={`/listings/${listingId}/edit`}>
+              Edit Listing
+          </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
