@@ -1,26 +1,13 @@
-/**
- * Test data generation utilities
- */
-
-/**
- * Generate a unique test listing title with timestamp
- */
 export function generateTestListingTitle(prefix: string = 'TEST'): string {
   const timestamp = Date.now();
   return `[${prefix}] ${timestamp} - Test Listing`;
 }
 
-/**
- * Generate random price between min and max
- */
 export function generateRandomPrice(min: number = 10, max: number = 500): string {
   const price = Math.floor(Math.random() * (max - min + 1)) + min;
   return price.toString();
 }
 
-/**
- * Test listing templates for different categories
- */
 export const LISTING_TEMPLATES = {
   textbook: {
     title: '[TEST] CS Textbook',
@@ -59,9 +46,6 @@ export const LISTING_TEMPLATES = {
   },
 };
 
-/**
- * Create a test listing object with unique title
- */
 export function createTestListingData(
   template: keyof typeof LISTING_TEMPLATES = 'textbook',
   overrides?: Partial<{
@@ -89,16 +73,10 @@ export function createTestListingData(
   };
 }
 
-/**
- * Wait helper with custom timeout
- */
 export function wait(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-/**
- * Retry a function until it succeeds or max attempts reached
- */
 export async function retry<T>(
   fn: () => Promise<T>,
   maxAttempts: number = 3,

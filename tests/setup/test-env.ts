@@ -1,8 +1,3 @@
-/**
- * Test environment configuration and constants
- */
-
-// Environment variables for tests
 export const TEST_ENV = {
   FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:3000',
   API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
@@ -10,22 +5,15 @@ export const TEST_ENV = {
   SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
 };
 
-/**
- * Test user credentials
- * with @ucla.edu or @g.ucla.edu email
- */
 export const TEST_USERS = {
   validUser: {
-    email: 'mjbagaoisan@ucla.edu', // Replace with actual test account
+    email: 'mjbagaoisan@ucla.edu',
   },
   invalidUser: {
     email: 'invalid@gmail.com',
   },
 };
 
-/**
- * Test listing data for creating test listings
- */
 export const TEST_LISTING = {
   title: '[TEST] CS 35L Textbook',
   price: '50',
@@ -36,9 +24,6 @@ export const TEST_LISTING = {
   preferred_payment: 'venmo',
 };
 
-/**
- * Test listing variations for different test scenarios
- */
 export const TEST_LISTINGS = {
   electronics: {
     title: '[TEST] MacBook Pro',
@@ -60,9 +45,6 @@ export const TEST_LISTINGS = {
   },
 };
 
-/**
- * Timeouts for various operations
- */
 export const TIMEOUTS = {
   SHORT: 5000,
   MEDIUM: 10000,

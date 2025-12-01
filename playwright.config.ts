@@ -11,7 +11,7 @@ export default defineConfig({
   globalSetup: './tests/setup/global-setup.ts',
   
   // Run tests in files in parallel
-  fullyParallel: false, // Sequential for DB consistency
+  fullyParallel: true, // Enable parallel test execution for better performance
   
   // Fail the build on CI if you accidentally left test.only
   forbidOnly: !!process.env.CI,
@@ -19,8 +19,8 @@ export default defineConfig({
   // Retry on CI only
   retries: process.env.CI ? 2 : 0,
   
-  // Opt out of parallel tests on CI
-  workers: process.env.CI ? 1 : 1, // Sequential for DB state
+  // Optimize workers for parallel execution
+  workers: process.env.CI ? 2 : 4, // Enable parallelism while managing resource usage
   
   // Reporter to use
   reporter: [
@@ -53,32 +53,32 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
-    // Uncomment for cross-browser testing
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
-    // },
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
+    },
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
+    },
   ],
 
   // Run your local dev server before starting the tests
-  webServer: [
-    {
-      command: 'npm run dev:next',
-      url: 'http://localhost:3000',
-      reuseExistingServer: !process.env.CI,
-      timeout: 120000,
-    },
-    {
-      command: 'npm run dev:api',
-      url: 'http://localhost:3001',
-      reuseExistingServer: !process.env.CI,
-      timeout: 120000,
-    },
-  ],
+  // Comment this out if you prefer to run dev servers manually
+  // webServer: [
+  //   {
+  //     command: 'npm run dev:next',
+  //     url: 'http://localhost:3000',
+  //     reuseExistingServer: !process.env.CI,
+  //     timeout: 120000,
+  //   },
+  //   {
+  //     command: 'npm run dev:api',
+  //     url: 'http://localhost:3001',
+  //     reuseExistingServer: !process.env.CI,
+  //     timeout: 120000,
+  //   },
+  // ],
 
   // Global timeout
   timeout: 30000,
