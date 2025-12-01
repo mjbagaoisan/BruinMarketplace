@@ -9,6 +9,7 @@ import { PlusIcon } from "lucide-react"
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select"
 import DebouncedSearch from "@/components/SearchBar";
 import CreateListing from '@/components/CreateListing';
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Media {
   id: string;
@@ -40,6 +41,7 @@ function ListingsPage() {
   const [loading, setLoading] = useState(true);
   const [searchResults, setSearchResults] = useState<Listing[]>([]);
   const router = useRouter();
+  const { user, isLoading } = useAuth();
 
   // Filter state
   const [conditionFilter, setConditionFilter] = useState<string>("");
@@ -47,15 +49,7 @@ function ListingsPage() {
   const [categoryFilter, setCategoryFilter] = useState<string>("");
   const [sort, setSort] = useState<string>("date_desc");
 
-  useEffect(() => {
-    fetchListings();
-  }, []);
-
-  useEffect(() => {
-    fetchListings();
-  }, [conditionFilter, locationFilter, categoryFilter, sort]);
-
-  const fetchListings = async () => {
+  const fetchListings = useCallback(async () => {
     try {
       // Build query params from filter state
       const params = new URLSearchParams();
@@ -91,7 +85,21 @@ function ListingsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [conditionFilter, locationFilter, categoryFilter, sort, router]);
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push('/login');
+    }
+  }, [isLoading, user, router]);
+
+  useEffect(() => {
+    if (isLoading || !user) {
+      return;
+    }
+
+    fetchListings();
+  }, [isLoading, user, fetchListings]);
 
   const handleSearchResults = useCallback((data: Listing[] | SearchResponse) => {
     setSearchResults(Array.isArray(data) ? data : data.results);
@@ -117,6 +125,14 @@ function ListingsPage() {
   const formatCondition = (condition: string) => {
     return condition.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   };
+
+  if (isLoading || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-sm text-gray-600">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <>
