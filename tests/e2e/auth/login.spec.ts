@@ -44,7 +44,7 @@ test.describe('Authentication - Login Flow', () => {
     await page.getByRole('button', { name: /sign in with google/i }).click();
     
     // Test domain validation by attempting login with non-UCLA email
-    console.log('\n⏳ Waiting for manual Google OAuth with non-UCLA email...');
+    console.log('\n Waiting for manual Google OAuth with non-UCLA email...');
     console.log('   Please select a NON-UCLA email account (e.g., @gmail.com)\n');
     
     await page.waitForURL(/\/login\?error=/, { timeout: 60000 });

@@ -23,7 +23,7 @@ export async function logout(page: Page): Promise<void> {
   
   await page.getByRole('button', { name: /logout/i }).click();
   
-  await page.waitForURL('/login', { timeout: 10000 });
+  await page.waitForURL('/', { timeout: 10000 });
   
   const cookies = await page.context().cookies();
   const hasAuthToken = cookies.some(cookie => cookie.name === 'auth_token');

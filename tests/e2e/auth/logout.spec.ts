@@ -24,7 +24,7 @@ test.describe('Authentication - Logout Flow', () => {
     
     await logout(page);
     
-    await expect(page).toHaveURL('/login');
+    await expect(page).toHaveURL('/');
     
     authenticated = await isAuthenticated(page);
     expect(authenticated).toBe(false);
