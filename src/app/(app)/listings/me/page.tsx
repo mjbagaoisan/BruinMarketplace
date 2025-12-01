@@ -4,6 +4,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Card, CardMedia, CardTitle, CardPrice } from "@/components/ui/card";
+import { ListingsActionsMenu } from "@/components/ListingsActionsMenu";
+import type { ListingStatus } from "@/lib/listings";
 import DebouncedSearch from "@/components/SearchBar";
 import Header from "@/components/Header";
 
@@ -20,6 +22,7 @@ interface Listing {
   description?: string;
   condition?: string;
   category?: string;
+  status: ListingStatus;
   created_at: string;
   media?: Media[];
 }
@@ -105,30 +108,59 @@ function MyListingsPage() {
           ) : (
             <div className="flex flex-wrap justify-center gap-6">
               {displayListings.map((listing) => (
-                <Link key={listing.id} href={`/listings/${listing.id}`} className="block w-full sm:w-60">
-                  <Card className="w-full h-full hover:shadow-lg transition-shadow cursor-pointer flex flex-col mb-7">
-                    <CardMedia>
-                      {listing.media && listing.media.length > 0 ? (
-                        <img 
-                          src={listing.media[0].url} 
-                          alt={listing.title} 
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                          <span className="text-gray-400 text-sm">No Image</span>
+                <div key={listing.id} className="w-full sm:w-60">
+                  <Card className="w-full h-full hover:shadow-lg transition-shadow flex flex-col mb-7">
+                    <Link
+                      href={`/listings/${listing.id}`}
+                      className="flex flex-col flex-grow"
+                    >
+                      <CardMedia>
+                        {listing.media && listing.media.length > 0 ? (
+                          <img
+                            src={listing.media[0].url}
+                            alt={listing.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                            <span className="text-gray-400 text-sm">No Image</span>
+                          </div>
+                        )}
+                      </CardMedia>
+                      <div className="p-4 pb-2 flex flex-col gap-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <CardTitle className="truncate flex-1">{listing.title}</CardTitle>
+                          <span
+                            className={`text-xs font-semibold px-2 py-1 rounded-full capitalize ${
+                              listing.status === "sold"
+                                ? "bg-red-50 text-red-600 border border-red-100"
+                                : "bg-green-50 text-green-600 border border-green-100"
+                            }`}
+                          >
+                            {listing.status}
+                          </span>
                         </div>
-                      )}
-                    </CardMedia>
-                    <div className="p-4 pb-2 flex flex-col gap-2 flex-grow">
-                      <CardTitle className="truncate">{listing.title}</CardTitle>
-                      <CardPrice>${listing.price.toFixed(2)}</CardPrice>
-                      {listing.condition && (
-                        <div className="text-sm text-gray-500">Condition: {formatCondition(listing.condition)}</div>
-                      )}
+                        <CardPrice>${listing.price.toFixed(2)}</CardPrice>
+                        {listing.condition && (
+                          <div className="text-sm text-gray-500">
+                            Condition: {formatCondition(listing.condition)}
+                          </div>
+                        )}
+                      </div>
+                    </Link>
+                    <div className="flex justify-end px-2 pb-2">
+                      <ListingsActionsMenu
+                        listingId={listing.id}
+                        currentStatus={listing.status}
+                        onListingUpdated={(updated) => {
+                          setListings((prev) =>
+                            prev.map((l) => (l.id === updated.id ? { ...l, ...updated } : l))
+                          );
+                        }}
+                      />
                     </div>
                   </Card>
-                </Link>
+                </div>
               ))}
             </div>
           )}

@@ -20,6 +20,7 @@ interface Listing {
   description?: string;
   condition?: string;
   category?: string;
+  status?: string;
   created_at: string;
   media?: Media[];
 }
@@ -74,7 +75,10 @@ function ListingsPage() {
     setSearchResults(Array.isArray(data) ? data : data.results);
   }, []);
 
-  const displayListings = searchResults.length > 0 ? searchResults : listings;
+  const baseListings = searchResults.length > 0 ? searchResults : listings;
+  const displayListings = baseListings.filter(
+    (listing) => listing.status?.toLowerCase() === "active"
+  );
 
   const formatCondition = (condition: string) => {
     return condition.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
