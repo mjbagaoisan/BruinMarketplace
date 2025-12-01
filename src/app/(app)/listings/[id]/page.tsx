@@ -267,7 +267,7 @@ export default function ListingDetailPage() {
 
               <Button className="w-full gap-2 text-base py-6" size="lg">
                 <MessageCircle className="h-5 w-5" />
-                I'm interested
+                Contact Seller
               </Button>
 
               <div className="mt-4 flex justify-center">
