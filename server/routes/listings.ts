@@ -173,13 +173,16 @@ router.post("/", authenticateToken, upload.array('mediaFiles', 5), async (req, r
   return res.status(201).json(data);
 });
 
+
+// get all active listings for the authenticated user
 router.get("/me", authenticateToken, async (req, res) => {
   const user_id = req.user!.userId;
 
   const { data, error } = await supabase
     .from("listings")
-    .select("*")
+    .select("*, media(*)")
     .eq("user_id", user_id)
+    .eq("status", "active")
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -190,6 +193,7 @@ router.get("/me", authenticateToken, async (req, res) => {
 });
 
 
+// update a listing
 router.put("/:id", authenticateToken, async (req, res) => {
   const user_id = req.user!.userId;
   const { id } = req.params;
@@ -266,6 +270,7 @@ router.put("/:id", authenticateToken, async (req, res) => {
 });
 
 
+// get a specific listing by its id
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
 
@@ -293,6 +298,8 @@ router.get("/:id", async (req, res) => {
   return res.json(data);
 });
 
+
+// delete a listing by its id
 router.delete("/:id", authenticateToken, async (req, res) => {
   const user_id = req.user!.userId;
   const { id } = req.params;
@@ -323,6 +330,7 @@ router.delete("/:id", authenticateToken, async (req, res) => {
 });
 
 
+// update an existant listing
 router.post("/:id/status", authenticateToken, async (req, res) => {
   const user_id = req.user!.userId;
   const user_role = req.user!.role; // we already store role in req.user
@@ -363,5 +371,6 @@ router.post("/:id/status", authenticateToken, async (req, res) => {
 
   return res.json(data);
 });
+
 
 export default router;
