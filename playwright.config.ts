@@ -34,9 +34,6 @@ export default defineConfig({
     // Base URL for navigation
     baseURL: process.env.FRONTEND_URL || 'http://localhost:3000',
     
-    // Run in headed mode by default for easier manual OAuth flows
-    headless: false,
-    
     // Collect trace when retrying the failed test
     trace: 'on-first-retry',
     
@@ -48,18 +45,6 @@ export default defineConfig({
     
     // Timeout for each action
     actionTimeout: 10000,
-   // Added this because of browser security issues 
-    launchOptions: {
-      args: [
-        '--disable-blink-features=AutomationControlled',
-        '--no-sandbox',
-        '--disable-web-security',
-        '--disable-infobars',
-        '--disable-extensions',
-        '--start-maximized',
-        '--window-size=1280,720',
-      ],
-    },
   },
 
   // Configure projects for major browsers
@@ -78,10 +63,25 @@ export default defineConfig({
     },
   ],
 
-
+  // Run your local dev server before starting the tests
+  // Comment this out if you prefer to run dev servers manually
+  // webServer: [
+  //   {
+  //     command: 'npm run dev:next',
+  //     url: 'http://localhost:3000',
+  //     reuseExistingServer: !process.env.CI,
+  //     timeout: 120000,
+  //   },
+  //   {
+  //     command: 'npm run dev:api',
+  //     url: 'http://localhost:3001',
+  //     reuseExistingServer: !process.env.CI,
+  //     timeout: 120000,
+  //   },
+  // ],
 
   // Global timeout
-  timeout: 100000,
+  timeout: 30000,
   
   // Expect timeout
   expect: {
