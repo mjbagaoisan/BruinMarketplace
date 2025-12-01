@@ -105,7 +105,6 @@ router.get("/me", authenticateToken, async (req, res) => {
     .from("listings")
     .select("*, media(*)")
     .eq("user_id", user_id)
-    .eq("status", "active")
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -253,8 +252,8 @@ router.delete("/:id", authenticateToken, async (req, res) => {
 });
 
 
-// update an existant listing
-router.post("/:id/status", authenticateToken, async (req, res) => {
+// update listing status
+router.patch("/:id/status", authenticateToken, async (req, res) => {
   const user_id = req.user!.userId;
   const user_role = req.user!.role; // we already store role in req.user
   
@@ -294,6 +293,8 @@ router.post("/:id/status", authenticateToken, async (req, res) => {
 
   return res.json(data);
 });
+
+
 
 
 export default router;
