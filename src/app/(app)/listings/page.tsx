@@ -254,9 +254,7 @@ function ListingsPage() {
                       {listing.created_at && (
                         <div className="text-sm text-gray-500">Posted: {formatDate(listing.created_at)}</div>
                       )}
-                      {user?.userId === listing.user_id && (
-                        <div className="text-sm font-semibold text-blue-600">Your listing</div>
-                      )}
+
                     </div>
                   </Card>
                 </Link>
