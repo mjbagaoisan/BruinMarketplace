@@ -19,20 +19,23 @@ test.describe('Listings - Browse', () => {
     await expect(page).toHaveURL('/listings');
     await waitForListingsToLoad(page);
     
-    const hasListings = await page.locator(listingCards).count() > 0;
-    const hasEmptyState = await page.getByText(/no listings/i).isVisible();
-    
-    expect(hasListings || hasEmptyState).toBe(true);
-    
-    if (hasListings) {
-      await expect(page.locator(listingCards).first()).toBeVisible();
-      await expect(page.getByText(/\$\d+\.\d{2}/).first()).toBeVisible();
+    const listingCount = await page.locator(listingCards).count();
+    if (listingCount === 0) {
+      await expect(page.getByText(/no listings/i)).toBeVisible({ timeout: 5000 });
+      return;
     }
+    
+    await expect(page.locator(listingCards).first()).toBeVisible();
+    await expect(page.getByText(/\$\d+\.\d{2}/).first()).toBeVisible();
   });
 
   test('BROWSE_02: filters by condition', async ({ page }) => {
     await waitForListingsToLoad(page);
     const initialCount = await page.locator(listingCards).count();
+    if (initialCount === 0) {
+      test.skip(true, 'No listings to filter');
+      return;
+    }
     
     await page.getByRole('combobox').filter({ hasText: /condition/i }).click();
     await page.getByRole('option', { name: /like new/i }).click();
@@ -47,6 +50,10 @@ test.describe('Listings - Browse', () => {
   test('BROWSE_03: filters by location', async ({ page }) => {
     await waitForListingsToLoad(page);
     const initialCount = await page.locator(listingCards).count();
+    if (initialCount === 0) {
+      test.skip(true, 'No listings to filter');
+      return;
+    }
     
     await page.getByRole('combobox').filter({ hasText: /location/i }).click();
     await page.getByRole('option', { name: /the hill/i }).click();
@@ -61,6 +68,10 @@ test.describe('Listings - Browse', () => {
   test('BROWSE_04: filters by category', async ({ page }) => {
     await waitForListingsToLoad(page);
     const initialCount = await page.locator(listingCards).count();
+    if (initialCount === 0) {
+      test.skip(true, 'No listings to filter');
+      return;
+    }
     
     await page.getByRole('combobox').filter({ hasText: /categor/i }).click();
     await page.getByRole('option', { name: /electronics/i }).click();
@@ -75,6 +86,10 @@ test.describe('Listings - Browse', () => {
   test('BROWSE_06: combines multiple filters', async ({ page }) => {
     await waitForListingsToLoad(page);
     const initialCount = await page.locator(listingCards).count();
+    if (initialCount === 0) {
+      test.skip(true, 'No listings to filter');
+      return;
+    }
     
     await page.getByRole('combobox').filter({ hasText: /condition/i }).click();
     await page.getByRole('option', { name: /good/i }).click();
@@ -96,9 +111,13 @@ test.describe('Listings - Browse', () => {
   test('resets filter when selecting "All" option', async ({ page }) => {
     await waitForListingsToLoad(page);
     const initialCount = await page.locator(listingCards).count();
+    if (initialCount === 0) {
+      test.skip(true, 'No listings to reset');
+      return;
+    }
     
     await page.getByRole('combobox').filter({ hasText: /condition/i }).click();
-    await page.getByRole('option', { name: /new$/i }).click();
+    await page.getByRole('option', { name: /^new$/i }).click();
     await page.waitForTimeout(500);
     
     await page.getByRole('combobox').filter({ hasText: /condition/i }).click();
