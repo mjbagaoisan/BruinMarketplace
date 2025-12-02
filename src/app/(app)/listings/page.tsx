@@ -177,8 +177,21 @@ function ListingsPage() {
         {/* Listings Grid */}
         <div className="container mx-auto px-8">
           {loading ? (
-            <div className="flex justify-center items-center py-12">
-              <div className="text-lg text-gray-600">Loading listings...</div>
+            <div className="container mx-auto px-8">
+              <div className="flex flex-wrap justify-center gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="w-full sm:w-60 animate-pulse">
+                    <div className="bg-white rounded-xl shadow-sm border flex flex-col h-full">
+                      <div className="aspect-video bg-gray-200 rounded-t-xl"></div>
+                      <div className="p-4 flex-1 flex flex-col">
+                        <div className="h-6 bg-gray-200 rounded mb-2"></div>
+                        <div className="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
+                        <div className="h-8 bg-gray-200 rounded w-1/2 mt-auto"></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           ) : displayListings.length === 0 ? (
             <div className="flex justify-center items-center py-12">
@@ -192,7 +205,7 @@ function ListingsPage() {
             <div className="flex flex-wrap justify-center gap-6">
               {displayListings.map((listing) => (
                 <Link key={listing.id} href={`/listings/${listing.id}`} className="block w-full sm:w-60">
-                  <Card className="w-full h-full hover:shadow-lg transition-shadow cursor-pointer flex flex-col mb-7">
+                  <Card className="w-full h-full hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300 cursor-pointer flex flex-col">
                     <CardMedia>
                       {listing.media && listing.media.length > 0 ? (
                         <img 
