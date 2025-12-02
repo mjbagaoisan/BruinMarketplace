@@ -29,11 +29,11 @@ function useDebounce<T>(value: T, delay: number): T {
 type Props = {
   delay?: number;               // debounce delay (ms)
   api?: string;                 // your search endpoint (GET ?q=)
-  onResults?: (rows: any[]) => void; // consume results outside
+  onResults?: (rows: any[], query: string) => void; // consume results outside
 };
 
 export default function DebouncedSearch({
-  delay = 300,
+  delay = 125,
   api = `${process.env.NEXT_PUBLIC_API_URL}/api/search`,
   onResults,
 }: Props) {
@@ -47,7 +47,7 @@ export default function DebouncedSearch({
 
   React.useEffect(() => {
     if (!debouncedQ.trim()) {
-      onResultsRef.current?.([]);
+      onResultsRef.current?.([], "");
       return;
     }
     // send GET request to search endpoint
@@ -56,7 +56,7 @@ export default function DebouncedSearch({
       credentials: 'include',
     })
       .then((r) => r.json())
-      .then((data) => onResultsRef.current?.(data))
+      .then((data) => onResultsRef.current?.(data, debouncedQ))
       .catch((e) => console.error("Search error:", e));
   }, [debouncedQ, api]);
 

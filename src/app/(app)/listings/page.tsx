@@ -40,6 +40,7 @@ function ListingsPage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchResults, setSearchResults] = useState<Listing[]>([]);
+  const [activeQuery, setActiveQuery] = useState<string>("");
   const router = useRouter();
   const { user, isLoading } = useAuth();
 
@@ -101,11 +102,13 @@ function ListingsPage() {
     fetchListings();
   }, [isLoading, user, fetchListings]);
 
-  const handleSearchResults = useCallback((data: Listing[] | SearchResponse) => {
+  const handleSearchResults = useCallback((data: Listing[] | SearchResponse, query: string) => {
     setSearchResults(Array.isArray(data) ? data : data.results);
+    setActiveQuery(query);
   }, []);
 
-  const displayListings = searchResults.length > 0 ? searchResults : listings;
+  const hasActiveSearch = activeQuery.trim().length > 0;
+  const displayListings = hasActiveSearch ? searchResults : listings;
 
   const formatDate = (dateString: string) => {
     const created = new Date(dateString);
@@ -235,8 +238,8 @@ function ListingsPage() {
           ) : displayListings.length === 0 ? (
             <div className="flex justify-center items-center py-12">
               <div className="text-lg text-gray-600">
-                {searchResults.length === 0 && listings.length > 0 
-                  ? "No listings found matching your search." 
+                {activeQuery
+                  ? "No listings found matching your search."
                   : "No listings available."}
               </div>
             </div>

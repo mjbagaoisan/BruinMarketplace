@@ -61,7 +61,7 @@ test.describe('Listings - Search', () => {
     await page.waitForTimeout(DEBOUNCE_WAIT);
     await page.waitForLoadState('networkidle');
     
-    await expect(page.getByText(/no listings found/i)).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/no listings found matching your search/i)).toBeVisible({ timeout: 5000 });
     expect(await page.locator(listingCards).count()).toBe(0);
   });
 
