@@ -3,6 +3,8 @@ interface Media {
   id: string;
   listing_id: string;
   url: string;
+  type: string;
+  user_id: string;
 }
 
 interface Seller {
@@ -11,6 +13,15 @@ interface Seller {
   profile_image_url?: string;
   is_verified: boolean;
   created_at: string;
+}
+
+interface InterestedUser {
+  id: string;
+  name?: string;
+  email?: string;
+  phone_number?: string;
+  class_year?: number;
+  major?: string;
 }
 
 export interface Listing {
@@ -23,6 +34,8 @@ export interface Listing {
   status: string;
   location: string;
   preferred_payment: string;
+  interested_users?: string[];
+  interested_user_details?: InterestedUser[];
   created_at: string;
   media?: Media[];
   user?: Seller;
