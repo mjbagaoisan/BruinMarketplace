@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from "react";
+import { useRouter } from "next/navigation"; 
 
 interface User {
   userId: string;
@@ -20,6 +21,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();                 
 
   const apiBase = process.env.NEXT_PUBLIC_API_URL;
 
@@ -28,11 +30,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const fetchUser = async () => {
       try {
+        if (!apiBase) {
+          console.error("NEXT_PUBLIC_API_URL is not set");
+          if (isMounted) {
+            setUser(null);
+            setIsLoading(false);
+          }
+          return;
+        }
+
         setIsLoading(true);
-        const res = await fetch(`${apiBase}/api/auth/me`, { // include auth_token cookie
-          credentials: "include",
+
+        const res = await fetch(`${apiBase}/api/auth/me`, {
+          credentials: "include", // include auth_token cookie
         });
 
+        // 🔴 Handle suspended accounts explicitly
+        if (res.status === 403) {
+          const data = await res.json().catch(() => ({}));
+
+          if (
+            typeof data.error === "string" &&
+            data.error.toLowerCase().includes("suspended")
+          ) {
+            if (isMounted) {
+              setUser(null);
+              setIsLoading(false);
+            }
+            router.replace("/suspended"); 
+            return;
+          }
+
+          // other 403 reasons – just treat as not logged in
+          if (isMounted) {
+            setUser(null);
+          }
+          return;
+        }
+
+        // not authenticated (401) or other non-OK
         if (!res.ok) {
           if (isMounted) {
             setUser(null);
@@ -67,7 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       isMounted = false;
     };
-  }, [apiBase]);
+  }, [apiBase, router]); 
 
   const value: AuthContextType = {
     user,
@@ -85,7 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { ReportModal } from "@/components/ReportModal";
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { 
@@ -58,6 +59,9 @@ export default function ListingDetailPage() {
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [showListingReport, setShowListingReport] = useState(false);
+  const [showSellerReport, setShowSellerReport] = useState(false);
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -270,11 +274,28 @@ export default function ListingDetailPage() {
                 I'm interested
               </Button>
 
-              <div className="mt-4 flex justify-center">
-                <Button variant="ghost" className="text-red-500 hover:text-red-600 hover:bg-red-50 gap-2" size="sm">
+              <div className="mt-4 flex justify-center gap-2">
+                <Button
+                  variant="ghost"
+                  className="text-red-500 hover:text-red-600 hover:bg-red-50 gap-2"
+                  size="sm"
+                  onClick={() => setShowListingReport(true)}
+                >
                   <Flag className="h-4 w-4" />
                   Report Listing
                 </Button>
+
+                {listing.user && (
+                  <Button
+                    variant="ghost"
+                    className="text-red-500 hover:text-red-600 hover:bg-red-50 gap-2"
+                    size="sm"
+                    onClick={() => setShowSellerReport(true)}
+                  >
+                    <Flag className="h-4 w-4" />
+                    Report Seller
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -283,6 +304,21 @@ export default function ListingDetailPage() {
           </div>
         </div>
       </main>
+      <ReportModal
+        isOpen={showListingReport}
+        onClose={() => setShowListingReport(false)}
+        targetType="listing"
+        targetId={listing.id}
+      />
+
+      {listing.user && (
+        <ReportModal
+          isOpen={showSellerReport}
+          onClose={() => setShowSellerReport(false)}
+          targetType="user"
+          targetId={listing.user.id}
+        />
+      )}
     </div>
   );
 }

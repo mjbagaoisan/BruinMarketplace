@@ -233,4 +233,46 @@ router.post(
   }
 );
 
+// POST /admin/users/:id/unsuspend
+router.post(
+  '/users/:id/unsuspend',
+  authenticateToken,
+  requireAdmin,
+  async (req, res) => {
+    const admin = (req as any).user;
+    const adminId = admin.userId;
+    const userId = Number(req.params.id); // or leave as string if users.id is text
+
+    // 1) Unsuspend user
+    const { data: userRow, error: userError } = await supabase
+      .from('users')
+      .update({ is_suspended: false })
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (userError) {
+      console.error('Unsuspend user error:', userError);
+      return res.status(500).json({ error: userError.message });
+    }
+
+    // 2) Log action
+    const { error: logError } = await supabase
+      .from('admin_actions')
+      .insert({
+        admin_id: adminId,
+        action: 'unsuspend_user',
+        target_type: 'user',
+        target_id: userId,
+        notes: 'User unsuspended by admin',
+      });
+
+    if (logError) {
+      console.error('admin_actions log error (unsuspend_user):', logError);
+    }
+
+    return res.json({ success: true, user: userRow });
+  }
+);
+
 export default router;
