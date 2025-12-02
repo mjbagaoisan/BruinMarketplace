@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +15,8 @@ import {
   Listing,
 } from "@/lib/listings";
 import Link from "next/link";
+import EditListing from "@/components/EditListing";
+
 
 interface ListingsActionsMenuProps {
   listingId: string;
@@ -22,14 +24,23 @@ interface ListingsActionsMenuProps {
   onListingUpdated?: (listing: Listing) => void;
 }
 
-export function ListingsActionsMenu({
-  listingId,
-  currentStatus,
-  onListingUpdated,
-}: ListingsActionsMenuProps) {
+export function ListingsActionsMenu( {listingId, currentStatus, onListingUpdated}: ListingsActionsMenuProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [listingData, setListingData] = useState<any | null>(null);
 
   const isSold = currentStatus === "sold";
+
+  // get listing initial data
+  useEffect(() => {
+    async function fetchData() {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/listings/${listingId}`,
+        { credentials: "include" }
+      );
+      if (res.ok) setListingData(await res.json());
+    }
+    fetchData();
+  }, [listingId]);
 
   const handleMarkAsSold = async () => {
     try {
@@ -63,12 +74,18 @@ export function ListingsActionsMenu({
           disabled={isSold || isLoading}
         >
           Mark as sold
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href={`/listings/${listingId}/edit`}>
-              Edit Listing
-          </Link>
-        </DropdownMenuItem>
+        </DropdownMenuItem >
+
+        {listingData && (
+          <EditListing listingId={listingId} initialData={listingData}>
+            <DropdownMenuItem
+              onSelect={(e) => e.preventDefault()} 
+              className="cursor-pointer"
+            >
+              Edit listing
+            </DropdownMenuItem>
+          </EditListing>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -194,19 +194,22 @@ router.get("/me", authenticateToken, async (req, res) => {
 
 
 // update a listing
-router.put("/:id", authenticateToken, async (req, res) => {
+router.put("/:id", authenticateToken, upload.array('mediaFiles', 5), async (req, res) => {
   const user_id = req.user!.userId;
   const { id } = req.params;
 
   const {
     title,
     price,
-    description,
+    description = "",
     condition,
     category,
     location,
-    preferred_payment
+    preferred_payment = "other",
+    mediaToDelete = "[]",
   } = req.body;
+
+  const files = req.files as Express.Multer.File[];
 
   //validations
   const { data: listing, error: fetchError } = await supabase
@@ -266,8 +269,50 @@ router.put("/:id", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 
-  return res.json(data);
+  // delete the media that the user removed 
+  let parsedMediaToDelete: number[] = [];
+
+  try {
+    parsedMediaToDelete = JSON.parse(mediaToDelete);
+  } catch (e) {
+    parsedMediaToDelete = [];
+  }
+  if (parsedMediaToDelete.length > 0) {
+    await supabase.from("media").delete().in("id", parsedMediaToDelete);
+  }
+
+  // upload new files as media
+  if (files && files.length > 0) {
+    const mediaToInsert = [];
+
+    for (const file of files) {
+      try {
+        const fileForUpload = new File([file.buffer], file.originalname, {
+          type: file.mimetype,
+        });
+
+        const { publicUrl, type } = await uploadListingMedia({
+          listingId: id,
+          file: fileForUpload,
+        });
+        mediaToInsert.push({
+          listing_id: id,
+          url: publicUrl,
+          type: type,
+        });
+      } catch (uploadErr) {
+        console.error("Upload error:", uploadErr);
+      }
+    }
+
+    if (mediaToInsert.length > 0) {
+      await supabase.from("media").insert(mediaToInsert);
+    }
+  }
+
+  return res.json({ success: true, updated: data });
 });
+
 
 
 // get a specific listing by its id
