@@ -31,7 +31,7 @@ test.describe('Listings - Detail Page', () => {
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     await expect(page.getByText(/\$\d+\.\d{2}/)).toBeVisible();
     await expect(page.getByText(/new|like new|good|fair|poor/i).first()).toBeVisible();
-    await expect(page.getByText(/description/i)).toBeVisible();
+    await expect(page.getByRole('heading', { name: /description/i })).toBeVisible();
     await expect(page.getByText(/location/i).first()).toBeVisible();
     await expect(page.getByText(/seller information/i)).toBeVisible();
     await expect(page.getByRole('button', { name: /back/i })).toBeVisible();
@@ -43,7 +43,7 @@ test.describe('Listings - Detail Page', () => {
     await page.waitForLoadState('networkidle');
     
     await expect(page.getByText(/listing not found/i)).toBeVisible({ timeout: 10000 });
-    await expect(page.getByText(/doesn't exist/i)).toBeVisible();
+    await expect(page.getByText(/could not load listing details/i)).toBeVisible();
     
     const backButton = page.getByRole('button', { name: /back to listings/i });
     await expect(backButton).toBeVisible();
