@@ -1,10 +1,25 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 import { generateTestListingTitle } from '../fixtures/test-data';
 
 // API-level delete tests since there's no delete button in the UI yet
 test.describe('Listings - Delete (API)', () => {
   
   test.use({ storageState: 'tests/e2e/.auth/user.json' });
+
+  async function openCreateDialog(page: Page) {
+    const floatingButton = page.locator('div.fixed button').first();
+    const sellItemButton = page.getByRole('button', { name: /sell item/i });
+    const hasFloating = (await floatingButton.count()) > 0;
+
+    if (hasFloating && await floatingButton.isVisible()) {
+      await floatingButton.click();
+    } else {
+      await expect(sellItemButton).toBeVisible({ timeout: 10000 });
+      await sellItemButton.click();
+    }
+
+    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 10000 });
+  }
 
   async function getAuthCookieHeader(page: any) {
     const cookies = await page.context().cookies();
@@ -14,11 +29,9 @@ test.describe('Listings - Delete (API)', () => {
   async function createTestListing(page: any, title: string) {
     await page.goto('/listings');
     await page.waitForLoadState('networkidle');
+    await openCreateDialog(page);
     
-    await page.locator('button').filter({ has: page.locator('svg') }).last().click();
-    await expect(page.getByRole('dialog')).toBeVisible();
-    
-    await page.getByLabel(/title/i).fill(title);
+    await page.locator('input[name="title"]').fill(title);
     await page.locator('input[name="price"]').fill('10');
     
     await page.getByRole('combobox').first().click();
@@ -117,7 +130,8 @@ test.describe('Listings - Delete (API)', () => {
 
   test('returns 401 without authentication', async ({ request }) => {
     const deleteResponse = await request.delete(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/listings/any-id`
+      `${process.env.NEXT_PUBLIC_API_URL}/api/listings/any-id`,
+      { headers: { Cookie: '' } }
     );
     expect(deleteResponse.status()).toBe(401);
   });
