@@ -20,7 +20,7 @@ export default function AuthGate({ children }: AuthGateProps) {
     );
   }
 
-  // Show a branded prompt explaining why access is restricted.
+  // Show a prompt for unauthenticated users
   if (!user) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-white px-4">
