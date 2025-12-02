@@ -75,6 +75,8 @@ export default function ListingDetailPage() {
   const [interestSubmitting, setInterestSubmitting] = useState(false);
   const [interestError, setInterestError] = useState<string | null>(null);
   const [showInterestedList, setShowInterestedList] = useState(false);
+  const [removalError, setRemovalError] = useState<string | null>(null);
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
   const { user } = useAuth();
   
   const isOwner = !!(user?.userId && listing?.user?.id && user.userId === listing.user.id);
@@ -192,6 +194,46 @@ export default function ListingDetailPage() {
       .join('')
       .toUpperCase()
       .slice(0, 2);
+  };
+
+  const handleRemoveInterestedUser = async (userId: string) => {
+    if (!listing?.id) return;
+    const confirmed = window.confirm("Are you sure you want to remove this interested user?");
+    if (!confirmed) return;
+
+    setRemovalError(null);
+    setDeletingUserId(userId);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/listings/${listing.id}/interested/${userId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || "Failed to remove interested user");
+      }
+
+      const data = await response.json();
+      setListing((prev) => {
+        if (!prev) return prev;
+        const filteredDetails = prev.interested_user_details?.filter((buyer) => buyer.id !== userId) || [];
+        const filteredIds =
+          (data as any).interested_users ??
+          prev.interested_users?.filter((id) => id !== userId) ??
+          [];
+        return {
+          ...prev,
+          interested_user_details: filteredDetails,
+          interested_users: filteredIds,
+        };
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to remove interested user";
+      setRemovalError(message);
+    } finally {
+      setDeletingUserId(null);
+    }
   };
 
   return (
@@ -386,12 +428,24 @@ export default function ListingDetailPage() {
                 Close
               </Button>
             </div>
+            {removalError && (
+              <p className="text-sm text-red-600">{removalError}</p>
+            )}
             {!listing?.interested_user_details || listing.interested_user_details.length === 0 ? (
               <p className="text-sm text-gray-600">No one has expressed interest yet.</p>
             ) : (
               <div className="space-y-3">
                 {listing.interested_user_details.map((buyer) => (
-                  <div key={buyer.id} className="border rounded-lg p-4">
+                  <div key={buyer.id} className="border rounded-lg p-4 relative">
+                    <button
+                      type="button"
+                      className="absolute right-2 top-2 text-gray-400 hover:text-red-600"
+                      onClick={() => handleRemoveInterestedUser(buyer.id)}
+                      disabled={deletingUserId === buyer.id}
+                      aria-label="Remove interested user"
+                    >
+                      {deletingUserId === buyer.id ? "…" : "×"}
+                    </button>
                     <p className="font-semibold text-gray-900">{buyer.name || "Unknown Name"}</p>
                     <p className="text-sm text-gray-700">Email: {buyer.email || "Not provided"}</p>
                     <p className="text-sm text-gray-700">Phone Number: {buyer.phone_number || "Not provided"}</p>

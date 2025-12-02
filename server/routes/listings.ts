@@ -353,6 +353,41 @@ router.post("/:id/interested", authenticateToken, async (req, res) => {
   return res.json(data);
 });
 
+router.delete("/:id/interested/:userId", authenticateToken, async (req, res) => {
+  const requesterId = req.user!.userId;
+  const { id, userId } = req.params;
+
+  const { data: listing, error: fetchError } = await supabase
+    .from("listings")
+    .select("id, user_id, interested_users")
+    .eq("id", id)
+    .single();
+
+  if (fetchError || !listing) {
+    return res.status(404).json({ error: "Listing not found" });
+  }
+
+  if (listing.user_id !== requesterId && req.user!.role !== "admin") {
+    return res.status(403).json({ error: "You do not own this listing" });
+  }
+
+  const current = Array.isArray(listing.interested_users) ? listing.interested_users : [];
+  const updated = current.filter((uid) => uid !== userId);
+
+  const { data, error: updateError } = await supabase
+    .from("listings")
+    .update({ interested_users: updated })
+    .eq("id", id)
+    .select("interested_users")
+    .single();
+
+  if (updateError) {
+    return res.status(500).json({ error: updateError.message });
+  }
+
+  return res.json(data);
+});
+
 router.delete("/:id", authenticateToken, async (req, res) => {
   const user_id = req.user!.userId;
   const { id } = req.params;
