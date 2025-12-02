@@ -337,6 +337,10 @@ export default function ListingDetailPage() {
                 <div className="text-gray-500 mb-6">Seller information unavailable</div>
               )}
 
+              <Button className="w-full gap-2 text-base py-6" size="lg">
+                <MessageCircle className="h-5 w-5" />
+                Contact Seller
+              </Button>
               {interestButton}
 
               <div className="mt-4 flex justify-center">

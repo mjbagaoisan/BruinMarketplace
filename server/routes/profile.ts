@@ -49,7 +49,7 @@ router.get("/:user_id", authenticateToken, async (req, res) => {
 
 
 // updates the logged in user's profile
-router.patch("/me", authenticateToken, upload.single("avatar"), async (req, res) => {
+router.put("/me", authenticateToken, upload.single("avatar"), async (req, res) => {
   try {
     const user_id = req.user!.userId;
  
