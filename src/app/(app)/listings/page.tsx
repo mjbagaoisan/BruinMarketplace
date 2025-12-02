@@ -241,7 +241,7 @@ function ListingsPage() {
             <div className="flex flex-wrap justify-center gap-6">
               {displayListings.map((listing) => (
                 <Link key={listing.id} href={`/listings/${listing.id}`} className="block w-full sm:w-60">
-                  <Card className="w-full h-full hover:shadow-lg transition-shadow cursor-pointer flex flex-col mb-7">
+                  <Card className="w-full h-full hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300 cursor-pointer flex flex-col">
                     <CardMedia>
                       {listing.media && listing.media.length > 0 ? (
                         <img 

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { 
   MapPin, 
   Calendar, 
@@ -9,6 +10,8 @@ import {
   ArrowLeft, 
   Flag,
   MessageCircle,
+  ChevronRight,
+  Home,
 } from 'lucide-react';
 import {
   Carousel,
@@ -127,6 +130,24 @@ export default function ListingDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
+      {/* Breadcrumbs */}
+      <div className="bg-white border-b px-4 py-3">
+        <nav className="flex items-center text-sm text-gray-600">
+          <Link href="/home" className="flex items-center gap-1 hover:text-gray-900 transition-colors">
+            <Home className="h-4 w-4" />
+            Home
+          </Link>
+          <ChevronRight className="h-4 w-4 mx-2 text-gray-400" />
+          <Link href="/listings" className="hover:text-gray-900 transition-colors">
+            Browse Listings
+          </Link>
+          <ChevronRight className="h-4 w-4 mx-2 text-gray-400" />
+          <span className="text-gray-900 font-medium truncate max-w-[200px]">
+            {listing?.title || 'Loading...'}
+          </span>
+        </nav>
+      </div>
+
       {/* Navigation Header */}
       <div className="sticky top-0 z-10 bg-white border-b px-4 py-3 flex items-center justify-between shadow-sm">
         <Button 

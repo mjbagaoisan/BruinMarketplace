@@ -11,10 +11,11 @@ interface AppLayoutProps {
 export default function AppLayout({ children }: AppLayoutProps) {
   const pathname = usePathname();
   const isHomePage = pathname === "/home";
+  const isListingDetail = pathname.startsWith("/listings/") && pathname !== "/listings" && pathname !== "/listings/me";
 
   return (
     <>
-      {!isHomePage && <Header />}
+      {!isHomePage && !isListingDetail && <Header />}
       <main>{children}</main>
     </>
   );
