@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 
 interface User {
   userId: string;
@@ -13,6 +13,8 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  refreshUser: () => Promise<void>;
+  clearUser: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,57 +24,69 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const apiBase = process.env.NEXT_PUBLIC_API_URL;
+  const isMountedRef = useRef(true);
 
-  useEffect(() => {
-    let isMounted = true;
+  // Centralized helper that resolves the current session and stores it in React state.
+  const fetchUser = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetch(`${apiBase}/api/auth/me`, {
+        credentials: "include",
+      });
 
-    const fetchUser = async () => {
-      try {
-        setIsLoading(true);
-        const res = await fetch(`${apiBase}/api/auth/me`, { // include auth_token cookie
-          credentials: "include",
-        });
-
-        if (!res.ok) {
-          if (isMounted) {
-            setUser(null);
-          }
-          return;
-        }
-
-        const data = await res.json();
-
-        if (data?.user && isMounted) {
-          setUser({
-            userId: data.user.id ?? data.user.userId,
-            email: data.user.email,
-            name: data.user.name,
-            role: data.user.role,
-          });
-        }
-      } catch (error) {
-        console.error("Failed to fetch current user:", error);
-        if (isMounted) {
+      if (!res.ok) {
+        if (isMountedRef.current) {
           setUser(null);
         }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        return;
       }
-    };
 
+      const data = await res.json();
+
+      if (data?.user && isMountedRef.current) {
+        setUser({
+          userId: data.user.id ?? data.user.userId,
+          email: data.user.email,
+          name: data.user.name,
+          role: data.user.role,
+        });
+      } else if (isMountedRef.current) {
+        setUser(null);
+      }
+    } catch (error) {
+      console.error("Failed to fetch current user:", error);
+      if (isMountedRef.current) {
+        setUser(null);
+      }
+    } finally {
+      if (isMountedRef.current) {
+        setIsLoading(false);
+      }
+    }
+  }, [apiBase]);
+
+  useEffect(() => {
+    isMountedRef.current = true;
     fetchUser();
 
     return () => {
-      isMounted = false;
+      isMountedRef.current = false;
     };
-  }, [apiBase]);
+  }, [fetchUser]);
+
+  // Exposed so components (e.g., logout button) can immediately clear cached identity.
+  const clearUser = useCallback(() => {
+    if (!isMountedRef.current) return;
+    setUser(null);
+    setIsLoading(false);
+  }, []);
 
   const value: AuthContextType = {
     user,
     isLoading,
     isAuthenticated: !!user,
+    refreshUser: fetchUser,
+    clearUser,
   };
 
   return (

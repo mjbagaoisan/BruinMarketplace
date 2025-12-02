@@ -1,43 +1,22 @@
 "use client";
 
-import { useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Check, Shield, Users, Zap, Search, MessageCircle, Handshake } from 'lucide-react';
+import { Search, MessageCircle, Handshake } from 'lucide-react';
 import { useAuth } from "@/contexts/AuthContext";
+import AuthGate from "@/components/AuthGate";
 
 export default function Home() {
+  const { user } = useAuth();
 
-  const { user, isLoading } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    // uses useAuth to check if user is signed in
-    if (!isLoading && !user) {
-      router.push('/login');
-    }
-  }, [isLoading, user, router]);
-
-  if (isLoading || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-sm text-gray-600">Loading...</p>
-      </div>
-    );
-  }
-
-  // Get full name or fallback
+  // Extract first name for personalized greeting
   const fullName = user?.name ?? "Bruin";
-
-  // Take only the first word
   const [firstRaw] = fullName.split(" ");
-
-  // Make it "Normal" case: first letter upper, rest lower
   const firstName =
     firstRaw.charAt(0).toUpperCase() + firstRaw.slice(1).toLowerCase();
 
 
   return (
+    <AuthGate>
     <div className="min-h-screen bg-gradient-to-br from-[#f5f9ff] to-[#f0f7ff]">
       {/* Hero Section */}
       <section className="relative py-16 md:py-24 px-4 overflow-hidden bg-gradient-to-b from-blue-50 to-white">
@@ -106,5 +85,6 @@ export default function Home() {
 
       </section>
     </div>
+    </AuthGate>
   );
 }

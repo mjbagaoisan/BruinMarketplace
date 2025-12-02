@@ -10,6 +10,7 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@
 import DebouncedSearch from "@/components/SearchBar";
 import CreateListing from '@/components/CreateListing';
 import { useAuth } from "@/contexts/AuthContext";
+import AuthGate from "@/components/AuthGate";
 
 interface Media {
   id: string;
@@ -89,17 +90,9 @@ function ListingsPage() {
   }, [conditionFilter, locationFilter, categoryFilter, sort, router]);
 
   useEffect(() => {
-    if (!isLoading && !user) {
-      router.push('/login');
+    if (!isLoading && user) {
+      fetchListings();
     }
-  }, [isLoading, user, router]);
-
-  useEffect(() => {
-    if (isLoading || !user) {
-      return;
-    }
-
-    fetchListings();
   }, [isLoading, user, fetchListings]);
 
   const handleSearchResults = useCallback((data: Listing[] | SearchResponse, query: string) => {
@@ -129,16 +122,8 @@ function ListingsPage() {
     return condition.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   };
 
-  if (isLoading || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-sm text-gray-600">Loading...</p>
-      </div>
-    );
-  }
-
   return (
-    <>
+    <AuthGate>
       <div className="min-h-screen bg-gray-50 py-8">
         {/* Create New Listing */}
         <div className="fixed bottom-10 right-10">
@@ -278,7 +263,7 @@ function ListingsPage() {
           )}
         </div>
       </div>
-    </>
+    </AuthGate>
   );
 }
 

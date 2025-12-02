@@ -13,9 +13,15 @@ import {
 import LogoutButton from "./LogoutButton"
 import CreateListing from "./CreateListing"
 import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu"
+import { useAuth } from "@/contexts/AuthContext"
 
 const Header = React.memo(() => {
-    return(
+    const { user, isLoading } = useAuth()
+    if (isLoading || !user) {
+        return null
+    }
+
+    return (
         <div className="flex w-full justify-center border-b border-gray-200 px-4 py-3">
             <div className="inline-flex w-fit justify-center items-center border border-gray-200 rounded-3xl px-6 py-3">
                 <NavigationMenu viewport={false}>

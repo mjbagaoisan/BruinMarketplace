@@ -21,6 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import AuthGate from "@/components/AuthGate";
 
 interface Media {
   id: string;
@@ -126,6 +127,7 @@ export default function ListingDetailPage() {
   };
 
   return (
+    <AuthGate>
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* Navigation Header */}
       <div className="sticky top-0 z-10 bg-white border-b px-4 py-3 flex items-center justify-between shadow-sm">
@@ -284,5 +286,6 @@ export default function ListingDetailPage() {
         </div>
       </main>
     </div>
+    </AuthGate>
   );
 }
