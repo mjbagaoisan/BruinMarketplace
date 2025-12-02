@@ -9,6 +9,7 @@ import { PlusIcon } from "lucide-react"
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select"
 import DebouncedSearch from "@/components/SearchBar";
 import CreateListing from '@/components/CreateListing';
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Media {
   id: string;
@@ -25,6 +26,7 @@ interface Listing {
   category?: string;
   location?: string;
   created_at: string;
+  user_id: string;
   media?: Media[];
 }
 
@@ -40,6 +42,7 @@ function ListingsPage() {
   const [loading, setLoading] = useState(true);
   const [searchResults, setSearchResults] = useState<Listing[]>([]);
   const router = useRouter();
+  const { user } = useAuth();
 
   // Filter state
   const [conditionFilter, setConditionFilter] = useState<string>("");
@@ -248,9 +251,10 @@ function ListingsPage() {
                       {listing.condition && (
                         <div className="text-sm text-gray-500">Condition: {formatCondition(listing.condition)}</div>
                       )}
-                      {listing.created_at &&(
-                         <div className="text-sm text-gray-500">Posted: {formatDate(listing.created_at)}</div>
+                      {listing.created_at && (
+                        <div className="text-sm text-gray-500">Posted: {formatDate(listing.created_at)}</div>
                       )}
+
                     </div>
                   </Card>
                 </Link>

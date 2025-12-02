@@ -290,6 +290,101 @@ router.get("/:id", async (req, res) => {
     return res.status(404).json({ error: "Listing not found" });
   }
 
+  let interestedDetails: any[] = [];
+
+  if (Array.isArray((data as any).interested_users) && (data as any).interested_users.length > 0) {
+    const { data: users, error: usersError } = await supabase
+      .from("users")
+      .select("id, name, email, phone_number, class_year, major")
+      .in("id", (data as any).interested_users);
+
+    if (usersError) {
+      console.error("Fetch interested users error:", usersError);
+      return res.status(500).json({ error: usersError.message });
+    }
+    interestedDetails = users ?? [];
+  }
+
+  return res.json({
+    ...data,
+    interested_user_details: interestedDetails,
+  });
+});
+
+router.post("/:id/interested", authenticateToken, async (req, res) => {
+  const user_id = req.user!.userId;
+  const { id } = req.params;
+
+  const { data: listing, error: fetchError } = await supabase
+    .from("listings")
+    .select("id, user_id, interested_users")
+    .eq("id", id)
+    .single();
+
+  if (fetchError || !listing) {
+    return res.status(404).json({ error: "Listing not found" });
+  }
+
+  if (listing.user_id === user_id) {
+    return res.status(400).json({ error: "You cannot mark interest on your own listing" });
+  }
+
+  const current = Array.isArray(listing.interested_users)
+    ? listing.interested_users
+    : [];
+
+  if (current.includes(user_id)) {
+    return res.json({ interested_users: current });
+  }
+
+  const updated = [...current, user_id];
+
+  const { data, error: updateError } = await supabase
+    .from("listings")
+    .update({ interested_users: updated })
+    .eq("id", id)
+    .select("interested_users")
+    .single();
+
+  if (updateError) {
+    return res.status(500).json({ error: updateError.message });
+  }
+
+  return res.json(data);
+});
+
+router.delete("/:id/interested/:userId", authenticateToken, async (req, res) => {
+  const requesterId = req.user!.userId;
+  const { id, userId } = req.params;
+
+  const { data: listing, error: fetchError } = await supabase
+    .from("listings")
+    .select("id, user_id, interested_users")
+    .eq("id", id)
+    .single();
+
+  if (fetchError || !listing) {
+    return res.status(404).json({ error: "Listing not found" });
+  }
+
+  if (listing.user_id !== requesterId && req.user!.role !== "admin") {
+    return res.status(403).json({ error: "You do not own this listing" });
+  }
+
+  const current = Array.isArray(listing.interested_users) ? listing.interested_users : [];
+  const updated = current.filter((uid) => uid !== userId);
+
+  const { data, error: updateError } = await supabase
+    .from("listings")
+    .update({ interested_users: updated })
+    .eq("id", id)
+    .select("interested_users")
+    .single();
+
+  if (updateError) {
+    return res.status(500).json({ error: updateError.message });
+  }
+
   return res.json(data);
 });
 
