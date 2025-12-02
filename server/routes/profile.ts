@@ -59,6 +59,8 @@ router.patch("/me", authenticateToken, upload.single("avatar"), async (req, res)
       hide_major: req.body.hide_major,
       class_year: req.body.class_year ? Number(req.body.class_year) : null,
       hide_class_year: req.body.hide_class_year,
+      email: req.body.email ?? null,
+      phone_number: req.body.phone_number ?? null,
       updated_at: new Date().toISOString(),
     };
 
