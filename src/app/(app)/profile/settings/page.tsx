@@ -22,7 +22,8 @@ function profileSettingsPage() {
     const [save, setSave] = useState<boolean>(false);
     const [saveMsg, setSaveMsg] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
-
+    const [email, setEmail] = useState<string | null>(null);
+    const [phoneNumber, setPhoneNumber] = useState<string | null>(null);
 
     useEffect(() => {
       if (!authLoading && user) {
@@ -45,6 +46,8 @@ function profileSettingsPage() {
         setClassYear(data.class_year || null);
         setHideClassYear(data.hide_class_year);
         setProfilePicUrl(data.profile_image_url);
+        setEmail(data.email || "");
+        setPhoneNumber(data.phone_number || "");
     }
       catch (error) {
         console.error("Error loading profile:", error);
@@ -79,6 +82,8 @@ function profileSettingsPage() {
         formData.append("hide_major", (hideMajor? "true" : "false"));
         formData.append("class_year", String(classYear ?? ""));
         formData.append("hide_class_year", (hideClassYear? "true" : "false"));
+        formData.append("email", String(email ?? ""));
+        formData.append("phone_number", String(phoneNumber ?? ""));
 
 
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile/me`, {
@@ -159,79 +164,99 @@ function profileSettingsPage() {
                     </label>
                 </div>
 
-                {/* user's name */}
-                <div>
-                  <label className="text-sm font-medium">Name</label>
-                  <input
-                    className="border p-2 rounded w-full mt-1 bg-gray-100"
-                    value={user?.name || ""}
-                    disabled
-                  />
-                </div>
+             
+            {/* user's name */}
+            <div>
+              <label className="text-sm font-medium">Name</label>
+              <input
+                className="border p-2 rounded w-full mt-1 bg-gray-100"
+                value={user?.name || ""}
+                disabled
+              />
+            </div>
 
-                {/* user's major */}
-                <div>
-                  <label className="text-sm font-medium">Major</label>
-                  <input
-                    className="border p-2 rounded w-full mt-1"
-                    value={major ?? ""}
-                    onChange={(e) => setMajor(e.target.value || null)}
-                  />
-                </div>
+            {/* user's email */}
+            <div>
+              <label className="text-sm font-medium">Email</label>
+              <input
+                type="email"
+                className="border p-2 rounded w-full mt-1 bg-gray-100 cursor-not-allowed"
+                value={email ?? ""}
+                disabled
+              />
+            </div>
 
-                {/* make major visible */}
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={!hideMajor}
-                    onChange={() => setHideMajor(!hideMajor)}
-                  />
-                  <label className="text-sm">Make your major visible to others</label>
-                </div>
+            {/* user's phone number */}
+            <div>
+              <label className="text-sm font-medium">Phone Number</label>
+              <input
+                type="tel"
+                className="border p-2 rounded w-full mt-1"
+                value={phoneNumber ?? ""}
+                onChange={(e) => setPhoneNumber(e.target.value || null)}
+              />
+            </div>
 
-                {/* user's class year */}
-                <div>
-                  <label className="text-sm font-medium">Class Year</label>
-                  <input
-                    type="number"
-                    className="border p-2 rounded w-full mt-1"
-                    min={2026}
-                    value={classYear ?? ""}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setClassYear(val ? Number(val) : null);
-                    }}
-                  />
-                </div>
+            {/* user's major */}
+            <div>
+              <label className="text-sm font-medium">Major</label>
+              <input
+                className="border p-2 rounded w-full mt-1"
+                value={major ?? ""}
+                onChange={(e) => setMajor(e.target.value || null)}
+              />
+            </div>
 
-                {/* make class year visible */}
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={!hideClassYear}
-                    onChange={() => setHideClassYear(!hideClassYear)}
-                  />
-                  <label className="text-sm">Make your class year visible to others</label>
-                </div>
+            {/* make major visible */}
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                checked={!hideMajor}
+                onChange={() => setHideMajor(!hideMajor)}
+              />
+              <label className="text-sm">Make your major visible to others</label>
+            </div>
 
-                {/* save changes button */}
-                <div className="flex flex-col justify-end">
-                  <Button
-                    onClick={handleSave}
-                    disabled={save}
-                    className="w-fit"
-                  >
-                    {save ? "Saving..." : "Save Changes"}
-                  </Button>
-                  
-                  {saveMsg && (
-                    <p className="text-red-600 text-sm mt-1">
-                      {saveMsg}
-                    </p>
-                  )}
-                </div>
+            {/* user's class year */}
+            <div>
+              <label className="text-sm font-medium">Class Year</label>
+              <input
+                type="number"
+                className="border p-2 rounded w-full mt-1"
+                min={2026}
+                value={classYear ?? ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setClassYear(val ? Number(val) : null);
+                }}
+              />
+            </div>
 
-              </div>
+            {/* make class year visible */}
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                checked={!hideClassYear}
+                onChange={() => setHideClassYear(!hideClassYear)}
+              />
+              <label className="text-sm">Make your class year visible to others</label>
+            </div>
+
+            {/* save changes button */}
+            <div className="flex flex-col justify-end">
+              <Button
+                onClick={handleSave}
+                disabled={save}
+                className="w-fit"
+              >
+                {save ? "Saving..." : "Save Changes"}
+              </Button>
+              
+              {saveMsg && (
+                <p className="text-red-600 text-sm mt-1">
+                  {saveMsg}
+                </p>
+              )}
             </div>
 
           </div>
