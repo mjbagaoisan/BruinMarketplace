@@ -4,13 +4,24 @@ import { cn } from "@/lib/utils";
 import { ChevronLeft } from "lucide-react";
 import { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";   // ✅ NEW
 
 export const metadata: Metadata = {
   title: "Login | BruinMarketplace",
   description: "Login to your account",
 };
 
-export default function LoginPage() {
+export default function LoginPage({
+  searchParams,
+}: {
+  searchParams?: { [key: string]: string | string[] | undefined };
+}) {
+  // ✅ If backend sent ?error=account_suspended, go straight to /suspended
+  const errorParam = searchParams?.error;
+  if (errorParam === "account_suspended") {
+    redirect("/suspended");
+  }
+
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4">
       <div className="fixed top-4 left-4 md:left-8 md:top-8">
@@ -27,11 +38,12 @@ export default function LoginPage() {
       </div>
       <div className="w-full max-w-[400px] flex flex-col gap-8 p-8 bg-card rounded-lg shadow-lg">
         <div className="flex flex-col gap-4 text-center">
-          {/* <Icons.logo className="mx-auto h-10 w-10" /> */}
           <h1 className="text-3xl font-bold tracking-tight">
-            Welcome! 
+            Welcome!
           </h1>
-          <p className="text-base text-muted-foreground">Login/Create your account</p>
+          <p className="text-base text-muted-foreground">
+            Login/Create your account
+          </p>
         </div>
         <div className="w-full">
           <AuthButton />
