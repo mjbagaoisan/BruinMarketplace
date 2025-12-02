@@ -17,7 +17,7 @@ export default function Home() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link 
-                href="/listings"
+                href="/home"
                 className="bg-[#2774AE] hover:bg-[#1a5a8a] text-white font-medium py-3 px-8 rounded-full transition-all hover:shadow-lg hover:-translate-y-0.5 transform text-center"
               >
                 Start Exploring
