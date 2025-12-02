@@ -3,6 +3,7 @@
 import { ReportModal } from "@/components/ReportModal";
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { 
   MapPin, 
   Calendar, 
@@ -10,6 +11,8 @@ import {
   ArrowLeft, 
   Flag,
   MessageCircle,
+  ChevronRight,
+  Home,
 } from 'lucide-react';
 import {
   Carousel,
@@ -22,36 +25,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/contexts/AuthContext";
 
-interface Media {
-  id: string;
-  listing_id: string;
-  url: string;
-  type: string;
-}
+import { Listing } from "@/lib/types"
 
-interface Seller {
-  id: string;
-  name: string;
-  profile_image_url?: string;
-  is_verified: boolean;
-  created_at: string;
-}
-
-interface Listing {
-  id: string;
-  title: string;
-  price: number;
-  description: string;
-  condition: string;
-  category: string;
-  status: string;
-  location: string;
-  preferred_payment: string;
-  created_at: string;
-  media?: Media[];
-  user?: Seller;
-}
 
 export default function ListingDetailPage() {
   const params = useParams();
@@ -62,6 +39,34 @@ export default function ListingDetailPage() {
 
   const [showListingReport, setShowListingReport] = useState(false);
   const [showSellerReport, setShowSellerReport] = useState(false);
+  const [showInterestConfirm, setShowInterestConfirm] = useState(false);
+  const [interestSubmitting, setInterestSubmitting] = useState(false);
+  const [interestError, setInterestError] = useState<string | null>(null);
+  const [showInterestedList, setShowInterestedList] = useState(false);
+  const [removalError, setRemovalError] = useState<string | null>(null);
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
+  const { user } = useAuth();
+  
+  const isOwner = !!(user?.userId && listing?.user?.id && user.userId === listing.user.id);
+  let interestButton = (
+    <Button className="w-full gap-2 text-base py-6" size="lg" onClick={() => setShowInterestConfirm(true)}>
+      <MessageCircle className="h-5 w-5" />
+      I'm interested
+    </Button>
+  );
+
+  if (isOwner) {
+    interestButton = (
+      <Button
+        className="w-full gap-2 text-base py-6 text-black hover:bg-sky-100 " 
+        size="lg"
+        variant="secondary"
+        onClick={() => setShowInterestedList(true)}
+      >
+        Interested Users
+      </Button>
+    );
+  }
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -88,6 +93,36 @@ export default function ListingDetailPage() {
       fetchListing();
     }
   }, [params.id]);
+
+  const handleSendInterest = async () => {
+    if (isOwner) return;
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    if (!listing?.id) return;
+
+    setInterestSubmitting(true);
+    setInterestError(null);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/listings/${listing.id}/interested`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || "Failed to send interest");
+      }
+
+      setShowInterestConfirm(false);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to send interest";
+      setInterestError(message);
+    } finally {
+      setInterestSubmitting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -129,8 +164,66 @@ export default function ListingDetailPage() {
       .slice(0, 2);
   };
 
+  const handleRemoveInterestedUser = async (userId: string) => {
+    if (!listing?.id) return;
+    const confirmed = window.confirm("Are you sure you want to remove this interested user?");
+    if (!confirmed) return;
+
+    setRemovalError(null);
+    setDeletingUserId(userId);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/listings/${listing.id}/interested/${userId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || "Failed to remove interested user");
+      }
+
+      const data = await response.json();
+      setListing((prev) => {
+        if (!prev) return prev;
+        const filteredDetails = prev.interested_user_details?.filter((buyer) => buyer.id !== userId) || [];
+        const filteredIds =
+          (data as any).interested_users ??
+          prev.interested_users?.filter((id) => id !== userId) ??
+          [];
+        return {
+          ...prev,
+          interested_user_details: filteredDetails,
+          interested_users: filteredIds,
+        };
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to remove interested user";
+      setRemovalError(message);
+    } finally {
+      setDeletingUserId(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
+      {/* Breadcrumbs */}
+      <div className="bg-white border-b px-4 py-3">
+        <nav className="flex items-center text-sm text-gray-600">
+          <Link href="/home" className="flex items-center gap-1 hover:text-gray-900 transition-colors">
+            <Home className="h-4 w-4" />
+            Home
+          </Link>
+          <ChevronRight className="h-4 w-4 mx-2 text-gray-400" />
+          <Link href="/listings" className="hover:text-gray-900 transition-colors">
+            Browse Listings
+          </Link>
+          <ChevronRight className="h-4 w-4 mx-2 text-gray-400" />
+          <span className="text-gray-900 font-medium truncate max-w-[200px]">
+            {listing?.title || 'Loading...'}
+          </span>
+        </nav>
+      </div>
+
       {/* Navigation Header */}
       <div className="sticky top-0 z-10 bg-white border-b px-4 py-3 flex items-center justify-between shadow-sm">
         <Button 
@@ -256,7 +349,7 @@ export default function ListingDetailPage() {
                   </Avatar>
                   <div>
                     <div className="flex items-center gap-1">
-                      <a href="#" className="font-semibold text-lg hover:underline text-gray-900">
+                      <a href={`/profile/${listing.user.id}`} className="font-semibold text-lg hover:underline text-gray-900">
                         {listing.user.name}
                       </a>
                     </div>
@@ -269,10 +362,8 @@ export default function ListingDetailPage() {
                 <div className="text-gray-500 mb-6">Seller information unavailable</div>
               )}
 
-              <Button className="w-full gap-2 text-base py-6" size="lg">
-                <MessageCircle className="h-5 w-5" />
-                I'm interested
-              </Button>
+            
+              {interestButton}
 
               <div className="mt-4 flex justify-center gap-2">
                 <Button
@@ -304,6 +395,73 @@ export default function ListingDetailPage() {
           </div>
         </div>
       </main>
+
+      {showInterestConfirm && !isOwner && (
+        <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-lg space-y-4">
+            <h3 className="text-xl font-semibold text-gray-900">
+              Do you want to send your information to the seller?
+            </h3>
+            <p className="text-sm text-gray-600">
+              We’ll share your contact details so the seller can reach out.
+            </p>
+            {interestError && (
+              <p className="text-sm text-red-600">{interestError}</p>
+            )}
+            <div className="flex gap-3 justify-end">
+              <Button variant="outline" onClick={() => setShowInterestConfirm(false)}>
+                No
+              </Button>
+              <Button
+                onClick={handleSendInterest}
+                disabled={interestSubmitting}
+              >
+                {interestSubmitting ? "Sending..." : "Yes"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showInterestedList && isOwner && (
+        <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-2xl rounded-xl bg-white p-6 shadow-lg space-y-4 max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-semibold text-gray-900">Interested Buyers</h3>
+              <Button variant="ghost" size="sm" onClick={() => setShowInterestedList(false)}>
+                Close
+              </Button>
+            </div>
+            {removalError && (
+              <p className="text-sm text-red-600">{removalError}</p>
+            )}
+            {!listing?.interested_user_details || listing.interested_user_details.length === 0 ? (
+              <p className="text-sm text-gray-600">No one has expressed interest yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {listing.interested_user_details.map((buyer) => (
+                  <div key={buyer.id} className="border rounded-lg p-4 relative">
+                    <button
+                      type="button"
+                      className="absolute right-2 top-2 text-gray-400 hover:text-red-600"
+                      onClick={() => handleRemoveInterestedUser(buyer.id)}
+                      disabled={deletingUserId === buyer.id}
+                      aria-label="Remove interested user"
+                    >
+                      {deletingUserId === buyer.id ? "…" : "×"}
+                    </button>
+                    <p className="font-semibold text-gray-900">{buyer.name || "Unknown Name"}</p>
+                    <p className="text-sm text-gray-700">Email: {buyer.email || "Not provided"}</p>
+                    <p className="text-sm text-gray-700">Phone Number: {buyer.phone_number || "Not provided"}</p>
+                    <p className="text-sm text-gray-700">Class Year: {buyer.class_year || "Not provided"}</p>
+                    <p className="text-sm text-gray-700">Major: {buyer.major || "Not provided"}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
       <ReportModal
         isOpen={showListingReport}
         onClose={() => setShowListingReport(false)}

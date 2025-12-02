@@ -22,27 +22,27 @@ const Header = React.memo(() => {
                 <NavigationMenuList>
                     <NavigationMenuItem>
                    <NavigationMenuLink asChild>
-                        <Link href="/listings">Browse Listings</Link>
-                    </NavigationMenuLink>
-                    </NavigationMenuItem>
-
-                    <NavigationMenuItem>
-                    <NavigationMenuLink asChild>
                         <Link href="/home" className="block px-3 py-2 rounded-md hover:bg-accent transition-colors" >Home</Link>
                     </NavigationMenuLink>
                     </NavigationMenuItem>
 
                     <NavigationMenuItem>
-                    <CreateListing>
-                        <button className={navigationMenuTriggerStyle()}>
-                            Sell Item
-                        </button>
-                    </CreateListing>
+                    <NavigationMenuLink asChild>
+                        <Link href="/listings" className="block px-3 py-2 rounded-md hover:bg-accent transition-colors">Browse Listings</Link>
+                    </NavigationMenuLink>
+                    </NavigationMenuItem>
+
+                    <NavigationMenuItem>
+                        <Link href="/listings/me" className="block px-3 py-2 rounded-md hover:bg-accent transition-colors" >My Listings</Link>
                     </NavigationMenuItem>
 
                     <NavigationMenuItem>
                     <NavigationMenuLink asChild>
-                        <Link href="/listings">My Listings</Link>
+                         <CreateListing>
+                        <button className={navigationMenuTriggerStyle()}>
+                            Sell Item
+                        </button>
+                    </CreateListing>
                     </NavigationMenuLink>
                     </NavigationMenuItem>
 

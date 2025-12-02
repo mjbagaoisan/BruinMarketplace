@@ -9,37 +9,18 @@ import { PlusIcon } from "lucide-react"
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select"
 import DebouncedSearch from "@/components/SearchBar";
 import CreateListing from '@/components/CreateListing';
+import { useAuth } from "@/contexts/AuthContext";
 
-interface Media {
-  id: string;
-  listing_id: string;
-  url: string;
-}
+import { formatDate, formatCondition } from "@/lib/utils"
 
-interface Listing {
-  id: string;
-  title: string;
-  price: number;
-  description?: string;
-  condition?: string;
-  category?: string;
-  location?: string;
-  created_at: string;
-  media?: Media[];
-}
-
-interface SearchResponse {
-  results: Listing[];
-  total: number;
-  page: number;
-  limit: number;
-}
+import { Listing, SearchResponse } from "@/lib/types"
 
 function ListingsPage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchResults, setSearchResults] = useState<Listing[]>([]);
   const router = useRouter();
+  const { user } = useAuth();
 
   // Filter state
   const [conditionFilter, setConditionFilter] = useState<string>("");
@@ -99,25 +80,6 @@ function ListingsPage() {
 
   const displayListings = searchResults.length > 0 ? searchResults : listings;
 
-  const formatDate = (dateString: string) => {
-    const created = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - created.getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-    if (diffDays <= 0) {
-      return "Today";
-    }
-    if (diffDays === 1) {
-      return "1 day ago";
-    }
-    return `${diffDays} days ago`;
-  };
-
-  const formatCondition = (condition: string) => {
-    return condition.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-  };
-
   return (
     <>
       <div className="min-h-screen bg-gray-50 py-8">
@@ -158,7 +120,7 @@ function ListingsPage() {
                 <SelectItem value="poor">Poor</SelectItem>
               </SelectContent>
             </Select>
-            {/* Locaiton Filter */}
+            {/* Location Filter */}
             <Select
               value={locationFilter || "all"}
               onValueChange={(value) =>
@@ -171,8 +133,10 @@ function ListingsPage() {
               <SelectContent>
                 <SelectItem value="all">Locations</SelectItem>
                 <SelectItem value="hill">The Hill</SelectItem>
-                <SelectItem value="on campus">On Campus</SelectItem>
-                <SelectItem value="off campus">Off Campus</SelectItem>
+                <SelectItem value="on_campus">On Campus</SelectItem>
+                <SelectItem value="off_campus">Off Campus</SelectItem>
+                <SelectItem value="univ_apps">University Apartments</SelectItem>
+
               </SelectContent>
             </Select>
             {/* Category Filter */}
@@ -213,8 +177,21 @@ function ListingsPage() {
         {/* Listings Grid */}
         <div className="container mx-auto px-8">
           {loading ? (
-            <div className="flex justify-center items-center py-12">
-              <div className="text-lg text-gray-600">Loading listings...</div>
+            <div className="container mx-auto px-8">
+              <div className="flex flex-wrap justify-center gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="w-full sm:w-60 animate-pulse">
+                    <div className="bg-white rounded-xl shadow-sm border flex flex-col h-full">
+                      <div className="aspect-video bg-gray-200 rounded-t-xl"></div>
+                      <div className="p-4 flex-1 flex flex-col">
+                        <div className="h-6 bg-gray-200 rounded mb-2"></div>
+                        <div className="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
+                        <div className="h-8 bg-gray-200 rounded w-1/2 mt-auto"></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           ) : displayListings.length === 0 ? (
             <div className="flex justify-center items-center py-12">
@@ -228,7 +205,7 @@ function ListingsPage() {
             <div className="flex flex-wrap justify-center gap-6">
               {displayListings.map((listing) => (
                 <Link key={listing.id} href={`/listings/${listing.id}`} className="block w-full sm:w-60">
-                  <Card className="w-full h-full hover:shadow-lg transition-shadow cursor-pointer flex flex-col mb-7">
+                  <Card className="w-full h-full hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300 cursor-pointer flex flex-col">
                     <CardMedia>
                       {listing.media && listing.media.length > 0 ? (
                         <img 
@@ -248,9 +225,10 @@ function ListingsPage() {
                       {listing.condition && (
                         <div className="text-sm text-gray-500">Condition: {formatCondition(listing.condition)}</div>
                       )}
-                      {listing.created_at &&(
-                         <div className="text-sm text-gray-500">Posted: {formatDate(listing.created_at)}</div>
+                      {listing.created_at && (
+                        <div className="text-sm text-gray-500">Posted: {formatDate(listing.created_at)}</div>
                       )}
+
                     </div>
                   </Card>
                 </Link>
