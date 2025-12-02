@@ -24,6 +24,28 @@ router.get("/me", authenticateToken, async (req, res) => {
   return res.json(data);
 });
 
+router.get("/:user_id", authenticateToken, async (req, res) => {
+  const { user_id } = req.params;
+
+  const { data, error } = await supabase
+    .from("users")
+    // selecting specific fields to avoid sending private data
+    .select("id, name, profile_image_url, major, hide_major, class_year, hide_class_year, created_at")
+    .eq("id", user_id)
+    .single();
+
+  if (error) {
+    console.error(`Error fetching user ID: ${user_id}:`, error);
+    return res.status(500).json({ error: "An error occurred while fetching" });
+  }
+
+  if (!data) {
+    console.error(`User ID ${user_id} not found`);
+    return res.status(404).json({ error: "User not found" });
+  }
+
+  return res.json(data);
+})
 
 
 // updates the logged in user's profile
