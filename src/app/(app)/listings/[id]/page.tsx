@@ -202,7 +202,7 @@ export default function ListingDetailPage() {
   const [showInterestedList, setShowInterestedList] = useState(false);
   const [removalError, setRemovalError] = useState<string | null>(null);
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   
   const isOwner = !!(user?.userId && listing?.user?.id && user.userId === listing.user.id);
   let interestButton = (
@@ -226,18 +226,20 @@ export default function ListingDetailPage() {
   }
 
   useEffect(() => {
+    if (authLoading || !user || !params.id) return;
+
     const fetchListing = async () => {
       try {
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/listings/${params.id}`,
-          { credentials: "include" } // included cookies (credentials) for auth
+          { credentials: "include" }
         );
 
-        if (response.status === 401) { // if user is not authenticated, redirect them to the login page.
+        if (response.status === 401) {
           router.push("/login");
           return;
         }
-        
+
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
           console.error("Server Error Details:", errorData);
@@ -254,10 +256,8 @@ export default function ListingDetailPage() {
       }
     };
 
-    if (params.id) {
-      fetchListing();
-    }
-  }, [params.id]);
+    fetchListing();
+  }, [params.id, authLoading, user, router]);
 
   const handleSendInterest = async () => {
     if (isOwner) return;
@@ -288,6 +288,21 @@ export default function ListingDetailPage() {
       setInterestSubmitting(false);
     }
   };
+
+  if (authLoading) { // redirect users to authentication gate
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-pulse flex flex-col items-center gap-4">
+          <div className="h-12 w-12 rounded-full bg-gray-200"></div>
+          <div className="h-4 w-48 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthGate>{null}</AuthGate>;
+  }
 
   if (loading) {
     return (
