@@ -1,3 +1,4 @@
+// runs once before all tests
 import { chromium, FullConfig } from '@playwright/test';
 import path from 'path';
 import fs from 'fs/promises';
@@ -22,12 +23,12 @@ async function globalSetup(config: FullConfig) {
   
   console.log('Environment variables verified');
   
+  // auth state saved here so we dont login every test
   const authDir = path.join(process.cwd(), 'tests', 'e2e', '.auth');
   try {
     await fs.mkdir(authDir, { recursive: true });
     console.log('Auth directory created');
   } catch (error) {
-    // Directory might already exist
   }
   
   console.log('Global setup complete\n');

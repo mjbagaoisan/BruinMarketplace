@@ -1,11 +1,11 @@
+// logout flow tests
 import { test, expect } from '@playwright/test';
 import { logout, isAuthenticated, clearAuth } from '../fixtures';
 
 test.describe('Authentication - Logout Flow', () => {
   
-  test.use({ 
-    storageState: 'tests/e2e/.auth/user.json',
-  });
+  // use saved auth state so we dont have to login
+  test.use({ storageState: 'tests/e2e/.auth/user.json' });
 
   test.beforeEach(async ({ page }) => {
     const authenticated = await isAuthenticated(page);
@@ -41,8 +41,8 @@ test.describe('Authentication - Logout Flow', () => {
     
     await page.goto('/listings');
     
-    await page.waitForURL('/login', { timeout: 10000 });
-    await expect(page).toHaveURL('/login');
+    await expect(page.getByText(/login required/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('link', { name: /sign in with ucla account/i })).toBeVisible();
   });
 
   test('should clear user context after logout', async ({ page }) => {
@@ -52,7 +52,9 @@ test.describe('Authentication - Logout Flow', () => {
     
     await logout(page);
     
-    await page.goto('/');
+    await page.goto('/listings');
+    
+    await expect(page.getByText(/login required/i)).toBeVisible({ timeout: 10000 });
     
     const authenticated = await isAuthenticated(page);
     expect(authenticated).toBe(false);
@@ -83,6 +85,7 @@ test.describe('Authentication - Logout API', () => {
   });
 });
 
+// edge case: logout when already logged out
 test.describe('Authentication - Logout Without Auth', () => {
   
   test.beforeEach(async ({ page }) => {

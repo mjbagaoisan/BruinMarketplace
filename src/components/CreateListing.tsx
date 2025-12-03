@@ -162,7 +162,7 @@ export default function CreateListing(props: CreateListingProps){
                     <FieldGroup className="pl-1 pr-1 pb-1">
                         <Field>
                             <FieldLabel>Title</FieldLabel>
-                            <Input name="title" placeholder="e.g. Nike Blazer Highs" required/>
+                            <Input name="title" placeholder="e.g. Nike Blazer Highs" required />
                         </Field>
 
                         <Field orientation="horizontal">
@@ -298,7 +298,7 @@ export default function CreateListing(props: CreateListingProps){
                         </Field>
 
                         <Field>
-                            <FieldLabel htmlFor="description">Description</FieldLabel>
+                            <FieldLabel>Description</FieldLabel>
                             <Textarea name="description" placeholder="Describe your listing" className="resize-none"/>
                         </Field>
                     </FieldGroup>

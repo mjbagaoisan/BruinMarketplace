@@ -1,7 +1,7 @@
+// delete listing tests (api only - no ui delete button yet)
 import { test, expect, Page } from '@playwright/test';
 import { generateTestListingTitle } from '../fixtures/test-data';
 
-// API-level delete tests since there's no delete button in the UI yet
 test.describe('Listings - Delete (API)', () => {
   
   test.use({ storageState: 'tests/e2e/.auth/user.json' });

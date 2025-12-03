@@ -1,3 +1,4 @@
+// listing detail page tests
 import { test, expect } from '@playwright/test';
 
 test.describe('Listings - Detail Page', () => {

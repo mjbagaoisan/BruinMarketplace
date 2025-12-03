@@ -8,7 +8,7 @@ import {
 } from '../fixtures';
 import { TEST_PROFILE, TIMEOUTS } from '../../setup/test-env';
 
-// Profile Settings End-to-End Tests
+// profile settings tests
 
 test.describe('Profile Settings - Page Load & UI', () => {
   

@@ -1,6 +1,5 @@
+// profile page helpers
 import { Page, expect } from '@playwright/test';
-
-// Profile page test helpers for Playwright end-to-end testing
 
 export async function goToProfileSettings(page: Page): Promise<void> {
   await page.goto('/profile/settings');

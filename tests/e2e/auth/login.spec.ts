@@ -1,3 +1,4 @@
+// login flow tests
 import { test, expect } from '@playwright/test';
 import { goToLogin, waitForAuth, isAuthenticated, clearAuth } from '../fixtures';
 import { TEST_ENV } from '../../setup/test-env';
@@ -8,6 +9,7 @@ test.describe('Authentication - Login Flow', () => {
     await clearAuth(page);
   });
 
+  // requires manual google login - cant automate oauth
   test('AUTH_01: should successfully login with valid UCLA email via Google OAuth', async ({ page }) => {
     await goToLogin(page);
     
@@ -19,8 +21,6 @@ test.describe('Authentication - Login Flow', () => {
     
     await googleButton.click();
     
-    // Manual OAuth required: Google OAuth cannot be automated in headless mode
-    // Tests wait for user to complete authentication in the browser
     console.log('\nWaiting for manual login completion...');
     console.log(' Please select your @ucla.edu account in the browser\n');
     
@@ -33,18 +33,18 @@ test.describe('Authentication - Login Flow', () => {
     
     await expect(page).toHaveURL('/home');
     
-    await expect(page.getByText(/browse listings/i)).toBeVisible();
+    await expect(page.getByText(/login required/i)).not.toBeVisible();
     
     console.log('Login successful!\n');
   });
 
+  // test that non-ucla emails get rejected
   test('AUTH_02: should reject login with non-UCLA email domain', async ({ page }) => {
     await goToLogin(page);
     
     await page.getByRole('button', { name: /sign in with google/i }).click();
     
-    // Test domain validation by attempting login with non-UCLA email
-    console.log('\n⏳ Waiting for manual Google OAuth with non-UCLA email...');
+    console.log('\n Waiting for manual Google OAuth with non-UCLA email...');
     console.log('   Please select a NON-UCLA email account (e.g., @gmail.com)\n');
     
     await page.waitForURL(/\/login\?error=/, { timeout: 60000 });

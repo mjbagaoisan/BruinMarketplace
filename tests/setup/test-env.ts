@@ -1,3 +1,4 @@
+// environment config for tests
 export const TEST_ENV = {
   FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:3000',
   API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
@@ -14,6 +15,7 @@ export const TEST_USERS = {
   },
 };
 
+// default test listing data
 export const TEST_LISTING = {
   title: '[TEST] CS 35L Textbook',
   price: '50',
@@ -24,6 +26,7 @@ export const TEST_LISTING = {
   preferred_payment: 'venmo',
 };
 
+// [TEST] prefix makes cleanup easy
 export const TEST_LISTINGS = {
   electronics: {
     title: '[TEST] MacBook Pro',
@@ -55,5 +58,5 @@ export const TIMEOUTS = {
   SHORT: 5000,
   MEDIUM: 10000,
   LONG: 30000,
-  OAUTH: 60000,
+  OAUTH: 60000, // manual google login
 };

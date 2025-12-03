@@ -1,3 +1,4 @@
+// auth helpers for e2e tests
 import { Page, expect } from '@playwright/test';
 import { TEST_ENV } from '../../setup/test-env';
 
@@ -30,12 +31,13 @@ export async function logout(page: Page): Promise<void> {
   expect(hasAuthToken).toBe(false);
 }
 
+// clear cookies and storage for clean state
 export async function clearAuth(page: Page): Promise<void> {
   await page.context().clearCookies();
   
   try {
     const url = page.url();
-    if (url && !url.startsWith('about:')) {
+    if (url && !url.startsWith('about:')) { // cant access storage on about:blank
       await page.evaluate(() => {
         localStorage.clear();
         sessionStorage.clear();
@@ -54,6 +56,7 @@ export async function isOnLoginPage(page: Page): Promise<boolean> {
   return page.url().includes('/login');
 }
 
+// playwright reuses this to skip login
 export const AUTH_STATE_PATH = 'tests/e2e/.auth/user.json';
 
 export async function hasAuthState(): Promise<boolean> {

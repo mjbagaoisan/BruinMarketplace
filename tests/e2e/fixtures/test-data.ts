@@ -1,3 +1,4 @@
+// timestamp ensures unique titles
 export function generateTestListingTitle(prefix: string = 'TEST'): string {
   const timestamp = Date.now();
   return `[${prefix}] ${timestamp} - Test Listing`;
@@ -77,6 +78,7 @@ export function wait(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// retry flaky operations
 export async function retry<T>(
   fn: () => Promise<T>,
   maxAttempts: number = 3,
