@@ -21,11 +21,14 @@ test.describe('Profile Settings - Page Load & UI', () => {
     await expect(page.getByRole('heading', { name: /profile settings/i })).toBeVisible();
     await expect(page.getByText('Profile Picture')).toBeVisible();
     await expect(page.locator('input[type="file"]')).toBeAttached();
-    await expect(page.getByText('Name')).toBeVisible();
-    const nameInput = page.locator('input[disabled]');
+    await expect(page.getByText('Name', { exact: true })).toBeVisible();
+    const disabledInputs = page.locator('input[disabled]');
+    await expect(disabledInputs).toHaveCount(2);
+    const nameInput = disabledInputs.first();
     await expect(nameInput).toBeVisible();
-    await expect(page.getByText('Major')).toBeVisible();
-    await expect(page.getByText('Class Year')).toBeVisible();
+    await expect(nameInput).toBeDisabled();
+    await expect(page.getByText('Major', { exact: true })).toBeVisible();
+    await expect(page.getByText('Class Year', { exact: true })).toBeVisible();
     await expect(page.locator('input[type="number"]')).toBeVisible();
     await expect(page.getByText('Make your major visible to others')).toBeVisible();
     await expect(page.getByText('Make your class year visible to others')).toBeVisible();
@@ -37,7 +40,7 @@ test.describe('Profile Settings - Page Load & UI', () => {
     await goToProfileSettings(page);
     await waitForProfileLoad(page);
     
-    const nameInput = page.locator('input[disabled]');
+    const nameInput = page.locator('input[disabled]').first();
     await expect(nameInput).toBeVisible();
     await expect(nameInput).toBeDisabled();
     const nameValue = await nameInput.inputValue();

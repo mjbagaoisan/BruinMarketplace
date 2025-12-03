@@ -45,6 +45,12 @@ export const TEST_LISTINGS = {
   },
 };
 
+export const TEST_PROFILE = {
+  major: 'Computer Science',
+  updatedMajor: 'Computer Science - Updated',
+  classYear: '2027',
+};
+
 export const TIMEOUTS = {
   SHORT: 5000,
   MEDIUM: 10000,
