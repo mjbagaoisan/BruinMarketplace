@@ -143,9 +143,6 @@ function ProfileSettingsPage() {
           <div className="py-8">
             <div className="container mx-auto px-8 max-w-3xl">
 
-        <div className="py-8">
-          <div className="container mx-auto px-8 max-w-3xl">
-
           <h1 className="text-3xl font-bold mb-8">Profile Settings</h1>
 
             <div className="flex flex-col gap-6 bg-white p-6 rounded-lg shadow-sm">
@@ -261,9 +258,10 @@ function ProfileSettingsPage() {
               </p>
             )}
           </div>
+            </div>
+          </div>
         </div>
-</div>
-</div>
+      </div>
     </AuthGate>
   );
 }
