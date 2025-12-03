@@ -69,6 +69,29 @@ router.get("/", authenticateToken, async (req, res) => {
 
 router.post("/", authenticateToken, uploadLimiter, upload.array('mediaFiles', 5), async (req, res) => {
   const user_id = req.user!.userId; 
+
+  // ensure user created < 5 listings that day (resets at 12am)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const { data: todaysCreatedListings, error: countListingsError } = await supabase
+    .from("listings")
+    .select("id", { count: "exact" })
+    .eq("user_id", user_id)
+    .gte("created_at", today.toISOString());
+  if (countListingsError) {
+    console.error(countListingsError);
+    return res.status(500).json({ error: "Failed to verify daily listing limit" });
+  }
+
+  const DAILY_LIMIT = 5;
+  if (todaysCreatedListings.length >= DAILY_LIMIT) {
+    return res.status(429).json({
+      error: "Daily listing limit reached. You can only create 5 listings per day."
+    });
+  }
+
+
   const {
     title,
     price,
