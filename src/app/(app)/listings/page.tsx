@@ -10,10 +10,7 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@
 import DebouncedSearch from "@/components/SearchBar";
 import CreateListing from '@/components/CreateListing';
 import { useAuth } from "@/contexts/AuthContext";
-<<<<<<< HEAD
 import AuthGate from "@/components/AuthGate";
-=======
->>>>>>> main
 
 import { formatDate, formatCondition } from "@/lib/utils"
 
@@ -25,11 +22,7 @@ function ListingsPage() {
   const [searchResults, setSearchResults] = useState<Listing[]>([]);
   const [activeQuery, setActiveQuery] = useState<string>("");
   const router = useRouter();
-<<<<<<< HEAD
   const { user, isLoading } = useAuth();
-=======
-  const { user } = useAuth();
->>>>>>> main
 
   // Filter state
   const [conditionFilter, setConditionFilter] = useState<string>("");

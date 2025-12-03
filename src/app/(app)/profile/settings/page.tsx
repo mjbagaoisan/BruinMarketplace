@@ -3,17 +3,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-<<<<<<< HEAD
 import AuthGate from "@/components/AuthGate";
-
-=======
-import { format } from 'path';
-import { profile } from 'console';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
->>>>>>> main
 
-function profileSettingsPage() {
+
+function ProfileSettingsPage() {
     const router = useRouter();
     const { user, isLoading: authLoading} = useAuth();
 
@@ -128,11 +123,11 @@ function profileSettingsPage() {
           
 
     return (
-      <>
-        <div className="min-h-screen bg-gray-50">
+    <AuthGate>
+      <div className="min-h-screen bg-gray-50">
 
-          {/* Navigation Header */}
-          <div className="sticky top-0 z-10 bg-white border-b px-4 py-3 flex items-center justify-between shadow-sm">
+        {/* Navigation Header */}
+        <div className="sticky top-0 z-10 bg-white border-b px-4 py-3 flex items-center justify-between shadow-sm">
             <Button 
               variant="ghost" 
               size="sm" 
@@ -266,13 +261,10 @@ function profileSettingsPage() {
 
           </div>
         </div>
-<<<<<<< HEAD
-      </div>
+</div>
+</div>
     </AuthGate>
-=======
-      </>
->>>>>>> main
   );
 }
 
-export default profileSettingsPage;
+export default ProfileSettingsPage;
