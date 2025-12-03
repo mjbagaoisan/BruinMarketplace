@@ -123,7 +123,7 @@ function profileSettingsPage() {
           
 
     return (
-      <>
+      
         <div className="min-h-screen bg-gray-50">
 
           {/* Navigation Header */}
@@ -261,7 +261,8 @@ function profileSettingsPage() {
 
           </div>
         </div>
-      </>
+    </div>
+    </div>
   );
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { ReportModal } from "@/components/ReportModal";
+/*import { ReportModal } from "@/components/ReportModal";*/
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -29,6 +29,161 @@ import { useAuth } from "@/contexts/AuthContext";
 
 import { Listing } from "@/lib/types"
 
+type ReportReason =
+  | "scam"
+  | "prohibited_item"
+  | "harassment"
+  | "counterfeit"
+  | "no_show";
+
+interface ListingReportModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  targetType: "listing" | "user";
+  targetId: string | number;
+}
+
+const REPORT_REASONS: { value: ReportReason; label: string }[] = [
+  { value: "scam", label: "Scam / Fraud" },
+  { value: "prohibited_item", label: "Prohibited Item" },
+  { value: "harassment", label: "Harassment" },
+  { value: "counterfeit", label: "Counterfeit" },
+  { value: "no_show", label: "No Show" },
+];
+
+function ListingReportModal({
+  isOpen,
+  onClose,
+  targetType,
+  targetId,
+}: ListingReportModalProps) {
+  const [reason, setReason] = React.useState<ReportReason>("scam");
+  const [notes, setNotes] = React.useState("");
+  const [submitting, setSubmitting] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+  const [success, setSuccess] = React.useState(false);
+
+  if (!isOpen) return null;
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      const base = process.env.NEXT_PUBLIC_API_URL;
+      if (!base) throw new Error("API URL is not configured");
+
+      const body: any = { reason, notes: notes || undefined };
+
+      if (targetType === "listing") {
+        body.listingId = Number(targetId);
+      } else {
+        body.reportedUserId = targetId;
+      }
+
+      const res = await fetch(`${base}/api/reports`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(body),
+      });
+
+      if (res.status === 401) {
+        window.location.href = "/login";
+        return;
+      }
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Failed to submit report");
+      }
+
+      setSuccess(true);
+      setNotes("");
+    } catch (err: any) {
+      setError(err.message || "Failed to submit report");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  function handleClose() {
+    setError(null);
+    setSuccess(false);
+    setNotes("");
+    setReason("scam");
+    onClose();
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+        <h2 className="text-lg font-semibold mb-4">
+          Report {targetType === "listing" ? "Listing" : "User"} #{targetId}
+        </h2>
+
+        {success ? (
+          <div className="space-y-4">
+            <p className="text-green-600 text-sm">
+              Thank you. Your report has been submitted.
+            </p>
+            <Button onClick={handleClose} size="sm">
+              Close
+            </Button>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Reason</label>
+              <select
+                className="w-full border rounded px-3 py-2 text-sm"
+                value={reason}
+                onChange={(e) => setReason(e.target.value as ReportReason)}
+              >
+                {REPORT_REASONS.map((r) => (
+                  <option key={r.value} value={r.value}>
+                    {r.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Additional details (optional)
+              </label>
+              <textarea
+                className="w-full border rounded px-3 py-2 text-sm"
+                rows={4}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Provide any extra information that might help..."
+              />
+            </div>
+
+            {error && <p className="text-sm text-red-600">{error}</p>}
+
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleClose}
+                disabled={submitting}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" size="sm" disabled={submitting}>
+                {submitting ? "Submitting..." : "Submit report"}
+              </Button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function ListingDetailPage() {
   const params = useParams();
@@ -462,7 +617,7 @@ export default function ListingDetailPage() {
           </div>
         </div>
       )}
-      <ReportModal
+      <ListingReportModal
         isOpen={showListingReport}
         onClose={() => setShowListingReport(false)}
         targetType="listing"
@@ -470,13 +625,13 @@ export default function ListingDetailPage() {
       />
 
       {listing.user && (
-        <ReportModal
+        <ListingReportModal
           isOpen={showSellerReport}
           onClose={() => setShowSellerReport(false)}
           targetType="user"
           targetId={listing.user.id}
         />
-      )}
+      )} 
     </div>
   );
 }
