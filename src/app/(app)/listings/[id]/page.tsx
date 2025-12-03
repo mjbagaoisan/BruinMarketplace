@@ -438,7 +438,7 @@ export default function ListingDetailPage() {
                         <CarouselItem key={item.id} className="flex items-center justify-center bg-black aspect-video">
                           {isVideo(item.url, item.type) ? (
                             <video
-                              controls
+                              controls // adds a bunch of cool video control stuff (full screen, downloading, playback, etc.)
                               className="max-h-[500px] w-full object-contain bg-black"
                               src={item.url}
                               preload="metadata"

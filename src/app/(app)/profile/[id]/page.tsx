@@ -210,14 +210,13 @@ export default function viewOtherProfilePage() {
                         <CardMedia>
                           {listing.media && listing.media.length > 0 ? (
                             /\.(mp4|webm|ogg)(\?|$)/i.test(listing.media[0].url) ? (
-                              <video
-                                src={listing.media[0].url}
-                                className="w-full h-full object-cover"
-                                muted
-                                loop
-                                playsInline
-                                preload="metadata"
-                              />
+                            <video
+                              src={listing.media[0].url}
+                              className="w-full h-full object-cover"
+                              muted
+                              loop
+                              preload="metadata"
+                            />
                             ) : (
                               <img 
                                 src={listing.media[0].url} 

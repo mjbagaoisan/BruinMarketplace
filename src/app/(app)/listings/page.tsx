@@ -216,7 +216,6 @@ function ListingsPage() {
                             className="w-full h-full object-cover"
                             muted
                             loop
-                            playsInline
                             preload="metadata"
                           />
                         ) : (
