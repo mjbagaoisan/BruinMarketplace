@@ -72,34 +72,3 @@ export function requireAdmin(
   next();
 }
 
-/**
- * Optional authentication - doesn't fail if no token provided
- */
-export async function optionalAuth(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
-  try {
-    const token = req.cookies?.auth_token;
-
-    if (token) {
-      try {
-        const decoded = verifyToken(token);
-        req.user = {
-          userId: decoded.userId,
-          email: decoded.email,
-          role: decoded.role,
-          name: decoded.name,
-        };
-      } catch {
-        // Ignore invalid token and continue without user
-      }
-    }
-
-    next();
-  } catch {
-    // Continue without authentication
-    next();
-  }
-}
