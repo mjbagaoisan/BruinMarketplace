@@ -101,7 +101,10 @@ export default function EditListing({ children, listingId, initialData }: EditLi
     
 
     const handleChange = (e: any) => {
-      setForm({ ...form, [e.target.name]: e.target.value });
+      setForm({ 
+        ...form, 
+        [e.target.name]: e.target.value 
+      });
      };
 
     const handleFileDrop = (acceptedFiles: File[]) => {
@@ -136,11 +139,9 @@ export default function EditListing({ children, listingId, initialData }: EditLi
     const saveChanges = async (e: any) => {
       e.preventDefault();
       setSaving(true);
-
-
+      
       const formData = new FormData();
-
-       Object.entries(form).forEach(([key, val]) => {
+      Object.entries(form).forEach(([key, val]) => {
         formData.append(key, val as any);
       });
 
@@ -152,9 +153,7 @@ export default function EditListing({ children, listingId, initialData }: EditLi
 
 
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/listings/${listingId}`,
-          {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/listings/${listingId}`, {
             method: "PUT",
             credentials: "include",
             body: formData

@@ -286,14 +286,37 @@ router.put("/:id", authenticateToken, upload.array('mediaFiles', 5), async (req,
 
   // delete the media that the user removed 
   let parsedMediaToDelete: number[] = [];
-
   try {
     parsedMediaToDelete = JSON.parse(mediaToDelete);
   } catch (e) {
     parsedMediaToDelete = [];
   }
+
   if (parsedMediaToDelete.length > 0) {
-    await supabase.from("media").delete().in("id", parsedMediaToDelete);
+    const { data: mediaRows, error: fetchError } = await supabase
+      .from("media")
+      .select("url")
+      .in("id", parsedMediaToDelete);
+    if (fetchError) {
+      return res.status(500).json({ error: fetchError.message });
+    }
+
+    const paths = mediaRows.map(m => {
+      const parts = m.url.split("/object/public/listings/");
+      return parts[1];
+    });
+
+    const { error: storageError } = await supabase.storage
+      .from("listings")
+      .remove(paths);
+    if (storageError) {
+      return res.status(500).json({ error: storageError.message });
+    }
+
+    await supabase
+      .from("media")
+      .delete()
+      .in("id", parsedMediaToDelete);
   }
 
   // upload new files as media
