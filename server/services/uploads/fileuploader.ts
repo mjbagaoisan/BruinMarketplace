@@ -23,10 +23,16 @@ const {data: listingsData, error: listingsError} = await supabase
     });
 */
 
+const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+const MAX_LISTING_MEDIA_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 
 export async function uploadAvatarImage( opts: { userId: string; file: File | Blob;}) {
 
     const { userId, file } = opts;
+
+    if (file.size > MAX_AVATAR_SIZE_BYTES) {
+        throw new Error('Avatar file too large. Max size is 5MB.');
+    }
 
     const fileExtension = (file as File).name?.split('.').pop() || "png";
     const filePath = `${userId}/${Date.now()}-avatar.${fileExtension}`;
@@ -61,6 +67,10 @@ export async function uploadAvatarImage( opts: { userId: string; file: File | Bl
 
 export async function uploadListingMedia( opts: { listingId: string; file: File | Blob;}) {
     const { listingId, file } = opts;
+
+    if (file.size > MAX_LISTING_MEDIA_SIZE_BYTES) {
+        throw new Error('Listing media too large. Max size is 10MB.');
+    }
     
     const fileName = (file as File).name 
     const fileExtension = fileName.split('.').pop() || 'bin';
@@ -95,10 +105,6 @@ export async function uploadListingMedia( opts: { listingId: string; file: File 
     };
 
     }
-
-
-
-    
 
 
 

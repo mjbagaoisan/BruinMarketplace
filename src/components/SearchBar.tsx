@@ -28,6 +28,7 @@ function useDebounce<T>(value: T, delay: number): T {
 
 type Props = {
   delay?: number;               // debounce delay (ms)
+  scope?: "all" | "me"; 
   api?: string;                 // your search endpoint (GET ?q=)
   onResults?: (rows: any[], query: string) => void; // consume results outside
 };
@@ -50,8 +51,13 @@ export default function DebouncedSearch({
       onResultsRef.current?.([], "");
       return;
     }
+
+    const endpointRoute =
+      (scope === "me") ? `${process.env.NEXT_PUBLIC_API_URL}/api/search?scope=me&q=${encodeURIComponent(debouncedQ)}`
+        : `${api}?q=${encodeURIComponent(debouncedQ)}`;
+
     // send GET request to search endpoint
-    fetch(`${api}?q=${encodeURIComponent(debouncedQ)}`, {
+    fetch(endpointRoute, {
       headers: { "cache-control": "no-store" },
       credentials: 'include',
     })
