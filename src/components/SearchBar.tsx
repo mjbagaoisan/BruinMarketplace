@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Listing } from "@/lib/types";
 import { Search, X } from "lucide-react";
 import {
   InputGroup,
@@ -9,7 +10,6 @@ import {
   InputGroupButton,
 } from "@/components/ui/input-group";
 
-// Custom debounce hook that's SSR-friendly
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = React.useState<T>(value);
 
@@ -30,13 +30,12 @@ type Props = {
   delay?: number;               // debounce delay (ms)
   scope?: "all" | "me"; 
   api?: string;                 // your search endpoint (GET ?q=)
-  onResults?: (rows: any[]) => void; // consume results outside
-  onQueryChange?: (value: string) => void;
+  onResults?: (rows: Listing[], query: string) => void; // consume results outside
 };
 
 export default function DebouncedSearch({
-  delay = 300,
-  scope = "all", 
+  delay = 125,
+  scope = "all",
   api = `${process.env.NEXT_PUBLIC_API_URL}/api/search`,
   onResults,
 }: Props) {
@@ -50,7 +49,7 @@ export default function DebouncedSearch({
 
   React.useEffect(() => {
     if (!debouncedQ.trim()) {
-      onResultsRef.current?.([]);
+      onResultsRef.current?.([], "");
       return;
     }
 
@@ -64,7 +63,11 @@ export default function DebouncedSearch({
       credentials: 'include',
     })
       .then((r) => r.json())
-      .then((data) => onResultsRef.current?.(data))
+      .then((data) => {
+        const results = data?.results || [];
+        console.log('Search results:', results.length, 'items');
+        onResultsRef.current?.(results, debouncedQ);
+      })
       .catch((e) => console.error("Search error:", e));
   }, [debouncedQ, api]);
 

@@ -27,7 +27,7 @@ router.get('/', authenticateToken, async (req: Request, res: Response) => {
 
     let query = supabase
       .from('listings')
-      .select('*', { count: 'exact' })
+      .select('*, media(*)', { count: 'exact' })
       .or(`title.ilike.%${q}%,description.ilike.%${q}%`)
       .eq('status', 'active')
 

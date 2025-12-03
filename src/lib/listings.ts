@@ -14,7 +14,7 @@ export async function updateListingStatus(
   status: ListingStatus
 ): Promise<Listing> {
   const res = await fetch(`${apiBase}/api/listings/${listingId}/status`, {
-    method: 'PUT',
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
     body: JSON.stringify({ status }),

@@ -10,7 +10,12 @@
     "dev:api": "cross-env NODE_ENV=development npx tsx watch ./server/index.ts",
     "dev": "concurrently \"npm:dev:next\" \"npm:dev:api\"",
     "server": "npx tsx server/index.ts",
-    "server:prod": "cross-env NODE_ENV=production npx tsx server/index.ts"
+    "server:prod": "cross-env NODE_ENV=production npx tsx server/index.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
     "@next/font": "^14.2.15",
@@ -49,6 +54,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.57.0",
     "@tailwindcss/postcss": "^4",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
