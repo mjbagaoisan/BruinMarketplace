@@ -111,7 +111,7 @@ router.get('/google/callback', async (req: Request, res: Response) => {
     // check if user exists in database
     const { data: existing, error: fetchError } = await supabase
       .from('users')
-      .select('*')
+      .select('*')  // includes is_suspended
       .eq('id', sub)
       .maybeSingle();
 
@@ -157,7 +157,7 @@ router.get('/google/callback', async (req: Request, res: Response) => {
 
       user = updated;
     } else {
-      // stores current profile picture int database
+      // stores current profile picture in database
       let picPublicUrl = undefined;
       if (picture) {
         const profilePic = await fetch(picture); 
@@ -169,7 +169,7 @@ router.get('/google/callback', async (req: Request, res: Response) => {
           userId: sub,
           file: blob,
         });
-          picPublicUrl = uploadResult.publicUrl;
+        picPublicUrl = uploadResult.publicUrl;
       }
       
       // insert new user into database if user does not exist
@@ -185,6 +185,7 @@ router.get('/google/callback', async (req: Request, res: Response) => {
           hide_class_year: false,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
+          // is_suspended will default to false from DB schema
         })
         .select()
         .single();
@@ -195,6 +196,11 @@ router.get('/google/callback', async (req: Request, res: Response) => {
       }
 
       user = inserted;
+    }
+
+ 
+    if (user.is_suspended) {
+      return res.redirect(`${frontendUrl}/login?error=account_suspended`);
     }
 
     const token = generateToken({
@@ -231,7 +237,7 @@ router.get('/me', authenticateToken, async (req: Request, res: Response) => {
 
     const { data: user, error } = await supabase
       .from('users')
-      .select('id, email, name, profile_image_url, role, is_verified')
+      .select('id, email, name, profile_image_url, role, is_verified') // you can add is_suspended here if you ever want to expose it
       .eq('id', req.user.userId)
       .single();
 

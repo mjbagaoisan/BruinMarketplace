@@ -123,7 +123,7 @@ function ProfileSettingsPage() {
           
 
     return (
-    <AuthGate>
+      
       <div className="min-h-screen bg-gray-50">
 
         {/* Navigation Header */}
@@ -134,16 +134,16 @@ function ProfileSettingsPage() {
               className="gap-2 text-gray-600 hover:text-gray-900"
               onClick={() => router.back()}
             >
-              <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4" />
               Back
             </Button>
             <div className="flex gap-2"></div>
-          </div>
+        </div>
 
-          <div className="py-8">
-            <div className="container mx-auto px-8 max-w-3xl">
+        <div className="py-8">
+          <div className="container mx-auto px-8 max-w-3xl">
 
-          <h1 className="text-3xl font-bold mb-8">Profile Settings</h1>
+            <h1 className="text-3xl font-bold mb-8">Profile Settings</h1>
 
             <div className="flex flex-col gap-6 bg-white p-6 rounded-lg shadow-sm">
 
@@ -164,105 +164,103 @@ function ProfileSettingsPage() {
                 </label>
               </div>
 
-            
-          {/* user's name */}
-          <div>
-            <label className="text-sm font-medium">Name</label>
-            <input
-              className="border p-2 rounded w-full mt-1 bg-gray-100"
-              value={user?.name || ""}
-              disabled
-            />
-          </div>
+              {/* user's name */}
+              <div>
+                <label className="text-sm font-medium">Name</label>
+                <input
+                  className="border p-2 rounded w-full mt-1 bg-gray-100"
+                  value={user?.name || ""}
+                  disabled
+                />
+              </div>
 
-          {/* user's email */}
-          <div>
-            <label className="text-sm font-medium">Email</label>
-            <input
-              type="email"
-              className="border p-2 rounded w-full mt-1 bg-gray-100 cursor-not-allowed"
-              value={email ?? ""}
-              disabled
-            />
-          </div>
+              {/* user's email */}
+              <div>
+                <label className="text-sm font-medium">Email</label>
+                <input
+                  type="email"
+                  className="border p-2 rounded w-full mt-1 bg-gray-100 cursor-not-allowed"
+                  value={email ?? ""}
+                  disabled
+                />
+              </div>
 
-          {/* user's phone number */}
-          <div>
-            <label className="text-sm font-medium">Phone Number</label>
-            <input
-              type="tel"
-              className="border p-2 rounded w-full mt-1"
-              value={phoneNumber ?? ""}
-              onChange={(e) => setPhoneNumber(e.target.value || null)}
-            />
-          </div>
+              {/* user's phone number */}
+              <div>
+                <label className="text-sm font-medium">Phone Number</label>
+                <input
+                  type="tel"
+                  className="border p-2 rounded w-full mt-1"
+                  value={phoneNumber ?? ""}
+                  onChange={(e) => setPhoneNumber(e.target.value || null)}
+                />
+              </div>
 
-          {/* user's major */}
-          <div>
-            <label className="text-sm font-medium">Major</label>
-            <input
-              className="border p-2 rounded w-full mt-1"
-              value={major ?? ""}
-              onChange={(e) => setMajor(e.target.value || null)}
-            />
-          </div>
+              {/* user's major */}
+              <div>
+                <label className="text-sm font-medium">Major</label>
+                <input
+                  className="border p-2 rounded w-full mt-1"
+                  value={major ?? ""}
+                  onChange={(e) => setMajor(e.target.value || null)}
+                />
+              </div>
 
-          {/* make major visible */}
-          <div className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              checked={!hideMajor}
-              onChange={() => setHideMajor(!hideMajor)}
-            />
-            <label className="text-sm">Make your major visible to others</label>
-          </div>
+              {/* make major visible */}
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={!hideMajor}
+                  onChange={() => setHideMajor(!hideMajor)}
+                />
+                <label className="text-sm">Make your major visible to others</label>
+              </div>
 
-          {/* user's class year */}
-          <div>
-            <label className="text-sm font-medium">Class Year</label>
-            <input
-              type="number"
-              className="border p-2 rounded w-full mt-1"
-              min={2026}
-              value={classYear ?? ""}
-              onChange={(e) => {
-                const val = e.target.value;
-                setClassYear(val ? Number(val) : null);
-              }}
-            />
-          </div>
+              {/* user's class year */}
+              <div>
+                <label className="text-sm font-medium">Class Year</label>
+                <input
+                  type="number"
+                  className="border p-2 rounded w-full mt-1"
+                  min={2026}
+                  value={classYear ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setClassYear(val ? Number(val) : null);
+                  }}
+                />
+              </div>
 
-          {/* make class year visible */}
-          <div className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              checked={!hideClassYear}
-              onChange={() => setHideClassYear(!hideClassYear)}
-            />
-            <label className="text-sm">Make your class year visible to others</label>
-          </div>
+              {/* make class year visible */}
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={!hideClassYear}
+                  onChange={() => setHideClassYear(!hideClassYear)}
+                />
+                <label className="text-sm">Make your class year visible to others</label>
+              </div>
 
-          {/* save changes button */}
-          <div className="flex flex-col justify-end">
-            <Button
-              onClick={handleSave}
-              disabled={save}
-              className="w-fit"
-            >
-              {save ? "Saving..." : "Save Changes"}
-            </Button>
-            
-            {saveMsg && (
-              <p className="text-red-600 text-sm mt-1">
-                {saveMsg}
-              </p>
-            )}
-          </div>
+              {/* save changes button */}
+              <div className="flex flex-col justify-end">
+                <Button
+                  onClick={handleSave}
+                  disabled={save}
+                  className="w-fit"
+                >
+                  {save ? "Saving..." : "Save Changes"}
+                </Button>
+                
+                {saveMsg && (
+                  <p className="text-red-600 text-sm mt-1">
+                    {saveMsg}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </AuthGate>
+    </div>
   );
 }
 
