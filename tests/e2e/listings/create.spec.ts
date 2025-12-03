@@ -61,7 +61,7 @@ test.describe('Listings - Create', () => {
     await page.locator('input[name="title"]').fill(uniqueTitle);
     await page.locator('input[name="price"]').fill('50');
     
-    await page.locator('input[type="file"]').setInputFiles('public/39717e342e8eadd12055eb24442c0e22.jpg');
+    await page.locator('input[type="file"]').setInputFiles('public/39717e342e8eadd12055eb24442c0e22.jpg'); // replace with any image
     await page.waitForTimeout(500);
     await expect(page.getByText(/39717e342e8eadd12055eb24442c0e22/i)).toBeVisible();
     
@@ -116,7 +116,7 @@ test.describe('Listings - Create', () => {
   test('removes uploaded file when clicking X', async ({ page }) => {
     await openCreateDialog(page);
     
-    await page.locator('input[type="file"]').setInputFiles('public/39717e342e8eadd12055eb24442c0e22.jpg');
+    await page.locator('input[type="file"]').setInputFiles('public/39717e342e8eadd12055eb24442c0e22.jpg'); // replace with any image
     await page.waitForTimeout(500);
     await expect(page.getByText(/39717e342e8eadd12055eb24442c0e22/i)).toBeVisible();
     

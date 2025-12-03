@@ -1,6 +1,6 @@
 // listing helpers for e2e tests
 import { Page, expect } from '@playwright/test';
-import { TEST_ENV, TEST_LISTING } from '../../setup/test-env';
+import { TEST_ENV } from '../../setup/test-env';
 import path from 'path';
 
 export interface CreateListingOptions {
@@ -129,10 +129,10 @@ export async function createListing(
 }
 
 export async function uploadTestImage(page: Page): Promise<void> {
-  const testImagePath = path.join(process.cwd(), 'public', '39717e342e8eadd12055eb24442c0e22.jpg');
+  const testImagePath = path.join(process.cwd(), 'public', '39717e342e8eadd12055eb24442c0e22.jpg'); // replace with any image
   const fileInput = page.locator('input[type="file"]');
   await fileInput.setInputFiles(testImagePath);
-  await expect(page.getByText('39717e342e8eadd12055eb24442c0e22.jpg')).toBeVisible({ timeout: 5000 });
+  await expect(page.getByText('39717e342e8eadd12055eb24442c0e22.jpg')).toBeVisible({ timeout: 5000 }); // replace with any image
 }
 
 export async function deleteListingViaAPI(
@@ -156,69 +156,6 @@ async function getCookieHeader(page: Page): Promise<string> {
   return cookies.map(c => `${c.name}=${c.value}`).join('; ');
 }
 
-export async function goToListings(page: Page): Promise<void> {
-  await page.goto('/listings');
-  await expect(page).toHaveURL('/listings');
-}
-
-export async function searchListings(page: Page, query: string): Promise<void> {
-  const searchInput = page.getByPlaceholder(/search/i);
-  await searchInput.fill(query);
-  
-  await page.waitForTimeout(1000);
-}
-
-export async function applyFilter(
-  page: Page,
-  filterType: 'condition' | 'location' | 'category',
-  value: string
-): Promise<void> {
-  const filterMap = {
-    condition: /condition/i,
-    location: /location/i,
-    category: /categor/i,
-  };
-  
-  const trigger = page.getByRole('combobox').filter({ hasText: filterMap[filterType] });
-  await trigger.click();
-  
-  await page.getByRole('option', { name: new RegExp(value, 'i') }).click();
-  
-  await page.waitForTimeout(500);
-}
-
-export async function clearFilters(page: Page): Promise<void> {
-  const filters = ['condition', 'location', 'category'];
-  
-  for (const filter of filters) {
-    const trigger = page.getByRole('combobox').filter({ 
-      hasText: new RegExp(filter, 'i') 
-    });
-    
-    if (await trigger.isVisible()) {
-      await trigger.click();
-      await page.getByRole('option', { name: /all|conditions|locations|categories/i }).first().click();
-      await page.waitForTimeout(300);
-    }
-  }
-}
-
-export async function getListingCount(page: Page): Promise<number> {
-  // Technical pattern for counting listing links - CSS selector is appropriate
-  const listings = page.locator('a[href^="/listings/"]');
-  return await listings.count();
-}
-
-export async function clickListing(page: Page, title: string): Promise<void> {
-  await page.getByText(title).click();
-  await page.waitForURL(/\/listings\/[^/]+$/);
-}
-
-export async function verifyListingExists(page: Page, title: string): Promise<boolean> {
-  const listing = page.getByText(title);
-  return await listing.isVisible();
-}
-
 // open the actions menu (edit, mark sold) for a listing
 export async function openMyListingActions(page: Page, title: string): Promise<void> {
   // close any open menus first
@@ -240,36 +177,4 @@ export async function openMyListingActions(page: Page, title: string): Promise<v
   await expect(page.getByRole('menu')).toBeVisible({ timeout: 5000 });
 }
 
-export async function expectStatusBadge(page: Page, title: string, status: string): Promise<void> {
-  const listingCard = page.locator('[data-slot="card"]').filter({ hasText: title }).first();
-  const badge = listingCard.getByText(new RegExp(`^${status}$`, 'i'));
-  await expect(badge).toBeVisible();
-}
 
-
-// delete all [TEST] listings
-export async function cleanupTestListings(page: Page): Promise<void> {
-  await goToListings(page);
-  
-  await searchListings(page, '[TEST]');
-  
-  const testListings = page.locator('a[href^="/listings/"]').filter({ 
-    hasText: /\[TEST\]/ 
-  });
-  
-  const count = await testListings.count();
-  
-  for (let i = 0; i < count; i++) {
-    const href = await testListings.nth(i).getAttribute('href');
-    if (href) {
-      const id = href.split('/').pop();
-      if (id) {
-        try {
-          await deleteListingViaAPI(page, id);
-        } catch (error) {
-          console.log(`Failed to delete test listing ${id}:`, error);
-        }
-      }
-    }
-  }
-}

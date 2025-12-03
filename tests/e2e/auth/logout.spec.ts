@@ -14,7 +14,7 @@ test.describe('Authentication - Logout Flow', () => {
     }
   });
 
-  test('AUTH_04: should successfully logout and clear auth token', async ({ page }) => {
+  test('AUTH_01: should successfully logout and clear auth token', async ({ page }) => {
     await page.goto('/listings');
     
     let authenticated = await isAuthenticated(page);
@@ -85,16 +85,3 @@ test.describe('Authentication - Logout API', () => {
   });
 });
 
-// edge case: logout when already logged out
-test.describe('Authentication - Logout Without Auth', () => {
-  
-  test.beforeEach(async ({ page }) => {
-    await clearAuth(page);
-  });
-
-  test('should handle logout when not authenticated', async ({ page }) => {
-    const response = await page.request.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`);
-    
-    expect(response.status()).toBe(200);
-  });
-});

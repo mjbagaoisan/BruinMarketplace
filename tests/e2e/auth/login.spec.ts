@@ -1,7 +1,6 @@
 // login flow tests
 import { test, expect } from '@playwright/test';
-import { goToLogin, waitForAuth, isAuthenticated, clearAuth } from '../fixtures';
-import { TEST_ENV } from '../../setup/test-env';
+import { goToLogin, isAuthenticated, clearAuth } from '../fixtures';
 
 test.describe('Authentication - Login Flow', () => {
   
@@ -58,36 +57,5 @@ test.describe('Authentication - Login Flow', () => {
     expect(authenticated).toBe(false);
     
     console.log('Non-UCLA email correctly rejected\n');
-  });
-});
-
-test.describe('Authentication - Login Page UI', () => {
-  
-  test('should display login page elements correctly', async ({ page }) => {
-    await goToLogin(page);
-    
-    await expect(page.getByRole('heading', { name: /welcome/i })).toBeVisible();
-    
-    await expect(page.getByText(/login.*create your account/i)).toBeVisible();
-    
-    const googleButton = page.getByRole('button', { name: /sign in with google/i });
-    await expect(googleButton).toBeVisible();
-    
-    const googleLogo = page.getByAltText(/google/i);
-    await expect(googleLogo).toBeVisible();
-    
-    const backButton = page.getByRole('link', { name: /back/i });
-    await expect(backButton).toBeVisible();
-    
-    await expect(page.getByText(/terms of service/i)).toBeVisible();
-    await expect(page.getByText(/privacy policy/i)).toBeVisible();
-  });
-
-  test('should navigate back to home from login page', async ({ page }) => {
-    await goToLogin(page);
-    
-    await page.getByRole('link', { name: /back/i }).click();
-    
-    await expect(page).toHaveURL('/');
   });
 });

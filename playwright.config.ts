@@ -1,90 +1,41 @@
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
 
-// Load test environment variables
 dotenv.config({ path: '.env.local' });
 
 export default defineConfig({
   testDir: './tests/e2e',
-  
-  // Global setup
   globalSetup: './tests/setup/global-setup.ts',
-  
-  // Run tests in files in parallel
-  fullyParallel: true, // Enable parallel test execution for better performance
-  
-  // Fail the build on CI if you accidentally left test.only
+  fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  
-  // Retry on CI only
   retries: process.env.CI ? 2 : 0,
-  
-  // Optimize workers for parallel execution
-  workers: process.env.CI ? 2 : 4, // Enable parallelism while managing resource usage
-  
-  // Reporter to use
-  reporter: [
-    ['html'],
-    ['list'],
-    ['json', { outputFile: 'test-results/results.json' }]
-  ],
-  
-  // Shared settings for all the projects below
+  workers: process.env.CI ? 2 : 4,
+  reporter: 'html',
+  timeout: 60000,
+
   use: {
-    // Base URL for navigation
-    baseURL: process.env.FRONTEND_URL || 'http://localhost:3000',
-    
-    // Collect trace when retrying the failed test
+    baseURL: process.env.FRONTEND_URL,
     trace: 'on-first-retry',
-    
-    // Screenshot on failure
     screenshot: 'only-on-failure',
-    
-    // Video on failure
-    video: 'retain-on-failure',
-    
-    // Timeout for each action
-    actionTimeout: 10000,
-  },
+    headless: false,
 
-  // Configure projects for major browsers
+    // bypass google oauth "browser not secure" problem
+    launchOptions: {
+      args: [
+        '--disable-blink-features=AutomationControlled',
+        '--no-sandbox',
+        '--disable-infobars',
+        '--disable-extensions',
+        '--start-maximized',
+        '--window-size=1280,720'
+      ]
+    },
+    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+  },
+  // use to test different browsers
   projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
   ],
-
-  // Run your local dev server before starting the tests
-  // Comment this out if you prefer to run dev servers manually
-  // webServer: [
-  //   {
-  //     command: 'npm run dev:next',
-  //     url: 'http://localhost:3000',
-  //     reuseExistingServer: !process.env.CI,
-  //     timeout: 120000,
-  //   },
-  //   {
-  //     command: 'npm run dev:api',
-  //     url: 'http://localhost:3001',
-  //     reuseExistingServer: !process.env.CI,
-  //     timeout: 120000,
-  //   },
-  // ],
-
-  // Global timeout
-  timeout: 30000,
-  
-  // Expect timeout
-  expect: {
-    timeout: 5000,
-  },
 });

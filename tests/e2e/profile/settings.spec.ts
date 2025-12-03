@@ -3,10 +3,9 @@ import {
   goToProfileSettings, 
   waitForProfileLoad,
   clickSaveChanges,
-  waitForSaveComplete,
-  getSaveMessage 
+  waitForSaveComplete
 } from '../fixtures';
-import { TEST_PROFILE, TIMEOUTS } from '../../setup/test-env';
+import { TEST_PROFILE } from '../../setup/test-env';
 
 // profile settings tests
 
