@@ -3,12 +3,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { format } from 'path';
-import { profile } from 'console';
+import AuthGate from "@/components/AuthGate";
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 
-function profileSettingsPage() {
+
+function ProfileSettingsPage() {
     const router = useRouter();
     const { user, isLoading: authLoading} = useAuth();
 
@@ -123,21 +123,25 @@ function profileSettingsPage() {
           
 
     return (
+    <AuthGate>
       <div className="min-h-screen bg-gray-50">
 
         {/* Navigation Header */}
         <div className="sticky top-0 z-10 bg-white border-b px-4 py-3 flex items-center justify-between shadow-sm">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="gap-2 text-gray-600 hover:text-gray-900"
-            onClick={() => router.back()}
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back
-          </Button>
-          <div className="flex gap-2"></div>
-        </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="gap-2 text-gray-600 hover:text-gray-900"
+              onClick={() => router.back()}
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+            <div className="flex gap-2"></div>
+          </div>
+
+          <div className="py-8">
+            <div className="container mx-auto px-8 max-w-3xl">
 
         <div className="py-8">
           <div className="container mx-auto px-8 max-w-3xl">
@@ -258,10 +262,10 @@ function profileSettingsPage() {
             )}
           </div>
         </div>
-       </div>     
-      </div>
-    </div>
+</div>
+</div>
+    </AuthGate>
   );
 }
 
-export default profileSettingsPage;
+export default ProfileSettingsPage;

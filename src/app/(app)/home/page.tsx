@@ -1,8 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   ArrowUpRight,
   Package,
@@ -12,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
+import AuthGate from "@/components/AuthGate";
 import CreateListing from '@/components/CreateListing';
 
 const quickActions = [
@@ -42,22 +41,7 @@ const quickActions = [
 ];
 
 export default function Home() {
-  const { user, isLoading } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!isLoading && !user) {
-      router.push("/login");
-    }
-  }, [isLoading, user, router]);
-
-  if (isLoading || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-sm text-gray-600">Loading...</p>
-      </div>
-    );
-  }
+  const { user } = useAuth();
 
   const fullName = user?.name ?? "Bruin";
   const [firstRaw] = fullName.split(" ");
@@ -69,7 +53,8 @@ export default function Home() {
     hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-[#e8f1ff] via-white to-[#fff5d6] text-gray-900">
+    <AuthGate>
+      <div className="relative min-h-screen bg-gradient-to-br from-[#e8f1ff] via-white to-[#fff5d6] text-gray-900">
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute -left-10 top-24 h-72 w-72 rounded-full bg-[#2774AE]/15 blur-3xl" />
         <div className="absolute right-0 top-0 h-80 w-80 rounded-full bg-[#FFD100]/25 blur-[140px]" />
@@ -145,6 +130,7 @@ export default function Home() {
           </div>
         </div>
       </section>
-    </div>
+      </div>
+    </AuthGate>
   );
 }
