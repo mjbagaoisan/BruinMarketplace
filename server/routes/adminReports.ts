@@ -179,7 +179,7 @@ router.post(
   async (req, res) => {
     const admin = (req as any).user;
     const adminId = admin.userId;
-    const userId = Number(req.params.id);
+    const userId = req.params.id;
     const { reportId } = req.body || {};
 
     // 1) Update user as suspended
@@ -241,7 +241,7 @@ router.post(
   async (req, res) => {
     const admin = (req as any).user;
     const adminId = admin.userId;
-    const userId = Number(req.params.id); // or leave as string if users.id is text
+    const userId = req.params.id; // or leave as string if users.id is text
 
     // 1) Unsuspend user
     const { data: userRow, error: userError } = await supabase
