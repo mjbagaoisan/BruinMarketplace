@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { supabase } from "../services/db.js";
 import { authenticateToken } from "../middleware/auth.js";
-
+import { uploadLimiter } from "../middleware/rateLimiter.js";
 
 import multer from "multer"; // middleware for handling formData
 import { uploadListingMedia } from "../services/uploads/fileuploader.js";
@@ -67,7 +67,7 @@ router.get("/", authenticateToken, async (req, res) => {
 });
 
 
-router.post("/", authenticateToken, upload.array('mediaFiles', 5), async (req, res) => {
+router.post("/", authenticateToken, uploadLimiter, upload.array('mediaFiles', 5), async (req, res) => {
   const user_id = req.user!.userId; 
   const {
     title,
@@ -209,7 +209,7 @@ router.get("/user/:userId", authenticateToken, async (req, res) => {
 });
 
 // update a listing
-router.put("/:id", authenticateToken, upload.array('mediaFiles', 5), async (req, res) => {
+router.put("/:id", authenticateToken, uploadLimiter, upload.array('mediaFiles', 5), async (req, res) => {
   const user_id = req.user!.userId;
   const { id } = req.params;
 
@@ -353,9 +353,10 @@ router.put("/:id", authenticateToken, upload.array('mediaFiles', 5), async (req,
 
 
 
-// get a specific listing by its id
-router.get("/:id", async (req, res) => {
+// get a specific listing by its id (requires authentication)
+router.get("/:id", authenticateToken, async (req, res) => {
   const { id } = req.params;
+  const currentUserId = req.user!.userId;
 
   const { data, error } = await supabase
     .from("listings")
@@ -378,9 +379,11 @@ router.get("/:id", async (req, res) => {
     return res.status(404).json({ error: "Listing not found" });
   }
 
+  // only expose interested user details to the listing owner
+  const isOwner = currentUserId === (data as any).user_id;
   let interestedDetails: any[] = [];
 
-  if (Array.isArray((data as any).interested_users) && (data as any).interested_users.length > 0) {
+  if (isOwner && Array.isArray((data as any).interested_users) && (data as any).interested_users.length > 0) {
     const { data: users, error: usersError } = await supabase
       .from("users")
       .select("id, name, email, phone_number, class_year, major")
@@ -395,7 +398,7 @@ router.get("/:id", async (req, res) => {
 
   return res.json({
     ...data,
-    interested_user_details: interestedDetails,
+    interested_user_details: isOwner ? interestedDetails : undefined,
   });
 });
 
