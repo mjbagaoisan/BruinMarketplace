@@ -124,6 +124,7 @@ export default function CreateListing(props: CreateListingProps){
             setFilesToUpload([]);
             setFilesForPreview([]);
             setOpen(false);
+            window.location.reload(); // so page reloads and user can see newest listing
         } catch (error) {
             if (error instanceof Error) {
                 setSubmitError(error.message);

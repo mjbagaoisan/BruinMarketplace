@@ -494,11 +494,41 @@ router.delete("/:id", authenticateToken, async (req, res) => {
     return res.status(403).json({ error: "You do not own this listing" });
   }
 
+  const { data: mediaRows, error: mediaFetchError } = await supabase
+    .from("media")
+    .select("id, url")
+    .eq("listing_id", id)
+  if (mediaFetchError) {
+    return res.status(500).json({ error: mediaFetchError.message });
+  }
+  const paths = mediaRows.map(m => {
+    const split = m.url.split("/object/public/listings/");
+    return split[1];
+  });
+
+  if (paths.length > 0) {
+    const { error: storageError } = await supabase.storage
+      .from("listings")
+      .remove(paths);
+    if (storageError) {
+      return res.status(500).json({ error: storageError.message });
+    }
+
+    const ids = mediaRows.map((m) => m.id);
+    const { error: mediaDeleteError } = await supabase
+      .from("media")
+      .delete()
+      .in("id", ids);
+    if (mediaDeleteError) {
+      return res.status(500).json({ error: mediaDeleteError.message });
+    }
+  }
+
+
   const { error: deleteError } = await supabase
     .from("listings")
     .delete()                  
     .eq("id", id);
-
   if (deleteError) {
     return res.status(500).json({ error: deleteError.message });
   }
