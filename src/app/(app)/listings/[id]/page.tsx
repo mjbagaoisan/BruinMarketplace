@@ -228,7 +228,15 @@ export default function ListingDetailPage() {
   useEffect(() => {
     const fetchListing = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/listings/${params.id}`);
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/listings/${params.id}`,
+          { credentials: "include" } // included cookies (credentials) for auth
+        );
+
+        if (response.status === 401) { // if user is not authenticated, redirect them to the login page.
+          router.push("/login");
+          return;
+        }
         
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
