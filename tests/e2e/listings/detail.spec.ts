@@ -53,16 +53,6 @@ test.describe('Listings - Detail Page', () => {
     await expect(page).toHaveURL('/listings');
   });
 
-  test('navigates back to listings page', async ({ page }) => {
-    const hasListings = await navigateToFirstListing(page);
-    if (!hasListings) {
-      test.skip(true, 'No listings available');
-      return;
-    }
-    
-    await page.getByRole('button', { name: /back/i }).click();
-    await expect(page).toHaveURL('/listings');
-  });
 
   test('displays images when listing has media', async ({ page }) => {
     await page.goto('/listings');

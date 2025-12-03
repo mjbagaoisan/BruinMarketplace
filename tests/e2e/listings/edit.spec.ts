@@ -54,7 +54,6 @@ test.describe('Listings - Edit', () => {
     await expect(page.getByText('$150')).toBeVisible();
   });
 
-  // test html5 validation on required fields
   test('EDIT_02: form validation - requires title and price', async ({ page }) => {
     await page.goto('/listings');
     const title = generateTestListingTitle();

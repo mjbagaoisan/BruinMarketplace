@@ -80,15 +80,4 @@ test.describe('Listings - Search', () => {
     const countAfterClear = await page.locator(listingCards).count();
     expect(countAfterClear).toBe(initialCount);
   });
-
-  test('shows clear button when search has text', async ({ page }) => {
-    const searchInput = page.getByPlaceholder(searchPlaceholder);
-    await searchInput.fill('test');
-    
-    const clearButton = page.getByRole('button', { name: /clear/i });
-    await expect(clearButton).toBeVisible();
-    
-    await clearButton.click();
-    await expect(searchInput).toHaveValue('');
-  });
 });
