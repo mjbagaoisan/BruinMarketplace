@@ -31,6 +31,10 @@ import { useAuth } from "@/contexts/AuthContext";
 
 import { Listing } from "@/lib/types"
 
+const isVideo = (mediaUrl: string, type?: string) =>
+  (type && type.toLowerCase().startsWith("video")) ||
+  /\.(mp4|webm|ogg)(\?|$)/i.test(mediaUrl);
+
 type ReportReason =
   | "scam"
   | "prohibited_item"
@@ -432,14 +436,25 @@ export default function ListingDetailPage() {
                     <CarouselContent>
                       {listing.media.map((item) => (
                         <CarouselItem key={item.id} className="flex items-center justify-center bg-black aspect-video">
-                          <Image
-                            src={item.url}
-                            alt={listing.title}
-                            className="max-h-[500px] w-auto object-contain"
-                            width={800}
-                            height={600}
-                            style={{ objectFit: 'contain' }}
-                          />
+                          {isVideo(item.url, item.type) ? (
+                            <video
+                              controls
+                              className="max-h-[500px] w-full object-contain bg-black"
+                              src={item.url}
+                              preload="metadata"
+                            >
+                              Your browser does not support the video tag.
+                            </video>
+                          ) : (
+                            <Image
+                              src={item.url}
+                              alt={listing.title}
+                              className="max-h-[500px] w-auto object-contain"
+                              width={800}
+                              height={600}
+                              style={{ objectFit: 'contain' }}
+                            />
+                          )}
                         </CarouselItem>
                       ))}
                     </CarouselContent>

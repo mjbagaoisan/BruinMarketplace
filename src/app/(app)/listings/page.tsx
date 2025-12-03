@@ -210,11 +210,22 @@ function ListingsPage() {
                   <Card className="w-full h-full hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300 cursor-pointer flex flex-col">
                     <CardMedia>
                       {listing.media && listing.media.length > 0 ? (
-                        <img 
-                          src={listing.media[0].url} 
-                          alt={listing.title} 
-                          className="w-full h-full object-cover"
-                        />
+                        /\.(mp4|webm|ogg)(\?|$)/i.test(listing.media[0].url) ? (
+                          <video
+                            src={listing.media[0].url}
+                            className="w-full h-full object-cover"
+                            muted
+                            loop
+                            playsInline
+                            preload="metadata"
+                          />
+                        ) : (
+                          <img 
+                            src={listing.media[0].url} 
+                            alt={listing.title} 
+                            className="w-full h-full object-cover"
+                          />
+                        )
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-gray-200">
                           <span className="text-gray-400 text-sm">No Image</span>

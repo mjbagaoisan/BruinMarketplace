@@ -87,7 +87,8 @@ function MyListingsPage() {
       <div className="min-h-screen bg-gray-50 py-8">
         {/* Centered Search Bar */}
         <div className="flex justify-center mb-8">
-          <DebouncedSearch scope = "me" onResults={handleSearchResults} />
+          <DebouncedSearch scope = "me" onResults={handleSearchResults} />  
+          {/* Todo maybe, IDK why showing an error but code still works(?) I didn't change this lol */}
         </div>
 
         {/* Listings Grid */}
@@ -115,11 +116,22 @@ function MyListingsPage() {
                     >
                       <CardMedia>
                         {listing.media && listing.media.length > 0 ? (
-                          <img
-                            src={listing.media[0].url}
-                            alt={listing.title}
-                            className="w-full h-full object-cover"
-                          />
+                          /\.(mp4|webm|ogg)(\?|$)/i.test(listing.media[0].url) ? (
+                            <video
+                              src={listing.media[0].url}
+                              className="w-full h-full object-cover"
+                              muted
+                              loop
+                              playsInline
+                              preload="metadata"
+                            />
+                          ) : (
+                            <img
+                              src={listing.media[0].url}
+                              alt={listing.title}
+                              className="w-full h-full object-cover"
+                            />
+                          )
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-gray-200">
                             <span className="text-gray-400 text-sm">No Image</span>
