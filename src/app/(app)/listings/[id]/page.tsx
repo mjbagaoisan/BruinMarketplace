@@ -31,7 +31,7 @@ import { Listing } from "@/lib/types"
 
 type ReportReason =
   | "scam"
-  | "prohibited_item"
+  | "prohibited"
   | "harassment"
   | "counterfeit"
   | "no_show";
@@ -45,7 +45,7 @@ interface ListingReportModalProps {
 
 const REPORT_REASONS: { value: ReportReason; label: string }[] = [
   { value: "scam", label: "Scam / Fraud" },
-  { value: "prohibited_item", label: "Prohibited Item" },
+  { value: "prohibited", label: "Prohibited Item" },
   { value: "harassment", label: "Harassment" },
   { value: "counterfeit", label: "Counterfeit" },
   { value: "no_show", label: "No Show" },

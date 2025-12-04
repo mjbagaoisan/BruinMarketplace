@@ -7,7 +7,7 @@ const router = Router();
 
 type ReportReason =
   | "scam"
-  | "prohibited_item"
+  | "prohibited"
   | "harassment"
   | "counterfeit"
   | "no_show";
@@ -36,7 +36,7 @@ router.post("/", authenticateToken, async (req, res) => {
 
   const validReasons: ReportReason[] = [
     "scam",
-    "prohibited_item",
+    "prohibited",
     "harassment",
     "counterfeit",
     "no_show",

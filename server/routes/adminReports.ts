@@ -10,62 +10,32 @@ type ReportStatus = "open" | "in_review" | "resolved";
 
 /**
  * GET /admin/reports
- * List all reports for the admin dashboard.
- * Also include whether the reported user is currently suspended.
+ * List reports for the admin dashboard.
+ *
+ * Logic:
+ *  - Listing reports (listing_id NOT NULL):
+ *      show ONLY if status != 'resolved'
+ *  - User reports (reported_user_id NOT NULL):
+ *      always show (even if resolved)
  */
-router.get(
-  "/reports",
-  authenticateToken,
-  requireAdmin,
-  async (req, res) => {
-    // 1) Get all reports
-    const { data: reports, error } = await supabase
-      .from("reports")
-      .select("*")
-      .order("created_at", { ascending: false });
+router.get("/reports", authenticateToken, requireAdmin, async (req, res) => {
+  const { data, error } = await supabase
+    .from("reports")
+    .select("*")
+    .or(
+      // and(listing_id IS NOT NULL, status != 'resolved')
+      // OR reported_user_id IS NOT NULL
+      "and(listing_id.not.is.null,status.neq.resolved),reported_user_id.not.is.null"
+    )
+    .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error("Fetch reports error:", error);
-      return res.status(500).json({ error: error.message });
-    }
-
-    let enrichedReports: any[] = reports ?? [];
-
-    // 2) Collect distinct reported_user_ids
-    const userIds = Array.from(
-      new Set(
-        enrichedReports
-          .map((r) => r.reported_user_id)
-          .filter((id: string | null) => !!id)
-      )
-    );
-
-    if (userIds.length > 0) {
-      // 3) Fetch those users and their suspension status
-      const { data: users, error: usersError } = await supabase
-        .from("users")
-        .select("id, is_suspended")
-        .in("id", userIds);
-
-      if (usersError) {
-        console.error("Fetch users for reports error:", usersError);
-        // we’ll still return reports, just without the extra info
-      } else if (users) {
-        const userMap = new Map(users.map((u: any) => [u.id, u]));
-
-        // 4) Attach reported_user onto each report
-        enrichedReports = enrichedReports.map((r) => ({
-          ...r,
-          reported_user: r.reported_user_id
-            ? userMap.get(r.reported_user_id) ?? null
-            : null,
-        }));
-      }
-    }
-
-    return res.json(enrichedReports);
+  if (error) {
+    console.error("Fetch reports error:", error);
+    return res.status(500).json({ error: error.message });
   }
-);
+
+  return res.json(data ?? []);
+});
 
 /**
  * POST /admin/reports/:id/status
@@ -78,7 +48,7 @@ router.post(
   requireAdmin,
   async (req, res) => {
     const admin = (req as any).user;
-    const adminId = admin.userId;
+    const adminId: string = admin.userId;
     const reportId = Number(req.params.id);
     const { status } = req.body as { status: ReportStatus };
 
@@ -135,7 +105,8 @@ router.post(
 /**
  * POST /admin/listings/:id/remove
  * Body (optional): { reportId?: number }
- * Marks listing as removed (status + deleted_at), optionally resolves report, logs action.
+ * Marks listing as removed (status + deleted_at),
+ * optionally resolves report, logs action.
  */
 router.post(
   "/listings/:id/remove",
@@ -143,7 +114,7 @@ router.post(
   requireAdmin,
   async (req, res) => {
     const admin = (req as any).user;
-    const adminId = admin.userId;
+    const adminId: string = admin.userId;
     const listingId = Number(req.params.id);
     const { reportId } = req.body || {};
 
@@ -208,16 +179,14 @@ router.post(
   requireAdmin,
   async (req, res) => {
     const admin = (req as any).user;
-    const adminId = admin.userId;
-    const userId = req.params.id; // users.id is text
+    const adminId: string = admin.userId;
+    const userId: string = req.params.id; // users.id is text
     const { reportId } = req.body || {};
 
     // 1) Update user as suspended
     const { data: userRow, error: userError } = await supabase
       .from("users")
-      .update({
-        is_suspended: true,
-      })
+      .update({ is_suspended: true })
       .eq("id", userId)
       .select()
       .single();
@@ -245,9 +214,9 @@ router.post(
     // 3) Log action
     const { error: logError } = await supabase.from("admin_actions").insert({
       admin_id: adminId,
-      action: "suspend_user",
+      action: "ban_user",
       target_type: "user",
-      target_id: String(userId),
+      target_id: userId,
       notes: reportId
         ? `User suspended in response to report #${reportId}`
         : "User suspended by admin",
@@ -263,7 +232,7 @@ router.post(
 
 /**
  * POST /admin/users/:id/unsuspend
- * Unsuspends a user and logs the action.
+ * Unsuspends a user & logs action.
  */
 router.post(
   "/users/:id/unsuspend",
@@ -271,8 +240,8 @@ router.post(
   requireAdmin,
   async (req, res) => {
     const admin = (req as any).user;
-    const adminId = admin.userId;
-    const userId = req.params.id; // users.id is text
+    const adminId: string = admin.userId;
+    const userId: string = req.params.id; // users.id is text
 
     const { data: userRow, error: userError } = await supabase
       .from("users")
@@ -290,7 +259,7 @@ router.post(
       admin_id: adminId,
       action: "unsuspend_user",
       target_type: "user",
-      target_id: String(userId),
+      target_id: userId,
       notes: "User unsuspended by admin",
     });
 
