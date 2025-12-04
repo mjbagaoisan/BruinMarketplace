@@ -205,7 +205,6 @@ router.get("/me", authenticateToken, async (req, res) => {
     .from("listings")
     .select("*, media(*)")
     .eq("user_id", user_id)
-    .eq("status", "active")
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -222,6 +221,7 @@ router.get("/user/:userId", authenticateToken, async (req, res) => {
     .from("listings")
     .select("*, media(*)")
     .eq("user_id", userId)
+    .eq("status", "active")
     .order("created_at", { ascending: false });
 
   if (error) {

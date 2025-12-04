@@ -144,10 +144,12 @@ function MyListingsPage() {
                             className={`text-xs font-semibold px-2 py-1 rounded-full capitalize ${
                               listing.status === "sold"
                                 ? "bg-red-50 text-red-600 border border-red-100"
+                                : listing.status === "removed"
+                                ? "bg-red-100 text-red-700 border border-red-200"
                                 : "bg-green-50 text-green-600 border border-green-100"
                             }`}
                           >
-                            {listing.status}
+                            {listing.status === "removed" ? "Reported" : listing.status}
                           </span>
                         </div>
                         <CardPrice>${listing.price.toFixed(2)}</CardPrice>
