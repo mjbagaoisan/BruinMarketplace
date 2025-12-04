@@ -98,7 +98,6 @@ dist
 # Sveltekit cache directory
 .svelte-kit/
 
-*.sql
 *.dbml
 
 # Playwright
