@@ -1,6 +1,6 @@
 # API Documentation
 
-REST API for BruinMarketplace. All endpoints are served from the Express backend at `http://localhost:3001` and are prefixed with `/api` unless noted otherwise.
+REST API for BruinMarketplace. All endpoints are served from the Express backend at `http://localhost:3001` and are prefixed with `/api` 
 
 ## Base URL
 
