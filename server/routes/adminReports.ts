@@ -19,8 +19,15 @@ type ReportStatus = "open" | "in_review" | "resolved";
  *      always show (even if resolved)
  */
 router.get("/reports", authenticateToken, requireAdmin, async (req, res) => {
+  // Include the reported user's suspension flag in this query
   const { data, error } = await supabase
     .from("reports")
+    .select(`
+      *,
+      reported_user:users!reports_reported_user_id_fkey (
+        is_suspended
+      )
+    `)
     .select(`
       *,
       reported_user:users!reports_reported_user_id_fkey (is_suspended)
@@ -96,17 +103,19 @@ router.post(
       return res.status(500).json({ error: error.message });
     }
 
-    // log into admin_actions
-    const { error: logError } = await supabase.from("admin_actions").insert({
-      admin_id: adminId,
-      action: "update_report_status",
-      target_type: "report",
-      target_id: String(reportId),
-      notes: `Status changed from ${oldReport.status} to ${status}`,
-    });
+    // only log to admin_actions when resolving (close_report is a valid action per schema)
+    if (status === "resolved") {
+      const { error: logError } = await supabase.from("admin_actions").insert({
+        admin_id: adminId,
+        action: "close_report",
+        target_type: "report",
+        target_id: String(reportId),
+        notes: `Report resolved (was ${oldReport.status})`,
+      });
 
-    if (logError) {
-      console.error("admin_actions log error (update_report_status):", logError);
+      if (logError) {
+        console.error("admin_actions log error (close_report):", logError);
+      }
     }
 
     return res.json(updated);
