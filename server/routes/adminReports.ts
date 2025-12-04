@@ -19,9 +19,15 @@ type ReportStatus = "open" | "in_review" | "resolved";
  *      always show (even if resolved)
  */
 router.get("/reports", authenticateToken, requireAdmin, async (req, res) => {
+  // Include the reported user's suspension flag in this query
   const { data, error } = await supabase
     .from("reports")
-    .select("*")
+    .select(`
+      *,
+      reported_user:users!reports_reported_user_id_fkey (
+        is_suspended
+      )
+    `)
     .or(
       // and(listing_id IS NOT NULL, status != 'resolved')
       // OR reported_user_id IS NOT NULL
@@ -34,7 +40,14 @@ router.get("/reports", authenticateToken, requireAdmin, async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 
-  return res.json(data ?? []);
+  // Return the boolean the UI expects and drop the nested payload
+  const reportsWithSuspension = (data ?? []).map((report) => ({
+    ...report,
+    reported_user_is_suspended: report.reported_user?.is_suspended ?? false,
+    reported_user: undefined,
+  }));
+
+  return res.json(reportsWithSuspension);
 });
 
 /**
