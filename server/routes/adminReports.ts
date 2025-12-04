@@ -28,6 +28,10 @@ router.get("/reports", authenticateToken, requireAdmin, async (req, res) => {
         is_suspended
       )
     `)
+    .select(`
+      *,
+      reported_user:users!reports_reported_user_id_fkey (is_suspended)
+    `) // Select 'is_suspended' from 'users' where 'user_id' matches 'reported_user_id'.
     .or(
       // and(listing_id IS NOT NULL, status != 'resolved')
       // OR reported_user_id IS NOT NULL
@@ -40,12 +44,13 @@ router.get("/reports", authenticateToken, requireAdmin, async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 
-  // Return the boolean the UI expects and drop the nested payload
-  const reportsWithSuspension = (data ?? []).map((report) => ({
-    ...report,
-    reported_user_is_suspended: report.reported_user?.is_suspended ?? false,
-    reported_user: undefined,
-  }));
+  // Flatten the joined reported_user.is_suspended field into each report
+  const reportsWithSuspension = (data ?? []).map(
+    ({ reported_user, ...report }) => ({
+      ...report,
+      reported_user_is_suspended: reported_user?.is_suspended ?? false,
+    })
+  );
 
   return res.json(reportsWithSuspension);
 });
@@ -98,17 +103,19 @@ router.post(
       return res.status(500).json({ error: error.message });
     }
 
-    // log into admin_actions
-    const { error: logError } = await supabase.from("admin_actions").insert({
-      admin_id: adminId,
-      action: "update_report_status",
-      target_type: "report",
-      target_id: String(reportId),
-      notes: `Status changed from ${oldReport.status} to ${status}`,
-    });
+    // only log to admin_actions when resolving (close_report is a valid action per schema)
+    if (status === "resolved") {
+      const { error: logError } = await supabase.from("admin_actions").insert({
+        admin_id: adminId,
+        action: "close_report",
+        target_type: "report",
+        target_id: String(reportId),
+        notes: `Report resolved (was ${oldReport.status})`,
+      });
 
-    if (logError) {
-      console.error("admin_actions log error (update_report_status):", logError);
+      if (logError) {
+        console.error("admin_actions log error (close_report):", logError);
+      }
     }
 
     return res.json(updated);
