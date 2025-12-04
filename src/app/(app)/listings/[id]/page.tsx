@@ -31,6 +31,15 @@ import { useAuth } from "@/contexts/AuthContext";
 
 import { Listing } from "@/lib/types"
 
+const formatLocation = (location: string): string => {
+  const locationMap: Record<string, string> = {
+    hill: "The Hill",
+    on_campus: "On Campus",
+    off_campus: "Off Campus",
+  };
+  return locationMap[location] || location;
+};
+
 const isVideo = (mediaUrl: string, type?: string) =>
   (type && type.toLowerCase().startsWith("video")) ||
   /\.(mp4|webm|ogg)(\?|$)/i.test(mediaUrl);
@@ -493,7 +502,7 @@ export default function ListingDetailPage() {
                   <MapPin className="h-6 w-6" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900 capitalize">{listing.location}</p>
+                  <p className="font-medium text-gray-900">{formatLocation(listing.location)}</p>
                   <p className="text-sm text-gray-500">Estimated location</p>
                 </div>
               </div>
