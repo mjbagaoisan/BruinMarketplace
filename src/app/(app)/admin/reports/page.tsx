@@ -2,18 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-// adjust this import to your actual auth context/hook
 import { useAuth } from "@/contexts/AuthContext";
 
 type Report = {
   id: number;
   listing_id: number | null;
-  reported_user_id: number | null; // or string, match your DB
-  reporter_id: number | string;
+  reported_user_id: string | null;
+  reporter_id: string;
   reason: string;
   notes: string | null;
   status: "open" | "in_review" | "resolved";
   created_at: string;
+  reported_user?: {
+    id: string;
+    is_suspended: boolean;
+  } | null;
 };
 
 export default function AdminReportsPage() {
@@ -25,6 +28,7 @@ export default function AdminReportsPage() {
   async function loadReports() {
     setLoadingReports(true);
     setError(null);
+
     try {
       const base = process.env.NEXT_PUBLIC_API_URL;
       if (!base) throw new Error("API URL not configured");
@@ -143,6 +147,32 @@ export default function AdminReportsPage() {
     }
   }
 
+  async function unsuspendUser(report: Report) {
+    if (!report.reported_user_id) return;
+    if (!confirm("Unsuspend this user?")) return;
+
+    try {
+      const base = process.env.NEXT_PUBLIC_API_URL!;
+      const res = await fetch(
+        `${base}/api/admin/users/${report.reported_user_id}/unsuspend`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        }
+      );
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Failed to unsuspend user");
+      }
+
+      await loadReports();
+    } catch (err: any) {
+      alert(err.message || "Failed to unsuspend user");
+    }
+  }
+
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between mb-4">
@@ -215,15 +245,29 @@ export default function AdminReportsPage() {
                       Remove listing
                     </Button>
                   )}
-                  {r.reported_user_id && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-red-700"
-                      onClick={() => suspendUser(r)}
-                    >
-                      Suspend user
-                    </Button>
+
+                  {r.reported_user_id && r.reported_user && (
+                    <span className="inline-flex gap-2">
+                      {r.reported_user.is_suspended ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          onClick={() => unsuspendUser(r)}
+                        >
+                          Unsuspend user
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 px-2 text-xs text-red-700"
+                          onClick={() => suspendUser(r)}
+                        >
+                          Suspend user
+                        </Button>
+                      )}
+                    </span>
                   )}
                 </td>
               </tr>
