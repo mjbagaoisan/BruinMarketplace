@@ -1,7 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
-import { useRouter } from "next/navigation"; 
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 
 interface User {
   userId: string;
@@ -14,6 +13,8 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  refreshUser: () => Promise<void>;
+  clearUser: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,94 +22,71 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();                 
 
   const apiBase = process.env.NEXT_PUBLIC_API_URL;
+  const isMountedRef = useRef(true);
 
-  useEffect(() => {
-    let isMounted = true;
+  // Centralized helper that resolves the current session and stores it in React state.
+  const fetchUser = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetch(`${apiBase}/api/auth/me`, {
+        credentials: "include",
+      });
 
-    const fetchUser = async () => {
-      try {
-        if (!apiBase) {
-          console.error("NEXT_PUBLIC_API_URL is not set");
-          if (isMounted) {
-            setUser(null);
-            setIsLoading(false);
-          }
-          return;
-        }
-
-        setIsLoading(true);
-
-        const res = await fetch(`${apiBase}/api/auth/me`, {
-          credentials: "include", // include auth_token cookie
-        });
-
-        // 🔴 Handle suspended accounts explicitly
-        if (res.status === 403) {
-          const data = await res.json().catch(() => ({}));
-
-          if (
-            typeof data.error === "string" &&
-            data.error.toLowerCase().includes("suspended")
-          ) {
-            if (isMounted) {
-              setUser(null);
-              setIsLoading(false);
-            }
-            router.replace("/suspended"); 
-            return;
-          }
-
-          // other 403 reasons – just treat as not logged in
-          if (isMounted) {
-            setUser(null);
-          }
-          return;
-        }
-
-        // not authenticated (401) or other non-OK
-        if (!res.ok) {
-          if (isMounted) {
-            setUser(null);
-          }
-          return;
-        }
-
-        const data = await res.json();
-
-        if (data?.user && isMounted) {
-          setUser({
-            userId: data.user.id ?? data.user.userId,
-            email: data.user.email,
-            name: data.user.name,
-            role: data.user.role,
-          });
-        }
-      } catch (error) {
-        console.error("Failed to fetch current user:", error);
-        if (isMounted) {
+      if (!res.ok) {
+        if (isMountedRef.current) {
           setUser(null);
         }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        return;
       }
-    };
 
+      const data = await res.json();
+
+      if (data?.user && isMountedRef.current) {
+        setUser({
+          userId: data.user.id ?? data.user.userId,
+          email: data.user.email,
+          name: data.user.name,
+          role: data.user.role,
+        });
+      } else if (isMountedRef.current) {
+        setUser(null);
+      }
+    } catch (error) {
+      console.error("Failed to fetch current user:", error);
+      if (isMountedRef.current) {
+        setUser(null);
+      }
+    } finally {
+      if (isMountedRef.current) {
+        setIsLoading(false);
+      }
+    }
+  }, [apiBase]);
+
+  useEffect(() => {
+    isMountedRef.current = true;
     fetchUser();
 
     return () => {
-      isMounted = false;
+      isMountedRef.current = false;
     };
-  }, [apiBase, router]); 
+  }, [fetchUser]);
+
+  // Exposed so components (e.g., logout button) can immediately clear cached identity.
+  const clearUser = useCallback(() => {
+    if (!isMountedRef.current) return;
+    setUser(null);
+    setIsLoading(false);
+  }, []);
 
   const value: AuthContextType = {
     user,
     isLoading,
     isAuthenticated: !!user,
+    refreshUser: fetchUser,
+    clearUser,
   };
 
   return (
@@ -121,7 +99,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 }

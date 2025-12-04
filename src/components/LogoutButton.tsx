@@ -11,23 +11,30 @@ interface LogoutButtonProps {
 
 const LogoutButton = React.memo(({ className, children }: LogoutButtonProps) => {
   const router = useRouter();
-  const { user } = useAuth();
+  const { clearUser } = useAuth();
 
   const handleLogout = React.useCallback(async () => {
-    try {
-      const apiBase = process.env.NEXT_PUBLIC_API_URL;
+    const apiBase = process.env.NEXT_PUBLIC_API_URL;
 
-      // sends Post request to /api/auth/logout to clear auth_token cookie
+    try {
+      if (!apiBase) {
+        throw new Error("NEXT_PUBLIC_API_URL is not configured");
+      }
+
+      // Ask the API to clear the httpOnly auth_token cookie on the server.
       await fetch(`${apiBase}/api/auth/logout`, {
         method: 'POST',
         credentials: 'include',
       });
-
-      router.push('/');
     } catch (error) {
       console.error('Logout error:', error);
+    } finally {
+      // Always clear client-side state + return user to the landing page.
+      clearUser();
+      router.replace('/');
+      router.refresh();
     }
-  }, [router]);
+  }, [router, clearUser]);
 
   return (
     <button

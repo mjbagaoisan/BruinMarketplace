@@ -52,9 +52,18 @@ router.get("/:user_id", authenticateToken, async (req, res) => {
 router.put("/me", authenticateToken, upload.single("avatar"), async (req, res) => {
   try {
     const user_id = req.user!.userId;
- 
-    const updateFields: any = {
 
+    // get prev pfp if found
+    const { data: oldUser, error: oldUserError } = await supabase
+        .from("users")
+        .select("profile_image_url")
+        .eq("id", user_id)
+        .single();
+    if (oldUserError) {
+      return res.status(500).json({ error: "Failed to fetch old avatar" });
+    }
+
+    const updateFields: any = {
       major: req.body.major ?? null,
       hide_major: req.body.hide_major,
       class_year: req.body.class_year ? Number(req.body.class_year) : null,
@@ -64,8 +73,23 @@ router.put("/me", authenticateToken, upload.single("avatar"), async (req, res) =
       updated_at: new Date().toISOString(),
     };
 
+
     // if we are inputting a file (pfp)
     if (req.file) {
+
+      // if there is a prev pfp (to delete it)
+      if (oldUser?.profile_image_url) {
+        const [, oldPath] = oldUser.profile_image_url.split("/object/public/avatars/");
+        if (oldPath) {
+          const { error: delError } = await supabase.storage
+            .from("avatars")
+            .remove([oldPath]);
+          if (delError) {
+            console.error("Failed to delete old avatar", delError);
+          }
+        }
+      }
+      
       //convert multer file to blob to save in supabase
       const blob = new Blob([req.file.buffer], { type: req.file.mimetype });
       // upload image and get the public url

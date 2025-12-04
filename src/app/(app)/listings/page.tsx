@@ -10,6 +10,7 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@
 import DebouncedSearch from "@/components/SearchBar";
 import CreateListing from '@/components/CreateListing';
 import { useAuth } from "@/contexts/AuthContext";
+import AuthGate from "@/components/AuthGate";
 
 import { formatDate, formatCondition } from "@/lib/utils"
 
@@ -19,8 +20,9 @@ function ListingsPage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchResults, setSearchResults] = useState<Listing[]>([]);
+  const [activeQuery, setActiveQuery] = useState<string>("");
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
 
   // Filter state
   const [conditionFilter, setConditionFilter] = useState<string>("");
@@ -28,15 +30,7 @@ function ListingsPage() {
   const [categoryFilter, setCategoryFilter] = useState<string>("");
   const [sort, setSort] = useState<string>("date_desc");
 
-  useEffect(() => {
-    fetchListings();
-  }, []);
-
-  useEffect(() => {
-    fetchListings();
-  }, [conditionFilter, locationFilter, categoryFilter, sort]);
-
-  const fetchListings = async () => {
+  const fetchListings = useCallback(async () => {
     try {
       // Build query params from filter state
       const params = new URLSearchParams();
@@ -72,16 +66,24 @@ function ListingsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [conditionFilter, locationFilter, categoryFilter, sort, router]);
 
-  const handleSearchResults = useCallback((data: Listing[] | SearchResponse) => {
+  useEffect(() => {
+    if (!isLoading && user) {
+      fetchListings();
+    }
+  }, [isLoading, user, fetchListings]);
+
+  const handleSearchResults = useCallback((data: Listing[] | SearchResponse, query: string) => {
     setSearchResults(Array.isArray(data) ? data : data.results);
+    setActiveQuery(query);
   }, []);
 
-  const displayListings = searchResults.length > 0 ? searchResults : listings;
+  const hasActiveSearch = activeQuery.trim().length > 0;
+  const displayListings = hasActiveSearch ? searchResults : listings;
 
   return (
-    <>
+    <AuthGate>
       <div className="min-h-screen bg-gray-50 py-8">
         {/* Create New Listing */}
         <div className="fixed bottom-10 right-10">
@@ -196,8 +198,8 @@ function ListingsPage() {
           ) : displayListings.length === 0 ? (
             <div className="flex justify-center items-center py-12">
               <div className="text-lg text-gray-600">
-                {searchResults.length === 0 && listings.length > 0 
-                  ? "No listings found matching your search." 
+                {activeQuery
+                  ? "No listings found matching your search."
                   : "No listings available."}
               </div>
             </div>
@@ -208,11 +210,21 @@ function ListingsPage() {
                   <Card className="w-full h-full hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300 cursor-pointer flex flex-col">
                     <CardMedia>
                       {listing.media && listing.media.length > 0 ? (
-                        <img 
-                          src={listing.media[0].url} 
-                          alt={listing.title} 
-                          className="w-full h-full object-cover"
-                        />
+                        /\.(mp4|webm|ogg)(\?|$)/i.test(listing.media[0].url) ? (
+                          <video
+                            src={listing.media[0].url}
+                            className="w-full h-full object-cover"
+                            muted
+                            loop
+                            preload="metadata"
+                          />
+                        ) : (
+                          <img 
+                            src={listing.media[0].url} 
+                            alt={listing.title} 
+                            className="w-full h-full object-cover"
+                          />
+                        )
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-gray-200">
                           <span className="text-gray-400 text-sm">No Image</span>
@@ -237,7 +249,7 @@ function ListingsPage() {
           )}
         </div>
       </div>
-    </>
+    </AuthGate>
   );
 }
 

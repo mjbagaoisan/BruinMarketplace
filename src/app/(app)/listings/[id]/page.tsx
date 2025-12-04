@@ -4,6 +4,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { 
   MapPin, 
   Calendar, 
@@ -25,9 +26,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import AuthGate from "@/components/AuthGate";
 import { useAuth } from "@/contexts/AuthContext";
 
 import { Listing } from "@/lib/types"
+
+const isVideo = (mediaUrl: string, type?: string) =>
+  (type && type.toLowerCase().startsWith("video")) ||
+  /\.(mp4|webm|ogg)(\?|$)/i.test(mediaUrl);
 
 type ReportReason =
   | "scam"
@@ -200,13 +206,13 @@ export default function ListingDetailPage() {
   const [showInterestedList, setShowInterestedList] = useState(false);
   const [removalError, setRemovalError] = useState<string | null>(null);
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   
   const isOwner = !!(user?.userId && listing?.user?.id && user.userId === listing.user.id);
   let interestButton = (
     <Button className="w-full gap-2 text-base py-6" size="lg" onClick={() => setShowInterestConfirm(true)}>
       <MessageCircle className="h-5 w-5" />
-      I'm interested
+      I&apos;m interested
     </Button>
   );
 
@@ -224,10 +230,20 @@ export default function ListingDetailPage() {
   }
 
   useEffect(() => {
+    if (authLoading || !user || !params.id) return;
+
     const fetchListing = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/listings/${params.id}`);
-        
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/listings/${params.id}`,
+          { credentials: "include" }
+        );
+
+        if (response.status === 401) {
+          router.push("/login");
+          return;
+        }
+
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
           console.error("Server Error Details:", errorData);
@@ -244,10 +260,8 @@ export default function ListingDetailPage() {
       }
     };
 
-    if (params.id) {
-      fetchListing();
-    }
-  }, [params.id]);
+    fetchListing();
+  }, [params.id, authLoading, user, router]);
 
   const handleSendInterest = async () => {
     if (isOwner) return;
@@ -278,6 +292,21 @@ export default function ListingDetailPage() {
       setInterestSubmitting(false);
     }
   };
+
+  if (authLoading) { // redirect users to authentication gate
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-pulse flex flex-col items-center gap-4">
+          <div className="h-12 w-12 rounded-full bg-gray-200"></div>
+          <div className="h-4 w-48 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthGate>{null}</AuthGate>;
+  }
 
   if (loading) {
     return (
@@ -342,7 +371,7 @@ export default function ListingDetailPage() {
         if (!prev) return prev;
         const filteredDetails = prev.interested_user_details?.filter((buyer) => buyer.id !== userId) || [];
         const filteredIds =
-          (data as any).interested_users ??
+          (data as { interested_users?: string[] }).interested_users ??
           prev.interested_users?.filter((id) => id !== userId) ??
           [];
         return {
@@ -360,6 +389,7 @@ export default function ListingDetailPage() {
   };
 
   return (
+    <AuthGate>
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* Breadcrumbs */}
       <div className="bg-white border-b px-4 py-3">
@@ -406,11 +436,25 @@ export default function ListingDetailPage() {
                     <CarouselContent>
                       {listing.media.map((item) => (
                         <CarouselItem key={item.id} className="flex items-center justify-center bg-black aspect-video">
-                          <img
-                            src={item.url}
-                            alt={listing.title}
-                            className="max-h-[500px] w-auto object-contain"
-                          />
+                          {isVideo(item.url, item.type) ? (
+                            <video
+                              controls // adds a bunch of cool video control stuff (full screen, downloading, playback, etc.)
+                              className="max-h-[500px] w-full object-contain bg-black"
+                              src={item.url}
+                              preload="metadata"
+                            >
+                              Your browser does not support the video tag.
+                            </video>
+                          ) : (
+                            <Image
+                              src={item.url}
+                              alt={listing.title}
+                              className="max-h-[500px] w-auto object-contain"
+                              width={800}
+                              height={600}
+                              style={{ objectFit: 'contain' }}
+                            />
+                          )}
                         </CarouselItem>
                       ))}
                     </CarouselContent>
@@ -633,5 +677,6 @@ export default function ListingDetailPage() {
         />
       )} 
     </div>
+    </AuthGate>
   );
 }

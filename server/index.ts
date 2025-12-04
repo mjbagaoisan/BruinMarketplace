@@ -15,6 +15,7 @@ import cookieParser from "cookie-parser";
 import apiRouter from "./routes/index.js";
 import listingsRouter from "./routes/listings.js";
 import profileRouter from "./routes/profile.js";
+import { generalLimiter, authLimiter } from "./middleware/rateLimiter.js";
 
 
 export const app = express();
@@ -36,6 +37,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser()); // parse cookies so auth middleware can read req.cookies.auth_token
 app.use(morgan("dev"));
+
+// Apply rate limiters before routes
+app.use("/api/auth", authLimiter);  // Stricter limit for auth endpoints
+app.use("/api", generalLimiter);    // General limit for all API routes
 
 app.use("/api", apiRouter);
 app.use("/listings", listingsRouter);

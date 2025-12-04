@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { supabase } from "../services/db.js";
 import { authenticateToken } from "../middleware/auth.js";
-
+import { uploadLimiter } from "../middleware/rateLimiter.js";
 
 import multer from "multer"; // middleware for handling formData
 import { uploadListingMedia } from "../services/uploads/fileuploader.js";
@@ -67,8 +67,31 @@ router.get("/", authenticateToken, async (req, res) => {
 });
 
 
-router.post("/", authenticateToken, upload.array('mediaFiles', 5), async (req, res) => {
+router.post("/", authenticateToken, uploadLimiter, upload.array('mediaFiles', 5), async (req, res) => {
   const user_id = req.user!.userId; 
+
+  // ensure user created < 5 listings that day (resets at 12am)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const { data: todaysCreatedListings, error: countListingsError } = await supabase
+    .from("listings")
+    .select("id", { count: "exact" })
+    .eq("user_id", user_id)
+    .gte("created_at", today.toISOString());
+  if (countListingsError) {
+    console.error(countListingsError);
+    return res.status(500).json({ error: "Failed to verify daily listing limit" });
+  }
+
+  const DAILY_LIMIT = 5;
+  if (todaysCreatedListings.length >= DAILY_LIMIT) {
+    return res.status(429).json({
+      error: "Daily listing limit reached. You can only create 5 listings per day."
+    });
+  }
+
+
   const {
     title,
     price,
@@ -182,7 +205,6 @@ router.get("/me", authenticateToken, async (req, res) => {
     .from("listings")
     .select("*, media(*)")
     .eq("user_id", user_id)
-    .eq("status", "active")
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -199,6 +221,7 @@ router.get("/user/:userId", authenticateToken, async (req, res) => {
     .from("listings")
     .select("*, media(*)")
     .eq("user_id", userId)
+    .eq("status", "active")
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -209,7 +232,7 @@ router.get("/user/:userId", authenticateToken, async (req, res) => {
 });
 
 // update a listing
-router.put("/:id", authenticateToken, upload.array('mediaFiles', 5), async (req, res) => {
+router.put("/:id", authenticateToken, uploadLimiter, upload.array('mediaFiles', 5), async (req, res) => {
   const user_id = req.user!.userId;
   const { id } = req.params;
 
@@ -286,14 +309,37 @@ router.put("/:id", authenticateToken, upload.array('mediaFiles', 5), async (req,
 
   // delete the media that the user removed 
   let parsedMediaToDelete: number[] = [];
-
   try {
     parsedMediaToDelete = JSON.parse(mediaToDelete);
   } catch (e) {
     parsedMediaToDelete = [];
   }
+
   if (parsedMediaToDelete.length > 0) {
-    await supabase.from("media").delete().in("id", parsedMediaToDelete);
+    const { data: mediaRows, error: fetchError } = await supabase
+      .from("media")
+      .select("url")
+      .in("id", parsedMediaToDelete);
+    if (fetchError) {
+      return res.status(500).json({ error: fetchError.message });
+    }
+
+    const paths = mediaRows.map(m => {
+      const parts = m.url.split("/object/public/listings/");
+      return parts[1];
+    });
+
+    const { error: storageError } = await supabase.storage
+      .from("listings")
+      .remove(paths);
+    if (storageError) {
+      return res.status(500).json({ error: storageError.message });
+    }
+
+    await supabase
+      .from("media")
+      .delete()
+      .in("id", parsedMediaToDelete);
   }
 
   // upload new files as media
@@ -330,9 +376,10 @@ router.put("/:id", authenticateToken, upload.array('mediaFiles', 5), async (req,
 
 
 
-// get a specific listing by its id
-router.get("/:id", async (req, res) => {
+// get a specific listing by its id (requires authentication)
+router.get("/:id", authenticateToken, async (req, res) => {
   const { id } = req.params;
+  const currentUserId = req.user!.userId;
 
   const { data, error } = await supabase
     .from("listings")
@@ -355,9 +402,11 @@ router.get("/:id", async (req, res) => {
     return res.status(404).json({ error: "Listing not found" });
   }
 
+  // only expose interested user details to the listing owner
+  const isOwner = currentUserId === (data as any).user_id;
   let interestedDetails: any[] = [];
 
-  if (Array.isArray((data as any).interested_users) && (data as any).interested_users.length > 0) {
+  if (isOwner && Array.isArray((data as any).interested_users) && (data as any).interested_users.length > 0) {
     const { data: users, error: usersError } = await supabase
       .from("users")
       .select("id, name, email, phone_number, class_year, major")
@@ -372,7 +421,7 @@ router.get("/:id", async (req, res) => {
 
   return res.json({
     ...data,
-    interested_user_details: interestedDetails,
+    interested_user_details: isOwner ? interestedDetails : undefined,
   });
 });
 
@@ -471,11 +520,41 @@ router.delete("/:id", authenticateToken, async (req, res) => {
     return res.status(403).json({ error: "You do not own this listing" });
   }
 
+  const { data: mediaRows, error: mediaFetchError } = await supabase
+    .from("media")
+    .select("id, url")
+    .eq("listing_id", id)
+  if (mediaFetchError) {
+    return res.status(500).json({ error: mediaFetchError.message });
+  }
+  const paths = mediaRows.map(m => {
+    const split = m.url.split("/object/public/listings/");
+    return split[1];
+  });
+
+  if (paths.length > 0) {
+    const { error: storageError } = await supabase.storage
+      .from("listings")
+      .remove(paths);
+    if (storageError) {
+      return res.status(500).json({ error: storageError.message });
+    }
+
+    const ids = mediaRows.map((m) => m.id);
+    const { error: mediaDeleteError } = await supabase
+      .from("media")
+      .delete()
+      .in("id", ids);
+    if (mediaDeleteError) {
+      return res.status(500).json({ error: mediaDeleteError.message });
+    }
+  }
+
+
   const { error: deleteError } = await supabase
     .from("listings")
     .delete()                  
     .eq("id", id);
-
   if (deleteError) {
     return res.status(500).json({ error: deleteError.message });
   }
