@@ -159,7 +159,7 @@ export default function Home() {
           </div>
 
           {/* visible only to admin users, centered when on its own row */}
-          {user.role === "admin" && (
+          {user?.role === "admin" && (
             <div className="mt-6 flex justify-center">
               <Link
                 href={adminDashboardAction.href}
