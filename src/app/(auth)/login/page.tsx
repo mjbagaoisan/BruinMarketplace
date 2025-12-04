@@ -11,14 +11,15 @@ export const metadata: Metadata = {
   description: "Login to your account",
 };
 
-export default function LoginPage({
+export default async function LoginPage({
   searchParams,
 }: {
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  // ✅ If backend sent ?error=account_suspended, go straight to /suspended
-  const errorParam = searchParams?.error;
-  if (errorParam === "account_suspended") {
+  const params = await searchParams;
+  
+  // If backend sent ?error=account_suspended, go straight to /suspended
+  if (params?.error === "account_suspended") {
     redirect("/suspended");
   }
 
