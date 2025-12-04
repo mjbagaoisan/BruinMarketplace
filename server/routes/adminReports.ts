@@ -21,7 +21,10 @@ type ReportStatus = "open" | "in_review" | "resolved";
 router.get("/reports", authenticateToken, requireAdmin, async (req, res) => {
   const { data, error } = await supabase
     .from("reports")
-    .select("*")
+    .select(`
+      *,
+      reported_user:users!reports_reported_user_id_fkey (is_suspended)
+    `) // Select 'is_suspended' from 'users' where 'user_id' matches 'reported_user_id'.
     .or(
       // and(listing_id IS NOT NULL, status != 'resolved')
       // OR reported_user_id IS NOT NULL
@@ -34,7 +37,15 @@ router.get("/reports", authenticateToken, requireAdmin, async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 
-  return res.json(data ?? []);
+  // Flatten the joined reported_user.is_suspended field into each report
+  const reportsWithSuspension = (data ?? []).map(
+    ({ reported_user, ...report }) => ({
+      ...report,
+      reported_user_is_suspended: reported_user?.is_suspended ?? false,
+    })
+  );
+
+  return res.json(reportsWithSuspension);
 });
 
 /**
