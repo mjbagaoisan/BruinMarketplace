@@ -117,78 +117,95 @@ export default function AdminReportsPage() {
     }
   }
 
+  /* 
+  PROMPT
+  In a Next.js React client component with TypeScript, write two async helper functions suspendUser(report: Report) and unsuspendUser(report: Report).
+
+  Use process.env.NEXT_PUBLIC_API_URL as base.
+
+  suspendUser should: confirm with the admin, POST to /api/admin/users/:reported_user_id/suspend with JSON { reportId }, credentials: "include", and proper headers, check res.ok, then set reported_user_is_suspended to true in my reports state via setReports, and finally call await loadReports().
+
+  unsuspendUser should do the same but POST to /unsuspend and set reported_user_is_suspended to false.
+
+  If reported_user_id is missing, just return.
+
+  On non-OK response, read res.json() and throw an Error(data.error || "Failed to suspend/unsuspend user"). Catch errors and alert the message.
+  Please output just the two function implementations in TypeScript.
+  PROMPT
+
+  I used ChatGPT here as I was really struggling with building an alternating button that would change when clicked
+  For the suspend/unsuspend users button here on the Report Page for admins
+  Using ChatGPT allowed me to have a skeleton and build on it and organize it properly while linked with the DB
+  
+  */
   async function suspendUser(report: Report) {
     if (!report.reported_user_id) return;
-  if (!confirm("Suspend this user?")) return;
+    if (!confirm("Suspend this user?")) return;
 
-  try {
-    const base = process.env.NEXT_PUBLIC_API_URL!;
-    const res = await fetch(
-      `${base}/api/admin/users/${report.reported_user_id}/suspend`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ reportId: report.id }),
+    try {
+      const base = process.env.NEXT_PUBLIC_API_URL!;
+      const res = await fetch(
+        `${base}/api/admin/users/${report.reported_user_id}/suspend`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ reportId: report.id }),
+        }
+      );
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Failed to suspend user");
       }
-    );
 
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      throw new Error(data.error || "Failed to suspend user");
+      setReports(prev =>
+        prev.map(r =>
+          r.reported_user_id === report.reported_user_id
+            ? { ...r, reported_user_is_suspended: true }
+            : r
+        )
+      );
+
+      await loadReports();
+    } catch (err: any) {
+      alert(err.message || "Failed to suspend user");
     }
-
-    // ✅ Optimistic UI toggle
-    setReports(prev =>
-      prev.map(r =>
-        r.reported_user_id === report.reported_user_id
-          ? { ...r, reported_user_is_suspended: true }
-          : r
-      )
-    );
-
-    // ✅ Re-sync with DB so UI matches real state
-    await loadReports();
-  } catch (err: any) {
-    alert(err.message || "Failed to suspend user");
   }
-}
 
-async function unsuspendUser(report: Report) {
-  if (!report.reported_user_id) return;
-  if (!confirm("Unsuspend this user?")) return;
+  async function unsuspendUser(report: Report) {
+    if (!report.reported_user_id) return;
+    if (!confirm("Unsuspend this user?")) return;
 
-  try {
-    const base = process.env.NEXT_PUBLIC_API_URL!;
-    const res = await fetch(
-      `${base}/api/admin/users/${report.reported_user_id}/unsuspend`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
+    try {
+      const base = process.env.NEXT_PUBLIC_API_URL!;
+      const res = await fetch(
+        `${base}/api/admin/users/${report.reported_user_id}/unsuspend`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        }
+      );
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Failed to unsuspend user");
       }
-    );
 
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      throw new Error(data.error || "Failed to unsuspend user");
+      setReports(prev =>
+        prev.map(r =>
+          r.reported_user_id === report.reported_user_id
+            ? { ...r, reported_user_is_suspended: false }
+            : r
+        )
+      );
+
+      await loadReports();
+    } catch (err: any) {
+      alert(err.message || "Failed to unsuspend user");
     }
-
-    // ✅ Optimistic toggle
-    setReports(prev =>
-      prev.map(r =>
-        r.reported_user_id === report.reported_user_id
-          ? { ...r, reported_user_is_suspended: false }
-          : r
-      )
-    );
-
-    // ✅ Re-sync with DB
-    await loadReports();
-  } catch (err: any) {
-    alert(err.message || "Failed to unsuspend user");
   }
-}
 
   return (
     <div className="p-6 space-y-4">

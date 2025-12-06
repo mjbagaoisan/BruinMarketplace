@@ -11,12 +11,6 @@ type ReportStatus = "open" | "in_review" | "resolved";
 /**
  * GET /admin/reports
  * List reports for the admin dashboard.
- *
- * Logic:
- *  - Listing reports (listing_id NOT NULL):
- *      show ONLY if status != 'resolved'
- *  - User reports (reported_user_id NOT NULL):
- *      always show (even if resolved)
  */
 router.get("/reports", authenticateToken, requireAdmin, async (req, res) => {
   // Include the reported user's suspension flag in this query
@@ -250,6 +244,29 @@ router.post(
   }
 );
 
+/*
+PROMPT
+I’m working in adminReports.ts on my Express + Supabase backend. I already have the router set up with authenticateToken and requireAdmin, 
+and I’m adding a POST /admin/users/:id/suspend route.
+The idea is:
+Get adminId from (req as any).user.userId
+userId from req.params.id (this matches users.id which is text)
+Optional JSON body { reportId?: number }
+I want to:
+Mark the user as suspended in the users table (is_suspended: true) and return the updated row.
+If a reportId is passed, mark that report as status = "resolved" and set resolved_by = adminId.
+Log the action in an admin_actions table with:
+admin_id, action: "ban_user", target_type: "user", target_id: userId
+notes should mention the report if reportId is present, otherwise just say it was a manual suspension.
+I’ve sketched most of this out but I’m not sure about the cleanest way to structure the error handling and logging around Supabase calls. 
+Can you show me what a solid implementation of this handler would look like, keeping it consistent with the rest of an Express route file?
+PROMPT
+
+Here I just wanted to really make sure I implemented this correctly, as suspending users is a serious offense
+So using ChatGPT to verify I was on the right track gave me peace of mind once properly implemented
+From here I tested it to make sure it worked and it did
+
+*/
 /**
  * POST /admin/users/:id/unsuspend
  * Unsuspends a user & logs action.
