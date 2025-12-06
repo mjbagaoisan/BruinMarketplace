@@ -18,6 +18,7 @@ A secure, UCLA-exclusive marketplace designed for students to buy, sell, and tra
   - [Installation \& Setup](#installation--setup)
     - [1. Clone the Repository](#1-clone-the-repository)
     - [2. Configure Environment Variables](#2-configure-environment-variables)
+      - [Generating a JWT Secret](#generating-a-jwt-secret)
     - [3. Set Up Google OAuth](#3-set-up-google-oauth)
     - [4. Set Up Supabase](#4-set-up-supabase)
     - [5. Run the App](#5-run-the-app)
@@ -69,7 +70,7 @@ GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
 
 # JWT
-JWT_Secret=your_jwt_secret_key
+JWT_SECRET=your_jwt_secret_key
 JWT_EXPIRES_IN=1d
 
 # URLS
@@ -89,6 +90,16 @@ NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 ```
+
+#### Generating a JWT Secret
+
+Generate a secure random string for `JWT_SECRET` using Node.js:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+```
+
+Copy the generated string and use it as your `JWT_SECRET`. This secret is used to sign and verify JWT tokens for user authentication.
 
 ### 3. Set Up Google OAuth
 
