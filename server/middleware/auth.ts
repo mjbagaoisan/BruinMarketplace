@@ -1,3 +1,13 @@
+/*
+AI-Assisted Code (Documentation Research)
+
+Prompt: How do I extend the Express Request type in TypeScript to include 
+a custom user property for authentication middleware?
+
+Additional Notes: I wrote the middleware logic myself. AI showed me how to 
+extend the Express Request interface using the global namespace pattern in 
+TypeScript.
+*/
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../utils/jwt.js';
 import { supabase } from '../services/db.js';
@@ -63,6 +73,15 @@ export async function authenticateToken(
     };
 
     next();
+  /*
+  AI-Assisted Code (Security Best Practices)
+
+  Prompt: What HTTP status codes should I return for different authentication 
+  failure scenarios (expired token vs invalid token)?
+
+  Additional Notes: AI suggested 401 for expired tokens since the client can 
+  retry, and 403 for invalid tokens since that's a security issue.
+  */
   } catch (error: any) {
     console.error('Auth middleware error:', error);
     if (error?.message === 'Token expired') {

@@ -1,3 +1,13 @@
+/*
+AI-Assisted Code (E2E Test Edge Cases)
+
+Prompt: What filter combination scenarios should I test for a listings 
+browse page with multiple filter dropdowns?
+
+Additional Notes: I wrote the individual filter tests. AI suggested testing 
+multiple filters at once and checking that selecting All actually resets 
+the filter state.
+*/
 // browse and filter listings tests
 import { test, expect, Page } from '@playwright/test';
 

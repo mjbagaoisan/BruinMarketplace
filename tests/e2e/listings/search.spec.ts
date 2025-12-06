@@ -1,3 +1,13 @@
+/*
+AI-Assisted Code (E2E Test Edge Cases)
+
+Prompt: What edge cases should I consider when testing a debounced search 
+feature for a listings page?
+
+Additional Notes: I wrote the core search tests. AI helped me think of testing 
+search on both title and description, using a timestamp query to guarantee no 
+results, and checking that the listing count goes back to normal after clearing.
+*/
 // search listings tests
 import { test, expect } from '@playwright/test';
 

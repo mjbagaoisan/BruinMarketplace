@@ -1,3 +1,14 @@
+/*
+AI-Assisted Code (E2E Test Edge Cases)
+
+Prompt: What edge cases should I test for a profile settings page with 
+editable fields, visibility toggles, and avatar upload?
+
+Additional Notes: I wrote the basic profile field tests. AI suggested testing 
+that the name field is disabled, that toggles keep their state after clicking 
+twice, that changes persist after reloading, and that the file input only 
+accepts images.
+*/
 import { test, expect } from '@playwright/test';
 import { 
   goToProfileSettings, 

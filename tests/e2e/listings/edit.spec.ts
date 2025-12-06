@@ -1,3 +1,13 @@
+/*
+AI-Assisted Code (E2E Test Edge Cases)
+
+Prompt: What scenarios should I test for an edit listing feature to ensure 
+data integrity and proper form behavior?
+
+Additional Notes: I wrote the basic edit flow test. AI suggested testing that 
+validation still works in edit mode, that you can remove old images and upload 
+new ones, and that canceling actually discards your changes.
+*/
 // edit listing tests
 import { test, expect, Page } from '@playwright/test';
 import { createListing, openMyListingActions, deleteListingViaAPI } from '../fixtures/listings';

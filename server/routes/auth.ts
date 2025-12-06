@@ -1,3 +1,14 @@
+/*
+AI-Assisted Code (Documentation Research)
+
+Prompt: How do I implement Google OAuth 2.0 authentication in Express.js 
+using the google-auth-library with CSRF protection?
+
+Additional Notes: I used AI to understand the Google Auth Library docs and 
+the OAuth flow. It explained the state parameter for CSRF protection and how 
+to exchange and verify tokens. I wrote the UCLA email restriction and all the 
+database stuff myself.
+*/
 import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
 import { OAuth2Client } from 'google-auth-library';
@@ -210,6 +221,15 @@ router.get('/google/callback', async (req: Request, res: Response) => {
       role: user.role,
     });
 
+    /*
+    AI-Assisted Code (Security Best Practices)
+
+    Prompt: What are the secure cookie settings for storing a JWT auth token?
+
+    Additional Notes: AI suggested httpOnly to prevent XSS, sameSite lax for 
+    CSRF protection while still allowing OAuth redirects, and only setting 
+    secure to true in production.
+    */
     // set auth_token cookie
     res.cookie('auth_token', token, {
       httpOnly: true,

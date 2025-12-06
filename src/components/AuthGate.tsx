@@ -20,6 +20,16 @@ export default function AuthGate({ children }: AuthGateProps) {
     );
   }
 
+  /*
+  AI-Assisted Code (CSS/Styling)
+
+  Prompt: Style this unauthenticated state with a modern, centered card layout 
+  using Tailwind CSS with a gradient background and UCLA brand colors.
+
+  Additional Notes: I wrote the React logic and the Link component. AI helped 
+  with the CSS like the gradient background, centering with flexbox, the rounded 
+  icon container, and the button hover effects.
+  */
   // Show a prompt for unauthenticated users
   if (!user) {
     return (

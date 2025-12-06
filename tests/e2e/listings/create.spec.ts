@@ -1,3 +1,13 @@
+/*
+AI-Assisted Code (E2E Test Edge Cases)
+
+Prompt: What validation edge cases should I test for a create listing form 
+with required fields and file uploads?
+
+Additional Notes: I wrote the happy path test. AI helped me think of testing 
+submission without a title to trigger validation, testing negative prices, 
+and checking that you can remove uploaded files before submitting.
+*/
 // create listing tests
 import { test, expect, Page } from '@playwright/test';
 import { generateTestListingTitle } from '../fixtures/test-data';

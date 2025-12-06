@@ -178,6 +178,16 @@ function ListingsPage() {
 
         {/* Listings Grid */}
         <div className="container mx-auto px-8">
+          {/*
+          AI-Assisted Code (CSS/Styling)
+
+          Prompt: Create an animated skeleton loading state for a listings grid 
+          that mimics the card layout with pulse animations.
+
+          Additional Notes: I wrote the loading state logic and the map iteration. 
+          AI helped design the skeleton with animate-pulse, the aspect-video placeholder 
+          for images, and the gray bars that match the card layout.
+          */}
           {loading ? (
             <div className="container mx-auto px-8">
               <div className="flex flex-wrap justify-center gap-6">

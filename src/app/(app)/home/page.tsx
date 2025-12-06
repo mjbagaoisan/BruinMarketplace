@@ -1,3 +1,14 @@
+/*
+AI-Assisted Code (CSS/Styling)
+
+Prompt: Create a modern, visually appealing home dashboard page with gradient 
+backgrounds, blur effects, and action cards using Tailwind CSS and UCLA brand colors.
+
+Additional Notes: I wrote all the React logic like useAuth, conditional rendering 
+for admins, the CreateListing trigger, and the quickActions array. AI helped with 
+the CSS styling like the gradient backgrounds, the blur circles, the card hover 
+animations, and making the grid responsive.
+*/
 "use client";
 
 import Link from "next/link";

@@ -1,3 +1,15 @@
+/*
+AI-Assisted Code (CSS/Styling)
+
+Prompt: How should I organize a product detail page layout with a media gallery, 
+product info, and seller card using a responsive grid in Tailwind?
+
+Additional Notes: I wrote all the React logic like fetching the listing, handling 
+interest submissions, the report modal, and conditional rendering for owners vs 
+buyers. AI helped with the page layout structure using a two-column grid on desktop 
+that stacks on mobile, the breadcrumb navigation styling, the sticky header, and 
+the card shadows and rounded corners.
+*/
 "use client";
 
 import React, { useEffect, useState } from 'react';

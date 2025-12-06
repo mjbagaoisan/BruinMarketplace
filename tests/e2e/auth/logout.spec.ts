@@ -1,3 +1,13 @@
+/*
+AI-Assisted Code (E2E Test Edge Cases)
+
+Prompt: What scenarios should I test after a user logs out to ensure 
+authentication state is properly cleared?
+
+Additional Notes: I wrote the basic logout test. AI suggested also checking 
+that the auth_token cookie is actually removed, that protected routes show 
+the AuthGate after logout, and testing the logout API endpoint directly.
+*/
 // logout flow tests
 import { test, expect } from '@playwright/test';
 import { logout, isAuthenticated, clearAuth } from '../fixtures';

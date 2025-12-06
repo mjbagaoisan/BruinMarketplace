@@ -1,3 +1,13 @@
+/*
+AI-Assisted Code (Test Fixtures)
+
+Prompt: What are best practices for Playwright test fixtures to handle 
+authentication state and cleanup between tests?
+
+Additional Notes: I wrote the basic helper functions. AI suggested clearing 
+both cookies and localStorage/sessionStorage, and wrapping the storage clearing 
+in a try-catch for when the page context isn't fully loaded yet.
+*/
 // auth helpers for e2e tests
 import { Page, expect } from '@playwright/test';
 

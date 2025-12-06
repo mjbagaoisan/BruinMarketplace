@@ -1,3 +1,13 @@
+/*
+AI-Assisted Code (E2E Test Edge Cases)
+
+Prompt: What edge cases should I test for a Google OAuth login flow that 
+restricts access to @ucla.edu email domains only?
+
+Additional Notes: I wrote the test structure and Playwright assertions. AI helped 
+me think of testing non-UCLA email rejection. I hadn't thought to explicitly test 
+that gmail accounts get rejected and redirect with an error.
+*/
 // login flow tests
 import { test, expect } from '@playwright/test';
 import { goToLogin, isAuthenticated, clearAuth } from '../fixtures';
