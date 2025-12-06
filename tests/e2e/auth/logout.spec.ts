@@ -24,7 +24,9 @@ test.describe('Authentication - Logout Flow', () => {
     
     await logout(page);
     
-    await expect(page).toHaveURL('/login');
+    // AuthGate shows "Login Required" in-place instead of redirecting
+    await expect(page.getByText(/login required/i)).toBeVisible();
+    await expect(page.getByRole('link', { name: /sign in with ucla account/i })).toBeVisible();
     
     authenticated = await isAuthenticated(page);
     expect(authenticated).toBe(false);

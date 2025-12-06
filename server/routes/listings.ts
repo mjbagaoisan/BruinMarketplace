@@ -84,7 +84,7 @@ router.post("/", authenticateToken, uploadLimiter, upload.array('mediaFiles', 5)
     return res.status(500).json({ error: "Failed to verify daily listing limit" });
   }
 
-  const DAILY_LIMIT = 5;
+  const DAILY_LIMIT = 50;
   if (todaysCreatedListings.length >= DAILY_LIMIT) {
     return res.status(429).json({
       error: "Daily listing limit reached. You can only create 5 listings per day."

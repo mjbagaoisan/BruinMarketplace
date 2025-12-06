@@ -108,24 +108,35 @@ export async function createListing(
     await uploadTestImage(page);
   }
   
-  // get listing id from api response
-  const responsePromise = page.waitForResponse(
-    (resp) => resp.url().includes('/api/listings') && resp.request().method() === 'POST'
-  );
+  // Capture response body via route interception to avoid protocol errors
+  let listingId: string | null = null;
+  
+  await page.route('**/api/listings', async (route) => {
+    const response = await route.fetch();
+    const body = await response.text();
+    
+    if (response.ok()) {
+      try {
+        const data = JSON.parse(body);
+        listingId = data.id || null;
+      } catch {
+        console.error('createListing: Failed to parse response JSON');
+      }
+    } else {
+      console.error(`createListing API error: ${response.status()} - ${body}`);
+    }
+    
+    await route.fulfill({ response });
+  });
   
   await page.getByRole('button', { name: /^post$/i }).click();
   
-  const response = await responsePromise;
+  await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 15000 });
   
-  if (!response.ok()) {
-    const errorBody = await response.text().catch(() => 'Unable to read response');
-    console.error(`createListing API error: ${response.status()} - ${errorBody}`);
-    return null;
-  }
+  // Unroute to clean up
+  await page.unroute('**/api/listings');
   
-  const data = await response.json();
-  await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10000 });
-  return data.id || null;
+  return listingId;
 }
 
 export async function uploadTestImage(page: Page): Promise<void> {

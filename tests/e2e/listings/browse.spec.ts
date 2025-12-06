@@ -5,7 +5,8 @@ test.describe('Listings - Browse', () => {
   
   test.use({ storageState: 'tests/e2e/.auth/user.json' });
 
-  const listingCards = 'a[href^="/listings/"]';
+  // Match only listing detail links (numeric IDs), not nav links like /listings/me
+  const listingCards = 'a[href*="/listings/"]:not([href="/listings/me"])';
   const conditionSelect = (page: Page) => page.getByRole('combobox').nth(0);
   const locationSelect = (page: Page) => page.getByRole('combobox').nth(1);
   const categorySelect = (page: Page) => page.getByRole('combobox').nth(2);
@@ -25,7 +26,7 @@ test.describe('Listings - Browse', () => {
     
     const listingCount = await page.locator(listingCards).count();
     if (listingCount === 0) {
-      await expect(page.getByText(/no listings/i)).toBeVisible({ timeout: 5000 });
+      await expect(page.getByText(/no listings (available|found)/i)).toBeVisible({ timeout: 5000 });
       return;
     }
     

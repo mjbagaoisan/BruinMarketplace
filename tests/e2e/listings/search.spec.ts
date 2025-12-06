@@ -5,7 +5,8 @@ test.describe('Listings - Search', () => {
   
   test.use({ storageState: 'tests/e2e/.auth/user.json' });
 
-  const listingCards = 'a[href^="/listings/"]';
+  // Match only listing detail links (numeric IDs), not nav links like /listings/me
+  const listingCards = 'a[href*="/listings/"]:not([href="/listings/me"])';
   const searchPlaceholder = /search for a listing/i;
   const DEBOUNCE_WAIT = 500;
 
@@ -49,7 +50,7 @@ test.describe('Listings - Search', () => {
     await page.waitForLoadState('networkidle');
     
     const hasResults = await page.locator(listingCards).count() > 0;
-    const hasEmptyState = await page.getByText(/no listings/i).isVisible();
+    const hasEmptyState = await page.getByText(/no listings (available|found)/i).isVisible();
     expect(hasResults || hasEmptyState).toBe(true);
   });
 
@@ -63,7 +64,7 @@ test.describe('Listings - Search', () => {
     await page.waitForLoadState('networkidle');
     
     await expect(page.getByText(/no listings found matching your search/i)).toBeVisible({ timeout: 5000 });
-    expect(await page.locator(listingCards).count()).toBe(0);
+    await expect(page.locator(listingCards)).toHaveCount(0, { timeout: 5000 });
   });
 
   test('restores all listings when search is cleared', async ({ page }) => {

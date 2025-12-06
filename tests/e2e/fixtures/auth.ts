@@ -13,7 +13,8 @@ export async function logout(page: Page): Promise<void> {
   
   await page.getByRole('button', { name: /logout/i }).click();
   
-  await page.waitForURL('/login', { timeout: 10000 });
+  // AuthGate shows "Login Required" in-place instead of redirecting to /login
+  await expect(page.getByText(/login required/i)).toBeVisible({ timeout: 10000 });
   
   const cookies = await page.context().cookies();
   const hasAuthToken = cookies.some(cookie => cookie.name === 'auth_token');
