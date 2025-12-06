@@ -27,7 +27,7 @@ router.post("/", authenticateToken, async (req, res) => {
     notes?: string;
   } = req.body;
 
-  // must report exactly ONE thing: a listing OR a user
+  // must report only one: user or listing
   if ((!!listingId && !!reportedUserId) || (!listingId && !reportedUserId)) {
     return res
       .status(400)
@@ -63,8 +63,6 @@ router.post("/", authenticateToken, async (req, res) => {
     console.error("Create report error:", error);
     return res.status(500).json({ error: error.message });
   }
-
-  // TODO: optional - insert a row into notifications or send email to admins
 
   return res.status(201).json(data);
 });
