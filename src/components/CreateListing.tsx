@@ -61,6 +61,18 @@ interface CreateListingProps {
 export default function CreateListing(props: CreateListingProps){
 
     const [open, setOpen] = useState(false);
+
+    /*
+    ////////// ////////// ////////// ////////// ////////// ////////// ////////// 
+    Start of Gemini Thinking generated code:
+
+    Prompt: Can you remake the dropzone component and the route so that it works with the database?
+
+    Additional Notes: I had given some of the backend code (server/routes/listing.ts and /uploads/fileuploader.ts)
+    and the database info to Gemini throughout my chat with it which is why it knew what the "database" was 
+    in the prompt. As well, I gave it the code for a Supabase dropzone component which I imported and was using at first.
+    */
+    
     const [submitting, setSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -153,6 +165,12 @@ export default function CreateListing(props: CreateListingProps){
             setSubmitError(null);
         }
     }, [open])
+
+
+    /* 
+    End of AI generated code
+    ////////// ////////// ////////// ////////// ////////// ////////// ////////// 
+    */
  
 
     return(
@@ -201,6 +219,19 @@ export default function CreateListing(props: CreateListingProps){
                                 </Field>
                             </Field>
 
+                            {/*
+                            ////////// ////////// ////////// ////////// ////////// ////////// ////////// 
+                            Start of AI generated code
+
+                            Prompt: Can you remake the dropzone component and the route so that it works with the database?
+
+                            Prompt: Can you make it so that there is a tiny preview of the image like the dropzone component?
+
+                            Additional Notes: I had given some of the backend code (server/routes/listing.ts and
+                            servies/uploads/fileuploader.ts) and the database info to Gemini throughout my chat with it which is 
+                            why it knew what the "database" was in the prompt. As well, I gave it the code for a Supabase dropzone 
+                            component which I imported.
+                            */}
                             <Field>
                                 <FieldLabel>Media</FieldLabel>
 
@@ -252,6 +283,10 @@ export default function CreateListing(props: CreateListingProps){
 
                                 </div>
                             </Field>
+                            {/*
+                            End of AI generated code
+                            ////////// ////////// ////////// ////////// ////////// ////////// ////////// 
+                            */}
 
                             <Field>
                                 <FieldLabel>

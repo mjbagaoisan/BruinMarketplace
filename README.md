@@ -30,6 +30,7 @@ A secure, UCLA-exclusive marketplace designed for students to buy, sell, and tra
     - [Tables Overview](#tables-overview)
     - [Database setup](#database-setup)
   - [Tech Stack](#tech-stack)
+  - [Diagrams](#diagrams)
   - [Authors](#authors)
 
 ## Feature Highlights
@@ -179,6 +180,438 @@ Run **[database/schema.sql](database/schema.sql)** in the Supabase SQL Editor to
 | **Authentication** | Google OAuth 2.0, JWT |
 | **File Storage** | Supabase Storage |
 | **Testing** | Playwright |
+
+
+## Diagrams
+
+### Diagram 1: Sequence Diagram
+
+<img src="public/FinalSequenceDiagram.drawio.svg" alt="Alt text" width="1000"/>
+<br>
+<br>
+
+**Description of Sequence Diagram**
+
+The sequence diagram shows how the authentication for our website works as well as how listings are selected and inserted into the database. We utilize Google OAuth for user authentication
+
+As you can see, the first step in the diagram is the client clicking the sign-in button whose component, AuthButton.tsx, is shown
+below. This button connects to a route in auth.ts.
+
+app/components/AuthButton.tsx
+```tsx
+export default function AuthButton() {
+  
+  ...
+
+  if (!user) {
+    return (
+      <div className="w-full">
+        <button
+          onClick={() => {
+            const apiBase = process.env.NEXT_PUBLIC_API_URL;
+            window.location.href = `${apiBase}/api/auth/google`; // redirect to Google OAuth instead of signIn('google') from NextAuth
+          }}
+          className="flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        >
+
+        ...
+
+        </button>
+      </div>
+    );
+  }
+
+  ...
+
+}  
+```
+
+The AuthButton routes to this code below in auth.ts.
+
+You can see in this route, the line of code `res.redirect(url)` which corresponds to the second arrow in the diagram from the server redirecting the client to the Google accounts sign-in page. The callback function that Google calls after the user enters their credentials is also defined in the line const ``const redirectUri = ${req.protocol}://${req.get('host')}/api/auth/google/callback`;`` 
+
+server/routes/auth.ts
+```ts
+router.get('/google', (req: Request, res: Response) => {
+  try {
+    if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
+      return res.status(500).json({ error: 'Google OAuth is not configured' });
+    }
+
+
+    // generate a random state for CSRF protection with 32 bytes of random data
+    const state = crypto.randomBytes(32).toString('hex');
+
+
+    res.cookie('oauth_state', state, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 10 * 60 * 1000,
+      path: '/',
+    });
+
+
+    const redirectUri = `${req.protocol}://${req.get('host')}/api/auth/google/callback`;
+    const client = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, redirectUri);
+
+
+    const url = client.generateAuthUrl({
+      access_type: 'offline',
+      scope: [
+        'openid',
+        'email',
+        'profile',
+        'https://www.googleapis.com/auth/userinfo.profile',
+        'https://www.googleapis.com/auth/userinfo.email',
+      ],
+      state,
+      prompt: 'select_account',
+    });
+
+
+    res.redirect(url);
+  } catch (error) {
+    console.error('Google auth init error:', error);
+    res.status(500).json({ error: 'Failed to start Google sign in' });
+  }
+});
+```
+
+Next in the sequence diagram, the client gets the Google sign-in page from the Google server. The blue ‘Opt’ box shows that only if the credentials are valid, meaning the user enters an actual Google account, will they be able to proceed. The alternate would just be whatever Google’s response is to an invalid Google account, which is in most cases is just prompting the user to sign in again. However, this is all handled by Google so it is not in our code and thus not shown in the sequence diagram.
+
+In the case the user has a valid Google account, Google does a callback to the callback handler mentioned before, sending the AUTHORIZATION_CODE in the URL. The definition of this callback handler can be seen in the code below. In the snippet below, the AUTHORIZATION_CODE is extracted in the line `const { code, state } = req.query;` where `code` is the AUTHORIZATION_CODE.
+
+In this first part of the code below, you can see we utilize a guard clause that checks the AUTHORIZATION_CODE was actually sent and that it is of type string. In our sequence diagram, this is represented by the orange alternate box. At the bottom of the diagram, you can see the alternate flow if the `code` is null or is not of type string; the user is redirected back to the login page with an error “missing_code”. The next guard clause checking that the `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are represented by the purple alternate box in the diagram. Similarly, if the guard clause catches the `GOOGLE_CLIENT_ID` or `GOOGLE_CLIENT_SECRET` equal to null, it again redirects the user to the login page but this time with an error “not_configured”
+
+```ts
+router.get('/google/callback', async (req: Request, res: Response) => {
+  try {
+    const { code, state } = req.query;
+    const storedState = req.cookies?.oauth_state;
+    const frontendUrl = process.env.FRONTEND_URL;
+
+
+    if (!code || typeof code !== 'string') {
+      return res.redirect(`${frontendUrl}/login?error=missing_code`);
+    }
+
+
+...
+
+
+    if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
+      return res.redirect(`${frontendUrl}/login?error=not_configured`);
+    }
+
+
+...
+
+
+}
+```
+
+The next part of the sequence diagram within the purple alternate box represents the code below. This is where the server sends the AUTHORIZATION_CODE to the Google to exchange it for tokens. 
+
+```ts
+router.get('/google/callback', async (req: Request, res: Response) => {
+
+
+...
+
+
+    const redirectUri = `${req.protocol}://${req.get('host')}/api/auth/google/callback`;
+    const client = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, redirectUri);
+
+
+    const { tokens } = await client.getToken({ code, redirect_uri: redirectUri });
+
+
+...
+
+
+}
+```
+
+Next, you can see in the code below where we check that the id_token is not null, represented by the yellow alternate box in the diagram. Like the other guard clauses, if the id_token is null, the server redirects the client to the login page with error “no_id_token”. Otherwise if the id_token is not null, next is the self-call in the diagram to `verifyIdToken()` that essentially checks if the id_token is for the `GOOGLE_CLIENT_ID` that was registered for our app.
+
+
+```ts
+router.get('/google/callback', async (req: Request, res: Response) => {
+
+
+...
+
+
+    if (!tokens.id_token) {
+      return res.redirect(`${frontendUrl}/login?error=no_id_token`);
+    }
+
+
+    const ticket = await client.verifyIdToken({
+      idToken: tokens.id_token,
+      audience: GOOGLE_CLIENT_ID,
+    });
+
+
+...
+
+
+}
+```
+
+The information is extracted from the ticket in the payload where, most importantly, we check that the email domain matches ucla.edu or g.ucla.edu using the `isAllowedEmail()` function. This is shown in the code below and represented by the green alternate box on our diagram. If the domain does not match, the client is redirected to the login in page with the error “invalid_domain”
+
+```ts
+const ALLOWED_DOMAINS = ['@ucla.edu', '@g.ucla.edu'];
+
+function isAllowedEmail(email: string): boolean {
+  const lower = email.toLowerCase();
+  return ALLOWED_DOMAINS.some((domain) => lower.endsWith(domain));
+}
+
+...
+
+router.get('/google/callback', async (req: Request, res: Response) => {
+
+
+...
+
+
+    const payload = ticket.getPayload();
+
+
+    if (!payload || !payload.sub || !payload.email) {
+      return res.redirect(`${frontendUrl}/login?error=invalid_profile`);
+    }
+
+
+    const { sub, email, name, picture } = payload;
+
+
+    if (!isAllowedEmail(email)) {
+      return res.redirect(`${frontendUrl}/login?error=invalid_domain`);
+    }
+...
+}
+```
+
+Next, we check if the user exists in the database and add them if they do not in the code below. In the diagram, these are the sequence
+of arrows within the pink alternate box.
+
+```ts
+router.get('/google/callback', async (req: Request, res: Response) => {
+
+
+...
+
+
+    // check if user exists in database
+    const { data: existing, error: fetchError } = await supabase
+      .from('users')
+      .select('*')  // includes is_suspended
+      .eq('id', sub)
+      .maybeSingle();
+
+
+    if (fetchError && fetchError.code !== 'PGRST116') {
+      console.error('Error fetching user:', fetchError);
+      return res.redirect(`${frontendUrl}/login?error=database_error`);
+    }
+
+
+    let user = existing;
+    if (user) {
+	...
+    } else {
+	...
+     
+      // insert new user into database if user does not exist
+      const { data: inserted, error: insertError } = await supabase
+        .from('users')
+        .insert({
+          id: sub,
+          email,
+          name: name,
+          profile_image_url: picPublicUrl || undefined,
+          role: 'user',
+          is_verified: true,
+          hide_class_year: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          // is_suspended will default to false from DB schema
+        })
+        .select()
+        .single();
+
+
+      if (insertError) {
+        console.error('Error creating user:', insertError);
+        return res.redirect(`${frontendUrl}/login?error=database_error`);
+      }
+
+
+      user = inserted;
+    }
+
+
+ 
+    if (user.is_suspended) {
+      return res.redirect(`${frontendUrl}/login?error=account_suspended`);
+    }
+
+
+...
+}
+```
+
+Then, we generate the JWT token as shown by the server’s self-call in the diagram and redirect the user back to the main app. This can be seen by the last portion of the callback handler below.
+
+```ts
+router.get('/google/callback', async (req: Request, res: Response) => {
+
+
+...
+
+
+    const token = generateToken({
+      userId: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+    });
+
+
+    // set auth_token cookie
+    res.cookie('auth_token', token, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60 * 1000,
+      path: '/',
+    });
+
+
+    res.redirect(`${frontendUrl}/callback?success=true`);
+  } catch (error) {
+    console.error('Google callback error:', error);
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    res.redirect(`${frontendUrl}/login?error=auth_failed`);
+  }
+});
+```
+
+Additionally, after authentication, our diagram shows various ways that the client and server request data from the database. These are pretty typical requests, with the client requesting via HTTP methods to GET or POST certain data; the server SELECTS or INSERTS the requested data from or to the database and returns it to the server and then the client. The code itself for these functions can be seen in the files profile.ts for getting the profile data and listings.ts for getting the listing data. Below are a truncated version of these routes showing
+the code most relevant to our sequence diagram.
+
+This route gets profile data:
+<br>
+server/routes/profile.ts
+```ts
+// gets the logged in user's profile
+router.get("/me", authenticateToken, async (req, res) => {
+  const user_id = req.user!.userId;
+
+
+  const { data, error } = await supabase
+    .from("users")
+    .select("*")
+    .eq("id", user_id)
+    .single();
+  if (error || !data) {
+    console.error("Fetch user profile error:", error);
+    return res.status(404).json({ error: "User not found" });
+  }
+
+
+  return res.json(data);
+});
+```
+
+This route gets listing data:
+<br>
+server/routes/listings.ts
+```ts
+router.get("/", authenticateToken, async (req, res) => {
+  const {
+    condition,
+    location,
+    category,
+    sort,
+  } = req.query as {
+    condition?: string;
+    location?: string;
+    category?: string;
+    sort?: string;
+  };
+ 
+  let query = supabase
+    .from("listings")
+    .select("*, media(*)")
+    .eq("status", "active");
+
+
+...
+
+
+  return res.json(data ?? []);
+});
+```
+
+This route posts listing data:
+<br>
+server/routes/listings.ts
+```ts
+router.post("/", authenticateToken, uploadLimiter, upload.array('mediaFiles', 5), async (req, res) => {
+  const user_id = req.user!.userId;
+
+
+...
+
+
+  const { data, error } = await supabase
+    .from("listings")
+    .insert({
+      user_id,
+      title,
+      price: priceNum,
+      description,
+      condition,
+      category,
+      status,
+      location,
+      preferred_payment,
+    })
+    .select()
+    .single();
+
+
+...
+
+
+  return res.status(201).json(data);
+});
+```
+
+### Diagram 2: Entity Relationship Diagram
+
+<img src="public/FinalEntityRelationshipDiagram.drawio.svg" alt="Alt text" width="1000"/>
+<br>
+<br>
+
+**Description of Sequence Diagram**
+
+The entity relationship describes the schema of our relational database. In the context of our app, the main two entities of our database are the User and Listing, which have two relationships. The first is a one-to-many relationship (cardinality of 1:N) showing the ownership of a Listing by a User; that is, a User can have multiple listings but a listing can only belong to one User.
+
+The second relationship between User and Listing represents one of our features where users can log themselves as interested in buying a listing. A listing can have multiple users that are interested in it, and a user can be interested in multiple listings. This is why this relationship on the diagram is a a many to many relationship, which is shown as a cardinality of N:M.
+
+Some notable attributes we collect on the User include name, email, as well as major and class year as we want to profile to reinforce the fact that our app is strictly for UCLA students.
+
+In terms of attributes for the Listing, we collect information such as the title, price, image URLs, and condition of the item, general category the item falls into, its status on the website (active listing, reported, etc.), preferred payment method, and the general location the seller is situated at in the UCLA area.
+
+Branching off from these two entities, there are two entities that are each only related to either User or Listing. As seen on the left of the diagram, Admin Actions only belongs to the User and a User can perform multiple Admin Actions but Admin Actions can only belong to one user (cardinality of 1:N), similar to the relationship between a User and Listing. As well, Listing is Media's only relationship and they again have a one-to-many relationship (cardinality of 1:N) as a Listing can have multiple Media entries but a Media entry only ever belongs to one Listing.
+
+Examining the entity connected to both User and Listing, this is the Report entity, which is part of our reporting system that allows users to report listings or users for inappropriate behavior on the app and have them removed. In terms of relationships, a user can have multiple reports but a report can only belong to one user which is why the relationship in the diagram is one-to-many or a cardinality of 1:N. Similary, multiple users can submit a report for a listing, so a listing can have multiple reports, but reports can only be for one listing. This is why the relationship between Reports and Listing has a one-to-many relationship (cardinality of 1:N).
 
 
 ## Authors

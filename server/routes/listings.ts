@@ -66,7 +66,18 @@ router.get("/", authenticateToken, async (req, res) => {
   return res.json(data ?? []);
 });
 
+/*
+////////// ////////// ////////// ////////// ////////// ////////// ////////// 
+Start of Gemini Thinking generated code
+ 
+Prompt: Can you remake the dropzone component and the route so that it works with the database?
 
+Additional Notes: Firstly, some parts of this code were added by my teammates, specifically the code
+that implements the limit of 5 listings per day. I had given some of the backend code
+(server/routes/listing.ts and /uploads/fileuploader.ts) and the database info to Gemini throughout my 
+chat with it which is why it knew what the "database" was in the prompt. Also, I gave it the code
+for a Supabase dropzone component which I imported and was using at first.
+*/
 router.post("/", authenticateToken, uploadLimiter, upload.array('mediaFiles', 5), async (req, res) => {
   const user_id = req.user!.userId; 
 
@@ -195,6 +206,11 @@ router.post("/", authenticateToken, uploadLimiter, upload.array('mediaFiles', 5)
 
   return res.status(201).json(data);
 });
+
+/*
+End of Gemini Thinking generated code
+////////// ////////// ////////// ////////// ////////// ////////// ////////// 
+*/
 
 
 // get all active listings for the authenticated user
@@ -520,6 +536,22 @@ router.delete("/:id", authenticateToken, async (req, res) => {
     return res.status(403).json({ error: "You do not own this listing" });
   }
 
+  /* Generative AI Prompt using OpenAI.
+    I'm working on the backend to delete listings, and i am confused about some parts when it comes to 
+    deleting images from Supabase. We have  media rows in our tables but we also have the actual files in 
+    the storage buckets. Will deleting the media rows be enough or will I need to manually delete the actual
+    files in my storage? What if I did the opposite and deleted them from the storage, will I need to also
+    delete the media row or will it automatically do that for me?
+
+    I then followedd up with: 
+    This is how I am getting the path for my actual files to delete them, is there a more reliable and easier way?
+      const paths = mediaRows.map(m => {
+        const split = m.url.split("/object/public/listings/");
+        return split[1];
+      });
+    What are the pros and cons of both? Also is this approach of seperating the media rows and actual files correct?
+    Or is there a better way that is more consistent?
+  */
   const { data: mediaRows, error: mediaFetchError } = await supabase
     .from("media")
     .select("id, url")
