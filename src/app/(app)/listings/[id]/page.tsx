@@ -614,7 +614,14 @@ export default function ListingDetailPage() {
           </div>
         </div>
       </main>
-
+{/* Generative AI Prompt: (Using OpenAI Codex)
+  Act as a skilled React developer who is proficient with TypeScript, Next.js, and frontend design. 
+  Create a frontend UI button titled "I'm interested" that allows users to express interest in a listing by sending their contact information to the seller.
+  Use provided backend code snippets as a reference for the API endpoint and data structure.
+  Context: The backend API endpoint to send interest is a POST request to /api/listings/{listingId}/interested.
+  This button should open a confirmation modal before sending the interest.
+  Please prompt me if you require any more context or information to complete this task.
+ */}
       {showInterestConfirm && !isOwner && (
         <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/40 px-4">
           <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-lg space-y-4">
@@ -641,12 +648,19 @@ export default function ListingDetailPage() {
           </div>
         </div>
       )}
-
+  {/* Generative AI Prompt: (Using OpenAI Codex)
+  Act as a skilled React developer who is proficient with TypeScript, Next.js, and frontend design. 
+  Similarly to your previous prompt, add on to that button where instead of sending interest, it shows a list of interested buyers to the listing owner.
+  Use provided backend code snippets as a reference for the API endpoint and data structure.
+  Context: The interested buyers are available in the listing data under interested_user_details.
+  This Button variation should only be visible if the user is the owner of the listing.
+  Please prompt me if you require any more context or information to complete this task.          
+ */}
       {showInterestedList && isOwner && (
         <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/40 px-4">
           <div className="w-full max-w-2xl rounded-xl bg-white p-6 shadow-lg space-y-4 max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between">
-              <h3 className="text-xl font-semibold text-gray-900">Interested Buyers</h3>
+              <h3 className="text-xl font-semibold text-gray-900">Interested Buyers</h3> 
               <Button variant="ghost" size="sm" onClick={() => setShowInterestedList(false)}>
                 Close
               </Button>
