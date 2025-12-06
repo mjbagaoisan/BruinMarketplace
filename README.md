@@ -271,7 +271,7 @@ Next in the sequence diagram, the client gets the Google sign-in page from the G
 
 In the case the user has a valid Google account, Google does a callback to the callback handler mentioned before, sending the AUTHORIZATION_CODE in the URL. The definition of this callback handler can be seen in the code below. In the snippet below, the AUTHORIZATION_CODE is extracted in the line `const { code, state } = req.query;` where `code` is the AUTHORIZATION_CODE.
 
-In this first part of the code below, you can see we utilize a guard clause that checks the AUTHORIZATION_CODE was actually sent and that it is of type string. In our sequence diagram, this is represented by the orange alternate box. At the bottom of the diagram, you can see the alternate flow if the code is null or is not of type string; the user is redirected back to the login page with an error “missing_code”. The next guard clause checking that the GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are represented by the purple alternate box in the diagram. Similarly, if the guard clause catches the GOOGLE_CLINET_ID or GOOGLE_CLIENTS_SECRET equal to null, it again redirects the user to the login page but this time with an error “not_configured”
+In this first part of the code below, you can see we utilize a guard clause that checks the AUTHORIZATION_CODE was actually sent and that it is of type string. In our sequence diagram, this is represented by the orange alternate box. At the bottom of the diagram, you can see the alternate flow if the `code` is null or is not of type string; the user is redirected back to the login page with an error “missing_code”. The next guard clause checking that the `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are represented by the purple alternate box in the diagram. Similarly, if the guard clause catches the `GOOGLE_CLIENT_ID` or `GOOGLE_CLIENT_SECRET` equal to null, it again redirects the user to the login page but this time with an error “not_configured”
 
 ```ts
 router.get('/google/callback', async (req: Request, res: Response) => {
@@ -300,7 +300,7 @@ router.get('/google/callback', async (req: Request, res: Response) => {
 }
 ```
 
-The next part of the sequence diagram within the purple alternate box represents the code below. This is where the server sends the AUTHORIZATION code to the Google to exchange it for tokens. 
+The next part of the sequence diagram within the purple alternate box represents the code below. This is where the server sends the AUTHORIZATION_CODE to the Google to exchange it for tokens. 
 
 ```ts
 router.get('/google/callback', async (req: Request, res: Response) => {
@@ -385,7 +385,7 @@ router.get('/google/callback', async (req: Request, res: Response) => {
 }
 ```
 
-Next, we check if the user exists in the database and add them if they do not in the code below. In the Diagram, these are the sequence
+Next, we check if the user exists in the database and add them if they do not in the code below. In the diagram, these are the sequence
 of arrows within the pink alternate box.
 
 ```ts
@@ -490,7 +490,7 @@ router.get('/google/callback', async (req: Request, res: Response) => {
 });
 ```
 
-Additionally, after authentication, our diagram shows various ways that the client and server request data from the database. These are pretty typical requests, with the client requesting via HTTP methods to GET or POST certain data which the server SELECTS or INSERTS data from the database and returns to the server and then the client. The code itself for these functions can be seen in the files profile.ts for getting the profile data and listings.ts for getting the listing data. Below are a truncated version of these routes showing
+Additionally, after authentication, our diagram shows various ways that the client and server request data from the database. These are pretty typical requests, with the client requesting via HTTP methods to GET or POST certain data; the server SELECTS or INSERTS the requested data from or to the database and returns it to the server and then the client. The code itself for these functions can be seen in the files profile.ts for getting the profile data and listings.ts for getting the listing data. Below are a truncated version of these routes showing
 the code most relevant to our sequence diagram.
 
 This route gets profile data:
