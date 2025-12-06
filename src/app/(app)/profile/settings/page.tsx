@@ -121,7 +121,6 @@ function ProfileSettingsPage() {
       );
     }
           
-
     return (
       
       <div className="min-h-screen bg-gray-50">
@@ -139,6 +138,26 @@ function ProfileSettingsPage() {
             </Button>
             <div className="flex gap-2"></div>
         </div>
+
+        {/* Generative AI Prompt using OpenAI.
+          You are a frontend experiecned engineer TypeScript and React. I am created a page for profile settings, 
+          where users can edit their personal information and save those changes. I want the page to include:
+          - profile picture (can upload and preview before saving)
+          - name (read-only)
+          - email (read-only)
+          - phone number (can be editted) 
+          - major
+          - checkbox to toggle for major visibility 
+          - class year
+          - checkbox to toggle for class year visibility 
+          - "Save Changes" with a "loading" state (so it shows ""Saving..." once clicked)
+          - saveMsg message right under "Save Changes" button 
+
+          you can also use my state variables since they can show old, saved values, these include: 
+          phoneNumber, major, hideMajor, classYear, hideClassYear, handleAvatarSelect, handleSave
+
+          I want the page to look clean and simple with card-like spacing. Let me know if you need more context.
+        */}
 
         <div className="py-8">
           <div className="container mx-auto px-8 max-w-3xl">
