@@ -578,6 +578,23 @@ router.post("/", authenticateToken, uploadLimiter, upload.array('mediaFiles', 5)
 
 ### Diagram 2: Entity Relationship Diagram
 
+<img src="public/FinalEntityRelationshipDiagram.drawio.svg" alt="Alt text" width="1000"/>
+<br>
+<br>
+
+**Description of Sequence Diagram**
+
+The entity relationship describes the schema of our relational database. In the context of our app, the main two entities of our database are the User and Listing, which have two relationships. The first is a 1 to many relationship (cardinality of 1:N) showing the ownership of a listing by a User; that is, a User can have multiple listings but a listing can only belong to one user.
+
+The second relationship between User and Listing represents one of our features where users can log themselves as interested in buying a listing. A listing can have multiple users that are interested in it, and a user can be interested in multiple listings. This is why this relationship on the diagram is a a many to many relationship, which is shown as cardinality of N:M.
+
+Some notable attributes we collect on the user include name, email, as well as major and class year as we want to profile to reinforce the fact that our app is strictly for UCLA students.
+
+In terms of attributes for the Listing, we collect information such as the title, price, image URLs, and condition of the item, general category the item falls into, its status on the website (active listing, reported, etc.), preferred payment method, and the general location the seller is situated at in the UCLA area.
+
+Branching off from these two entities, there are two entities that are each only related to either User or Listing. As seen on the left of the diagram, Admin Actions only belong to the User and a User can perform multiple Admin Actions but Admin Actions can only belong to one user (cardinality of 1:N), similar to the relationship between a User and Listing. As well, Media is only related to Listing and again have a one-to-many relationship (cardinality of 1:N) as a Listing can have multiple Media entries but a Media entry only ever belongs to one Listing.
+
+Examining the entity connected both User and Listing, this is the Report entity, which is part of our reporting system that allows users to report listings or users for inappropriate behavior on the app and have them removed. In terms of relationships, a user can have multiple reports but a report can only belong to one user which is why the relationship in the diagram is one-to-many or a cardinality of 1:N. Similary, multiple users can submit a report for a listing, so a listing can have multiple reports, but reports can only be for one listing. This is why the relationship between Reports and Listing has a one-to-many relationship (cardinality of 1:N).
 
 
 ## Authors
