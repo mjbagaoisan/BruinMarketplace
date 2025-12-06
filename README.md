@@ -186,7 +186,7 @@ The sequence diagram shows how the authentication for our website works as well 
 As you can see, the first step in the diagram is the client clicking sign in button whose component, call AuthButton, is shown
 below. This button connects to a route in auth.ts.
 
-AuthButton.tsx
+app/components/AuthButton.tsx
 ```tsx
 export default function AuthButton() {
   
@@ -219,7 +219,7 @@ The AuthButton routes to this code below in auth.ts.
 
 You can see in this route, the line of code `res.redirect(url)` which corresponds to the second arrow in the diagram from the server redirecting the client to the Google accounts sign-in page. The callback function that Google calls after the user enters their credentials is also defined in the line const ``const redirectUri = ${req.protocol}://${req.get('host')}/api/auth/google/callback`;`` 
 
-auth.ts
+server/routes/auth.ts
 ```ts
 router.get('/google', (req: Request, res: Response) => {
   try {
@@ -494,6 +494,8 @@ Additionally, after authentication, our diagram shows various ways that the clie
 the code most relevant to our sequence diagram.
 
 This route gets profile data:
+<br>
+server/routes/profile.ts
 ```ts
 // gets the logged in user's profile
 router.get("/me", authenticateToken, async (req, res) => {
@@ -516,6 +518,8 @@ router.get("/me", authenticateToken, async (req, res) => {
 ```
 
 This route gets listing data:
+<br>
+server/routes/listings.ts
 ```ts
 router.get("/", authenticateToken, async (req, res) => {
   const {
@@ -544,6 +548,8 @@ router.get("/", authenticateToken, async (req, res) => {
 ```
 
 This route posts listing data:
+<br>
+server/routes/listings.ts
 ```ts
 router.post("/", authenticateToken, uploadLimiter, upload.array('mediaFiles', 5), async (req, res) => {
   const user_id = req.user!.userId;
@@ -586,7 +592,7 @@ router.post("/", authenticateToken, uploadLimiter, upload.array('mediaFiles', 5)
 
 The entity relationship describes the schema of our relational database. In the context of our app, the main two entities of our database are the User and Listing, which have two relationships. The first is a 1 to many relationship (cardinality of 1:N) showing the ownership of a listing by a User; that is, a User can have multiple listings but a listing can only belong to one user.
 
-The second relationship between User and Listing represents one of our features where users can log themselves as interested in buying a listing. A listing can have multiple users that are interested in it, and a user can be interested in multiple listings. This is why this relationship on the diagram is a a many to many relationship, which is shown as cardinality of N:M.
+The second relationship between User and Listing represents one of our features where users can log themselves as interested in buying a listing. A listing can have multiple users that are interested in it, and a user can be interested in multiple listings. This is why this relationship on the diagram is a a many to many relationship, which is shown as a cardinality of N:M.
 
 Some notable attributes we collect on the user include name, email, as well as major and class year as we want to profile to reinforce the fact that our app is strictly for UCLA students.
 

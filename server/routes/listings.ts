@@ -66,7 +66,18 @@ router.get("/", authenticateToken, async (req, res) => {
   return res.json(data ?? []);
 });
 
+/*
+////////// ////////// ////////// ////////// ////////// ////////// ////////// 
+Start of Gemini Thinking generated code
+ 
+Prompt: Can you remake the dropzone component and the route so that it works with the database?
 
+Additional Notes: Firstly, some parts of this code were added by my teammates, specifically the code
+that implements the limit of 5 listings per day. I had given some of the backend code
+(server/routes/listing.ts and /uploads/fileuploader.ts) and the database info to Gemini throughout my 
+chat with it which is why it knew what the "database" was in the prompt. Also, I gave it the code
+for a Supabase dropzone component which I imported and was using at first.
+*/
 router.post("/", authenticateToken, uploadLimiter, upload.array('mediaFiles', 5), async (req, res) => {
   const user_id = req.user!.userId; 
 
@@ -195,6 +206,11 @@ router.post("/", authenticateToken, uploadLimiter, upload.array('mediaFiles', 5)
 
   return res.status(201).json(data);
 });
+
+/*
+End of Gemini Thinking generated code
+////////// ////////// ////////// ////////// ////////// ////////// ////////// 
+*/
 
 
 // get all active listings for the authenticated user
