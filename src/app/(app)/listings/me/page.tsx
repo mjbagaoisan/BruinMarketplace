@@ -137,6 +137,13 @@ function MyListingsPage() {
                           </div>
                         )}
                       </CardMedia>
+                      {/* Generative AI Prompt using OpenAI.
+                        You are a frontend experiecned engineer TypeScript and React. For the following UI component 
+                        for listing details (I gave it  the Tailwind UI snippet above) I want you to include a badge that is either green and says "Active" or 
+                        red and says "Reported" or "Sold" depending on the status of the listing from our database. To access
+                        the status, use listing.status, where it could either be sold, removed, or active. The badge is only
+                        green if the listing.status is active, but red otherwise. Let me know if you need more details.
+                      */}
                       <div className="p-4 pb-2 flex flex-col gap-2">
                         <div className="flex items-start justify-between gap-2">
                           <CardTitle className="truncate flex-1">{listing.title}</CardTitle>
