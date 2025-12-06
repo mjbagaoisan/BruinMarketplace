@@ -183,7 +183,7 @@ Run **[database/schema.sql](database/schema.sql)** in the Supabase SQL Editor to
 
 The sequence diagram shows how the authentication for our website works as well as how listings are selected and inserted into the database. We utilize Google OAuth for user authentication
 
-As you can see, the first step in the diagram is the client clicking sign in button whose component, call AuthButton, is shown
+As you can see, the first step in the diagram is the client clicking the sign-in button whose component, AuthButton.tsx, is shown
 below. This button connects to a route in auth.ts.
 
 app/components/AuthButton.tsx
@@ -267,7 +267,7 @@ router.get('/google', (req: Request, res: Response) => {
 });
 ```
 
-Next in the sequence diagram, the client gets the Google sign-in page from the Google server. The blue ‘Opt’ box shows that only if the credentials are valid, meaning the user enters an actual google account, will they be able to proceed. The alternate would just be whatever Google’s response is to an invalid Google account, which is in most cases just prompting the user to sign in again. However, this is all handled by Google so it is not in our code and thus not shown in the sequence diagram.
+Next in the sequence diagram, the client gets the Google sign-in page from the Google server. The blue ‘Opt’ box shows that only if the credentials are valid, meaning the user enters an actual Google account, will they be able to proceed. The alternate would just be whatever Google’s response is to an invalid Google account, which is in most cases is just prompting the user to sign in again. However, this is all handled by Google so it is not in our code and thus not shown in the sequence diagram.
 
 In the case the user has a valid Google account, Google does a callback to the callback handler mentioned before, sending the AUTHORIZATION_CODE in the URL. The definition of this callback handler can be seen in the code below. In the snippet below, the AUTHORIZATION_CODE is extracted in the line `const { code, state } = req.query;` where `code` is the AUTHORIZATION_CODE.
 
