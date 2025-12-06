@@ -31,6 +31,8 @@ A secure, UCLA-exclusive marketplace designed for students to buy, sell, and tra
     - [Database setup](#database-setup)
   - [Tech Stack](#tech-stack)
   - [Diagrams](#diagrams)
+    - [Diagram 1: Sequence Diagram](#diagram-1-sequence-diagram)
+    - [Diagram 2: Entity Relationship Diagram](#diagram-2-entity-relationship-diagram)
   - [Authors](#authors)
 
 ## Feature Highlights
@@ -115,8 +117,16 @@ Copy the generated string and use it as your `JWT_SECRET`. This secret is used t
 ### 4. Set Up Supabase
 
 1. Create a project at [supabase.com](https://supabase.com)
-2. Run the database schema (see [Database Schema](#database-schema) section)
-3. Copy your project URL and keys to `.env.local`
+2. Run the database schema (see [Database Setup](#database-setup) section)
+3. Get your Supabase credentials:
+   - **Supabase URL**: Go to **Connect** → **App Frameworks** → Copy the Supabase URL
+   - **API Keys**: Go to **Settings** → **API Keys** → **Legacy** section:
+     - Copy the `anon` key → paste as `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+     - Copy the `service_role` key → paste as `SUPABASE_SERVICE_ROLE_KEY`
+4. Create storage buckets (go to **Storage** → **New bucket**):
+   - `avatars` — Set to **Public** (for user profile images)
+   - `listings` — Set to **Public** (for listing images/videos)
+5. Add your credentials to `.env.local`
 
 ### 5. Run the App
 
